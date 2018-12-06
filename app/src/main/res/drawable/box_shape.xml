@@ -7,10 +7,10 @@
         android:endColor="#00FFFFFF"
         android:angle="270"
         />-->
-    <solid android:color="@color/trans60_colorGrayOne"/>
+    <solid android:color="@color/white"/>
     <stroke
         android:width="@dimen/_1sdp"
-        android:color="@color/white" />
+        android:color="@color/blue" />
     <corners
         android:radius="@dimen/_5sdp" />
 </shape>
