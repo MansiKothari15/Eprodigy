@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        layout="@layout/app_bar_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_singleChat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginLeft="@dimen/normal_margin"
+        android:layout_marginRight="@dimen/normal_margin" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4"
+            android:layout_margin="@dimen/normal_margin">
+            <ImageView
+                android:id="@+id/img_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/add_btn"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0.5"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@mipmap/text_box"
+                android:layout_weight="2.5"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/edtMessage"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:inputType="textMultiLine"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/padding_xsmall"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/chat_hint"
+                    android:scrollHorizontally="true"
+                    android:maxLines="10"
+                    android:scrollbarStyle="insideInset"
+                    android:scrollbars="vertical"
+                    android:isScrollContainer="true"
+                    android:overScrollMode="always"
+                    android:imeOptions="actionSend"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/text_small"
+                    android:textStyle="normal" />
+
+                <ImageView
+                    android:id="@+id/imgSend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:src="@mipmap/send_btn" />
+
+            </LinearLayout>
+            <!--<EditText-->
+                <!--android:id="@+id/edt_message"-->
+                <!--android:layout_width="274dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_weight="2.5"-->
+                <!--android:hint="Write Something"-->
+                <!--android:layout_marginLeft="@dimen/padding_xsmall"-->
+                <!--android:textSize="@dimen/text_normal"-->
+                <!--android:background="@mipmap/text_box"-->
+                <!--android:drawableRight="@mipmap/send_btn"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--android:padding="@dimen/padding_xsmall" />-->
+            <ImageView
+                android:id="@+id/img_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/add_picture_btn"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/padding_xsmall"
+                android:layout_weight="0.5"/>
+            <ImageView
+                android:id="@+id/img_audio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/add_audio_btn"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/padding_xsmall"
+                android:layout_weight="0.5"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@mipmap/bg">
+
+    <include
+        layout="@layout/app_bar_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/margin_large">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cn_text1"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:textSize="@dimen/text_small"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:background="@drawable/edittext_bg"
+            android:weightSum="2">
+            <TextView
+                android:id="@+id/tv_countrycode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center"
+                android:gravity="center"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="35dp"
+                android:background="@color/white"
+                android:layout_weight="0.01"
+                android:layout_gravity="bottom"/>
+            <TextView
+                android:id="@+id/tv_phoneNo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_xsmall"
+                android:textStyle="bold"
+                android:layout_marginLeft="@dimen/padding_small"
+                android:background="@null"
+                android:textSize="@dimen/text_normal"
+                android:inputType="phone"
+                android:textColor="@android:color/white"
+                android:layout_weight="1.5"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cn_text1"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/margin_large"
+            android:textSize="@dimen/text_small"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:background="@drawable/edittext_bg"
+            android:weightSum="2">
+            <Spinner
+                android:id="@+id/sp_countrycode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:layout_marginTop="@dimen/padding_xsmall"
+                android:layout_gravity="bottom"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="35dp"
+                android:background="@color/white"
+                android:layout_weight="0.01"
+                android:layout_gravity="bottom"/>
+            <EditText
+                android:id="@+id/edt_phoneNo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_normal"
+                android:textStyle="bold"
+                android:layout_marginLeft="@dimen/padding_small"
+                android:background="@null"
+                android:hint="Enter New Mobile Number"
+                android:textSize="@dimen/text_normal"
+                android:inputType="phone"
+                android:textColor="@android:color/white"
+                android:layout_weight="1.4"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

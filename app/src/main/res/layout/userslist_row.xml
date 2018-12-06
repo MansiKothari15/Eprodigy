@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/margin_large"
+        android:id="@+id/ll_main">
+        <ImageView
+            android:id="@+id/img_profile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/profile_pic"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/normal_margin">
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_normal"
+                android:textColor="@color/black"
+                android:text="Name"/>
+            <TextView
+                android:id="@+id/tv_country"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_normal"
+                android:textColor="@color/grey"
+                android:layout_marginTop="@dimen/padding_xsmall"
+                android:text="Country"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

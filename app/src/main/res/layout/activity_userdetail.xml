@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@mipmap/bg">
+
+    <TextView
+        android:id="@+id/tv_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Details"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_big"
+        android:layout_marginTop="@dimen/normal_margin"
+        android:layout_marginBottom="@dimen/margin_gap"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@+id/tv_label">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_profile"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_large"
+            app:civ_border_width="2dp"
+            app:civ_border_color="#969595"
+            android:src="@mipmap/profile_pic"/>
+        <EditText
+            android:id="@+id/edt_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:padding="@dimen/padding_xsmall"
+            android:textSize="@dimen/text_normal"
+            android:hint="Enter Username"
+            android:layout_margin="@dimen/margin_large"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textSize="@dimen/text_normal"
+        android:textColor="@android:color/white"
+        android:background="@mipmap/continue_btn"
+        android:text="confirm username" />
+
+</RelativeLayout>

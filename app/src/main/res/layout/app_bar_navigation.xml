@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bacancy.eprodigy.Activity.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@mipmap/header"
+            app:popupTheme="@style/AppTheme.PopupOverlay" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/normal_margin">
+
+            <TextView
+                android:id="@+id/tv_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="@android:color/white"
+                android:layout_alignParentLeft="true"
+                android:text="Back"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <TextView
+                android:id="@+id/tv_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="@android:color/white"
+                android:layout_alignParentLeft="true"
+                android:text="Create Group"
+                android:layout_centerVertical="true"
+                android:visibility="invisible"
+                android:textSize="@dimen/text_normal"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true">
+                <TextView
+                    android:id="@+id/tv_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:text="Chats"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_normal"/>
+                <TextView
+                    android:id="@+id/tv_lastseen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:text="Last Seen"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/padding_xsmall"
+                    android:textSize="@dimen/text_small"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/white"
+                android:text="New Message"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/white"
+                android:text="Cancel"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <TextView
+                android:id="@+id/tv_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/white"
+                android:text="Next"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <TextView
+                android:id="@+id/tv_create"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/white"
+                android:text="Create"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <TextView
+                android:id="@+id/tv_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@android:color/white"
+                android:text="Done"
+                android:visibility="invisible"
+                android:layout_centerVertical="true"
+                android:textSize="@dimen/text_normal"/>
+
+            <ImageView
+                android:id="@+id/img_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/profile_pic"/>
+        </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>
