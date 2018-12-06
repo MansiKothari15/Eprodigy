@@ -14,21 +14,19 @@ import android.widget.TextView;
 
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.R;
-import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder> {
+public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.MyViewHolder> {
 
-
-    List<ContactListResponse.ResponseDataBean> UserNameList;
+    ArrayList<String> phoneNumberList;
+    ArrayList<String> UserNameList;
     Activity activity;
 
-    public UsersAdapter(Activity activity, List<ContactListResponse.ResponseDataBean> UserNameList) {
+    public ContactListAdapter(Activity activity,ArrayList<String> UserNameList,ArrayList<String> phoneNumberList) {
         this.activity = activity;
         this.UserNameList = UserNameList;
-
+        this.phoneNumberList = phoneNumberList;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -47,7 +45,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
 
 
     @Override
-    public UsersAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.userslist_row, parent, false);
 
@@ -55,20 +53,21 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UsersAdapter.MyViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
 
-        final ContactListResponse.ResponseDataBean dataBean=UserNameList.get(position);
-        holder.tv_name.setText(dataBean.getName());
-         holder.tv_country.setText(dataBean.getPhone());
+        holder.tv_name.setText(UserNameList.get(position));
+        holder.tv_country.setText(phoneNumberList.get(position));
+        holder.ll_main.setId(position);
         holder.ll_main.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent resultIntent = new Intent();
+// TODO Add extras or a data URI to this intent as appropriate.
+                resultIntent.putExtra("name",UserNameList.get(view.getId()));
+                resultIntent.putExtra("phone",phoneNumberList.get(view.getId()));
 
-                Intent i = new Intent(activity,SingleChatActivity.class);
-                Bundle b = new Bundle();
-                b.putString("name",dataBean.getName());
-                i.putExtras(b);
-                activity.startActivity(i);
+                activity.setResult(Activity.RESULT_OK, resultIntent);
+                activity.finish();
             }
         });
     }
@@ -78,7 +77,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
         return UserNameList.size();
     }
 
-    public void filterList(List<ContactListResponse.ResponseDataBean> filterdNames) {
+    public void filterList(ArrayList<String> filterdNames) {
         this.UserNameList = filterdNames;
         notifyDataSetChanged();
     }

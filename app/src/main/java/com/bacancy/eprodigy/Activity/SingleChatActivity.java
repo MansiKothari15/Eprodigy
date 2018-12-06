@@ -40,6 +40,7 @@ import com.bacancy.eprodigy.ResponseModel.LastSeenResponse;
 import com.bacancy.eprodigy.ResponseModel.MediaUploadResponse;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.AlertUtils;
+import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -72,12 +73,12 @@ import retrofit2.Response;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
 
-    TextView tv_label,tv_newMessage,tv_createGroup,tv_back,tv_lastseen;
+    TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
-    ImageView img_profile,img_add,imgSend,img_camera;
+    ImageView img_profile, img_add, imgSend, img_camera;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String username,password,ChatUserId;
+    String username, password, ChatUserId;
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -87,9 +88,14 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int TAKE_PICTURE = 1,GALLERY = 2;
+    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
+    private String selectedImagePath = "";
+
+    private String sharedContactSenderNumber = "";
+    private String sharedContactSenderName = "";
+    private String sharedContactSenderImage = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +115,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                                 && (firstVisiblePosition < mMessageAdapter.getItemCount())) {
                             ChatPojo item =
                                     mMessageAdapter.getItem(firstVisiblePosition);
-                            if (item != null && conversation_ArrayList != null) {
+                            if (item != null && conversation_ArrayList != null && conversation_ArrayList.size() > 0) {
                                 conversation_ArrayList.get(
                                         conversation_ArrayList.size() - 1);
                                 rv_singleChat.smoothScrollToPosition(conversation_ArrayList.size() - 1);
@@ -122,28 +128,28 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void init() {
 
-        username = Pref.getValue(SingleChatActivity.this,"username","");
-        password = Pref.getValue(SingleChatActivity.this,"password","");
-        Log.d("Login init-",username+" "+password);
+        username = Pref.getValue(SingleChatActivity.this, "username", "");
+        password = Pref.getValue(SingleChatActivity.this, "password", "");
+        Log.d("Login init-", username + " " + password);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
-        tv_label = (TextView)findViewById(R.id.tv_label);
-        tv_newMessage = (TextView)findViewById(R.id.tv_right);
-        tv_createGroup = (TextView)findViewById(R.id.tv_left);
-        tv_back = (TextView)findViewById(R.id.tv_back);
-        tv_lastseen = (TextView)findViewById(R.id.tv_lastseen);
+        tv_label = (TextView) findViewById(R.id.tv_label);
+        tv_newMessage = (TextView) findViewById(R.id.tv_right);
+        tv_createGroup = (TextView) findViewById(R.id.tv_left);
+        tv_back = (TextView) findViewById(R.id.tv_back);
+        tv_lastseen = (TextView) findViewById(R.id.tv_lastseen);
         tv_back.setOnClickListener(this);
 
-        rv_singleChat = (RecyclerView)findViewById(R.id.rv_singleChat);
+        rv_singleChat = (RecyclerView) findViewById(R.id.rv_singleChat);
         rv_singleChat.setLayoutManager(new LinearLayoutManager(this));
         edtMessage = (EditText) findViewById(R.id.edtMessage);
-        img_profile = (ImageView)findViewById(R.id.img_profile);
-        img_camera = (ImageView)findViewById(R.id.img_camera);
-        img_add = (ImageView)findViewById(R.id.img_add);
-        imgSend = (ImageView)findViewById(R.id.imgSend);
+        img_profile = (ImageView) findViewById(R.id.img_profile);
+        img_camera = (ImageView) findViewById(R.id.img_camera);
+        img_add = (ImageView) findViewById(R.id.img_add);
+        imgSend = (ImageView) findViewById(R.id.imgSend);
         img_add.setOnClickListener(this);
         imgSend.setOnClickListener(this);
         img_camera.setOnClickListener(this);
@@ -204,7 +210,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    private void mediaUpload(File file){
+    private void mediaUpload(File file) {
 
         progressUtils.showProgressDialog("Please wait...");
 
@@ -219,9 +225,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body = MultipartBody.Part.createFormData("media", file.getName(), requestFile);
-        Log.d("Params->",userName.toString()+" "+loginToken.toString() +" "+mediaCount +" "+ body);
+        Log.d("Params->", userName.toString() + " " + loginToken.toString() + " " + mediaCount + " " + body);
 
-        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload(userName,loginToken,mediaCount,body);
+        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload(userName, loginToken, mediaCount, body);
         call.enqueue(new Callback<MediaUploadResponse>() {
             @Override
             public void onResponse(Call<MediaUploadResponse> call, Response<MediaUploadResponse> response) {
@@ -247,7 +253,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    public void hideCustomToolbar(){
+    public void hideCustomToolbar() {
         tv_newMessage.setVisibility(View.INVISIBLE);
         tv_createGroup.setVisibility(View.INVISIBLE);
         tv_back.setVisibility(View.VISIBLE);
@@ -255,7 +261,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 //        tv_lastseen.setVisibility(View.VISIBLE);
     }
 
-    private void getLastSeen(){
+    private void getLastSeen() {
 
         progressUtils.showProgressDialog("Please wait...");
 
@@ -263,8 +269,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("username",username);
-        data.put("login_token",login_token);
+        data.put("username", username);
+        data.put("login_token", login_token);
 
         Call<LastSeenResponse> call = ApiClient.getClient().lastSeen(data);
         call.enqueue(new Callback<LastSeenResponse>() {
@@ -323,9 +329,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
         @Override
         public void onConnected() {
-            username = Pref.getValue(SingleChatActivity.this,"username","");
-            password = Pref.getValue(SingleChatActivity.this,"password","");
-            Log.d("Login startXmppService-",username+" "+password);
+            username = Pref.getValue(SingleChatActivity.this, "username", "");
+            password = Pref.getValue(SingleChatActivity.this, "password", "");
+            Log.d("Login startXmppService-", username + " " + password);
             xmppHandler = MyApplication.getmService().xmpp;
             xmppHandler.setUserPassword(username, password);
             xmppHandler.login();
@@ -338,13 +344,97 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     };
 
-    private void SendMessage(String imageUrl) {
+    private void SendMsg(int msgType) {
 
-        Log.d("imageUrl---",imageUrl);
+        if (!InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
+            AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
+            return;
+        }
+
+
+        ChatUserId = ChatUserId.replace(" ", "");
+        Log.d("ChatUserId", ChatUserId);
+
+        ChatPojo chatPojo = new ChatPojo();
+        chatPojo.setChatId(ChatUserId);//to
+        chatPojo.setChatSender(username);//from
+        chatPojo.setChatRecv(ChatUserId);
+        chatPojo.setShowing(true);
+        chatPojo.setChatTimestamp(SCUtils.getNow());
+        chatPojo.setMsgType(msgType);
+        chatPojo.setMine(true);
+
+
+        switch (msgType) {
+            case Constants.MY_MESSAGE:
+                if (edtMessage.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    chatPojo.setChatText(edtMessage.getText().toString().trim());//message
+                }
+                break;
+
+            case Constants.MY_IMAGE:
+                if (selectedImagePath.trim().isEmpty()) {
+                    Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    chatPojo.setChatImage(selectedImagePath);
+                }
+                break;
+
+            case Constants.MY_CONTACT:
+                if (sharedContactSenderName.trim().isEmpty() || sharedContactSenderNumber.trim().isEmpty()) {
+                    Toast.makeText(this, "Please select contact", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    chatPojo.setSharedContactSenderName(sharedContactSenderName);
+                    chatPojo.setSharedContactSenderNumber(sharedContactSenderNumber);
+                    chatPojo.setSharedContactSenderImage(sharedContactSenderImage);
+                }
+                break;
+
+           /* default:
+                if (edtMessage.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
+                    return;
+
+                } else {
+                    chatPojo.setChatText(edtMessage.getText().toString().trim());//message
+                }
+                break;*/
+        }
+
+
+        try {
+            if (MyApplication.getmService().xmpp.sendMessage(chatPojo)) {
+                DataManager.getInstance().AddChat(chatPojo);
+                edtMessage.setText("");
+                chatPojoArrayList.add(chatPojo);
+                String username = "TestUser";
+                mMessageAdapter = new ChatAdapter(this, chatPojoArrayList, username);
+                rv_singleChat.setAdapter(mMessageAdapter);
+
+                if (mMessageAdapter.getItemCount() > 2)
+                    rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
+            }
+
+        } catch (SmackException e) {
+            e.printStackTrace();
+            Toast.makeText(SingleChatActivity.this, "SmackException=" + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+   /* private void SendMessage(String imageUrl) {
+
+        Log.d("imageUrl---", imageUrl);
         if (edtMessage.getText().toString().trim().isEmpty() && imageUrl.equals("")) {
             Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
 
-        }else {
+        } else {
 
             ChatUserId = ChatUserId.replace(" ", "");
             Log.d("ChatUserId", ChatUserId);
@@ -377,13 +467,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             }
         }
 
-    }
+    }*/
 
     private void startXmppService() {
 
         //Start XMPP Service (if not running already)
         if (!XMPPService.isServiceRunning) {
-            Log.d("startXmppService--","running already");
+            Log.d("startXmppService--", "running already");
             final Intent intent = new Intent(this, XMPPService.class);
 //            mChatApp.UnbindService();
             Handler handler1 = new Handler();
@@ -399,9 +489,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             if (!xmppHandler.isConnected()) {
                 xmppHandler.connect();
             } else {
-                username = Pref.getValue(SingleChatActivity.this,"username","");
-                password = Pref.getValue(SingleChatActivity.this,"password","");
-                Log.d("Login startXmppService-",username+" "+password);
+                username = Pref.getValue(SingleChatActivity.this, "username", "");
+                password = Pref.getValue(SingleChatActivity.this, "password", "");
+                Log.d("Login startXmppService-", username + " " + password);
+
                 xmppHandler.setUserPassword(username, password);
                 if (!xmppHandler.loggedin)
                     xmppHandler.login();
@@ -446,6 +537,29 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     }
                 }
                 break;
+            case SHARE_CONTACT:
+                if (data != null) {
+
+                    sharedContactSenderName = data.getStringExtra("name");
+                    sharedContactSenderNumber = data.getStringExtra("phone");
+                    sharedContactSenderImage="";
+                    Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
+
+                    SendMsg(Constants.MY_CONTACT);
+
+                } else {
+
+                    sharedContactSenderName = "";
+                    sharedContactSenderNumber = "";
+                    sharedContactSenderImage = "";
+                }
+                break;
+            default:
+                sharedContactSenderName = "";
+                sharedContactSenderNumber = "";
+                sharedContactSenderImage = "";
+                break;
+
         }
     }
 
@@ -464,7 +578,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     .getTimeInMillis() + ".jpg");
             f.createNewFile();
             Uri yourUri = Uri.fromFile(f);
-            SendMessage(yourUri.toString());
+            selectedImagePath = yourUri.toString();
+
+
+            SendMsg(Constants.MY_IMAGE);
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
             MediaScannerConnection.scanFile(this,
@@ -482,7 +599,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.img_add:
                 final PopupMenu popup = new PopupMenu(SingleChatActivity.this, img_add);
                 //Inflating the Popup using xml file
@@ -493,6 +610,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.menu_camera:
+                               /*Testing for the image
+                                selectedImagePath = "/data/user/0/com.commonlibrarysample/files/images/outputImage1543901674735.jpg";
+                                SendMsg(Constants.MY_IMAGE);*/
                                 takePhoto();
                                 return true;
                             case R.id.menu_gallery:
@@ -503,6 +623,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             case R.id.menu_location:
                                 return true;
                             case R.id.menu_contact:
+                                Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
+                                startActivityForResult(intent, SHARE_CONTACT);
                                 return true;
                             case R.id.menu_cancel:
                                 popup.dismiss();
@@ -521,7 +643,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             case R.id.imgSend:
 
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
-                    SendMessage("");
+                    SendMsg(Constants.MY_MESSAGE);
                 } else {
                     AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
 
@@ -529,8 +651,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 break;
             case R.id.img_camera:
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
-                }else {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                } else {
                     takePhoto();
                 }
                 break;
@@ -538,7 +660,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
         if (requestCode == 0) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rl_contact_outgoing"
+    android:id="@+id/rl_contact_incoming"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/normal_margin"
@@ -8,9 +8,9 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:background="@drawable/rounded_rectangle_blue"
-        android:id="@+id/ll_contact_outgoing"
-        android:layout_alignParentRight="true"
+        android:background="@drawable/rounded_rectangle_white"
+        android:id="@+id/ll_contact_incoming"
+
 
         android:layout_width="wrap_content"
         android:padding="@dimen/normal_margin"
@@ -19,7 +19,7 @@
 
         <ImageView
             android:layout_gravity="center_vertical"
-            android:id="@+id/img_contact_outgoing"
+            android:id="@+id/img_contact_incoming"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@mipmap/profile_pic" />
@@ -33,17 +33,17 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_contact_name_outgoing"
+                android:id="@+id/tv_contact_name_incoming"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+                android:textColor="@color/blue"
                 android:text="Contact Name" />
 
             <TextView
-                android:id="@+id/tv_phone_outgoing"
+                android:id="@+id/tv_phone_incoming"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+                android:textColor="@color/blue"
                 android:layout_marginTop="@dimen/normal_margin"
                 android:text="Phone Number" />
         </LinearLayout>
@@ -51,9 +51,9 @@
     </LinearLayout>
     <TextView
         android:layout_marginLeft="@dimen/normal_margin"
-        android:layout_alignLeft="@id/ll_contact_outgoing"
-        android:layout_below="@id/ll_contact_outgoing"
-        android:id="@+id/tv_time_outgoing"
+        android:layout_alignRight="@id/ll_contact_incoming"
+        android:layout_below="@id/ll_contact_incoming"
+        android:id="@+id/tv_time_incoming"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"

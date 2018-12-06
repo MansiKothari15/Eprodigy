@@ -1,10 +1,14 @@
 package com.bacancy.eprodigy.Activity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -15,8 +19,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bacancy.eprodigy.Adapters.ContactListAdapter;
+import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.permission.PermissionListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,8 +34,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ContactListActivity extends BaseActivity implements View.OnClickListener {
-
+public class ContactListActivity extends BaseActivity implements View.OnClickListener,PermissionListener{
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    PermissionListener permissionListenerIntr;
+    Activity mActivity;
     TextView tv_label,tv_right,tv_left,tv_back;
     RecyclerView rv_contacts;
     ArrayList<String> phoneNumberList = new ArrayList<>();
@@ -41,6 +51,9 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contactlist);
+        mActivity=this;
+        permissionListenerIntr=(PermissionListener)this;
+        initPermission(mActivity,  permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
         init();
     }
 
@@ -57,13 +70,14 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
         tv_label.setText("Contacts");
         hideCustomToolbar();
 
-        rv_contacts = (RecyclerView)findViewById(R.id.rv_group);
+        rv_contacts = (RecyclerView)findViewById(R.id.rv_contacts);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         rv_contacts.setLayoutManager(mLayoutManager);
         rv_contacts.setItemAnimator(new DefaultItemAnimator());
 
-        getDeviceContactList();
+
     }
+
 
     public void hideCustomToolbar(){
         tv_right.setVisibility(View.INVISIBLE);
@@ -117,8 +131,8 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
                                 e.printStackTrace();
                             }
                         }
-                        Log.i(TAG, "Name: " + name);
-                        Log.i(TAG, "Phone Number: " + phoneNo);
+//                        Log.i(TAG, "Name: " + name);
+//                        Log.i(TAG, "Phone Number: " + phoneNo);
                         phoneNumberList.add(phoneNo);
                         CountryList.add(country);
                         UserNameList.add(name);
@@ -145,9 +159,10 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
             }
             Log.d("JSON---",jsonArray.toString());
 
-//            usersAdapter = new UsersAdapter(this,UserNameList,CountryList);
-//            rv_contacts.setAdapter(usersAdapter);
+            ContactListAdapter usersAdapter = new ContactListAdapter(this,UserNameList,phoneNumberList);
+            rv_contacts.setAdapter(usersAdapter);
         }
+
         if(cur!=null){
             cur.close();
         }
@@ -157,8 +172,19 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.tv_next:
-               finish();
+
+                finish();
                 break;
         }
+    }
+
+    @Override
+    public void onPermissionGranted() {
+        getDeviceContactList();
+    }
+
+    @Override
+    public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+        initPermission(mActivity,  permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
     }
 }

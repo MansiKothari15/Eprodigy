@@ -1,21 +1,29 @@
 package com.bacancy.eprodigy.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ActorDiffCallback;
+import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatImageHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.ChatImageRecvHOlder;
 import com.bacancy.eprodigy.Adapters.viewholder.HeaderHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.RecvContactHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom.StickyHeaderAdapter;
+import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.squareup.picasso.Picasso;
 
@@ -27,7 +35,7 @@ import java.util.List;
 
 
 /**
- * Created by samir on 22/2/18.
+ * Created by bacancy on 22/2/18.
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<HeaderHolder> {
@@ -35,7 +43,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     private Context context;
     private List<ChatPojo> mLists;
     private SparseBooleanArray mSelectedItemsIds;
-    private static final int MY_MESSAGE = 0, OTHER_MESSAGE = 1, HEADER_MESSAGE = 2, IMAGE_OUTGOING = 3;
+    private static final int HEADER_MESSAGE = 2;
+    //private static final int MY_MESSAGE = 0, OTHER_MESSAGE = 1, HEADER_MESSAGE = 2, IMAGE_OUTGOING = 3, CONTACT_OUTGOING = 4;
     private String mUsername;
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -74,14 +83,25 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        if (i == MY_MESSAGE) {
+        if (i == Constants.MY_MESSAGE) {
+            return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.my_message, viewGroup, false));
+        } else if (i == Constants.OTHER_MESSAGE) {
             return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.their_message, viewGroup, false));
-        } else if(i == IMAGE_OUTGOING){
-            return new ChatImageHolder(LayoutInflater.from(context).inflate(R.layout.outgoing_imageview,viewGroup,false));
+        } else if (i == Constants.MY_IMAGE) {
+            return new ChatImageHolder(LayoutInflater.from(context).inflate(R.layout.outgoing_imageview, viewGroup, false));
+        } else if (i == Constants.OTHER_IMAGE) {
+            return new ChatImageRecvHOlder(LayoutInflater.from(context).inflate(R.layout.incoming_imageview, viewGroup, false));
+        } else if (i == Constants.MY_CONTACT) {
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
+            return new SendContactHolder(layoutView);
+        }else if (i == Constants.OTHER_CONTACT) {
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
+            return new RecvContactHolder(layoutView);
         } else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
         } else {
+            //default
             return new ChatHolderTo(LayoutInflater.from(context).inflate(R.layout.my_message, viewGroup, false));
         }
     }
@@ -89,13 +109,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
-        ChatPojo chatPojo = mLists.get(position);
+        final ChatPojo chatPojo = mLists.get(position);
+        String formatted_date = SCUtils.formatted_date(chatPojo.getChatTimestamp());
 
         if (holder instanceof ChatHolderFrom) {
 
-            ((ChatHolderFrom) holder).tvMessage.setText(chatPojo.getChatText());
-            String formatted_date = SCUtils.formatted_date(chatPojo.getChatTimestamp());
-            ((ChatHolderFrom) holder).tvTime.setText(formatted_date);
+            if (!TextUtils.isEmpty(chatPojo.getChatText())) {
+
+
+                ((ChatHolderFrom) holder).tvMessage.setText(chatPojo.getChatText());
+
+
+                ((ChatHolderFrom) holder).tvTime.setText(formatted_date);
+            }
 
 //            String userPic = Pref.getValue(context, AppConfing.USER_PROFILE_PIC,"");
 //            if (!userPic.equals("")) {
@@ -104,13 +130,89 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 //            }
 
         } else if (holder instanceof ChatHolderTo) {
-            ((ChatHolderTo) holder).tvMessage.setText(chatPojo.getChatText());
-            String formatted_date = SCUtils.formatted_date(chatPojo.getChatTimestamp());
-            ((ChatHolderTo) holder).tvTime.setText(formatted_date);
+            if (!TextUtils.isEmpty(chatPojo.getChatText())) {
+                ((ChatHolderTo) holder).tvMessage.setText(chatPojo.getChatText());
 
-        } else if (holder instanceof ChatImageHolder){
-            Picasso.with(context).load(chatPojo.getChatImage()).into(((ChatImageHolder) holder).img_outgoing);
-        }else if(holder instanceof HeaderHolder){
+                ((ChatHolderTo) holder).tvTime.setText(formatted_date);
+            }
+
+        } else if (holder instanceof ChatImageHolder) {
+            if (!TextUtils.isEmpty(chatPojo.getChatImage())) {
+
+
+                ((ChatImageHolder) holder).tvTime.setText(formatted_date);
+
+                Picasso.with(context).load(chatPojo.getChatImage())
+                        .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                        .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                        .into(((ChatImageHolder) holder).img_outgoing);
+            }
+        } else if (holder instanceof ChatImageRecvHOlder) {
+            if (!TextUtils.isEmpty(chatPojo.getChatImage())) {
+
+
+                ((ChatImageRecvHOlder) holder).tvTime.setText(formatted_date);
+
+                Picasso.with(context).load(chatPojo.getChatImage())
+                        .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                        .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                        .into(((ChatImageRecvHOlder) holder).img_incoming);
+            }
+        } else if (holder instanceof SendContactHolder) {
+
+            String name=chatPojo.getSharedContactSenderName();
+            String cono=chatPojo.getSharedContactSenderNumber();
+            //  String image=chatPojo.getSharedContactSenderImage();
+
+            if (!TextUtils.isEmpty(chatPojo.getSharedContactSenderName())
+                    && !TextUtils.isEmpty(chatPojo.getSharedContactSenderNumber())) {
+
+                ((SendContactHolder) holder).tv_time_outgoing.setText(formatted_date);
+                  /*  Picasso.with(context).load(image)
+                            .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .into(((SendContactHolder) holder).img_contact_outgoing);*/
+
+                ((SendContactHolder) holder).tv_contact_name_outgoing.setText(name);
+                ((SendContactHolder) holder).tv_phone_outgoing.setText(cono);
+                ((SendContactHolder) holder).rl_contact_outgoing.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatContactDetailActivity.StartChatContactDetailActivity(context,chatPojo);
+                    }
+                });
+            }
+
+
+
+        }else if (holder instanceof RecvContactHolder) {
+
+            String name=chatPojo.getSharedContactRecvName();
+            String cono=chatPojo.getSharedContactRecvNumber();
+            // String image=chatPojo.getSharedContactRecvImage();
+
+            if (!TextUtils.isEmpty(name)
+                    && !TextUtils.isEmpty(cono)) {
+
+                ((RecvContactHolder) holder).tv_time_incoming.setText(formatted_date);
+                   /* Picasso.with(context).load(image)
+                            .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .into(((RecvContactHolder) holder).img_contact_incoming);*/
+
+                ((RecvContactHolder) holder).tv_contact_name_incoming.setText(name);
+                ((RecvContactHolder) holder).tv_phone_incoming.setText(cono);
+                ((RecvContactHolder) holder).tv_contact_name_incoming.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatContactDetailActivity.StartChatContactDetailActivity(context,chatPojo);
+                    }
+                });
+
+            }
+
+
+        } else if (holder instanceof HeaderHolder) {
 
             ChatPojo bean = mLists.get(position);
 
@@ -125,7 +227,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             } else {
                 ((HeaderHolder) holder).headerDate.setText(msgHeader);
             }
-        }else {
+        } else {
 
         }
 
@@ -151,14 +253,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     @Override
     public int getItemViewType(int position) {
-        ChatPojo item = mLists.get(position);
+        /*ChatPojo item = mLists.get(position);
 
         if (item.getChatSender().equalsIgnoreCase(mUsername))
             return MY_MESSAGE;
-        else if (!item.getChatImage().equals("") && !item.getChatImage().isEmpty()){
+        else if (!item.getChatImage().equals("") && !item.getChatImage().isEmpty()) {
             return IMAGE_OUTGOING;
-        }
-        else return OTHER_MESSAGE;
+        } else if (!item.getChatImage().equals("") && !item.getChatImage().isEmpty()) {
+            return CONTACT_OUTGOING;
+        } else return OTHER_MESSAGE;*/
+
+        return mLists.get(position).getMsgType();
+
+
     }
 
     //Toggle selection methods

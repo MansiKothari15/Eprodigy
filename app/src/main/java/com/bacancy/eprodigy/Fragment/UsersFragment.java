@@ -33,6 +33,8 @@ import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.interfaces.MyContactListener;
+import com.bacancy.eprodigy.tasks.GetMyContactTask;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -50,7 +52,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UsersFragment extends Fragment {
+public class UsersFragment extends Fragment implements MyContactListener {
 
     private String TAG = "UsersFragment";
     // Request code for READ_CONTACTS. It can be any number > 0.
@@ -160,7 +162,9 @@ public class UsersFragment extends Fragment {
     }
 
     private void getDeviceContactList() {
-        ContentResolver cr = getActivity().getContentResolver();
+        GetMyContactTask getMyContactTask=new GetMyContactTask(getContext(),this);
+        getMyContactTask.execute();
+       /* ContentResolver cr = getActivity().getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
 
@@ -237,9 +241,9 @@ public class UsersFragment extends Fragment {
             }
             jsonArray.put(student1);
         }
-        Log.d("JSON---", jsonArray.toString());
+        Log.d("JSON---", jsonArray.toString());*/
 
-        getContactList(jsonArray.toString());
+
     }
 
     private void getContactList(String contact_list) {
@@ -264,16 +268,16 @@ public class UsersFragment extends Fragment {
                         Log.d("ContactListResponse", response.toString());
                         List<ContactListResponse.ResponseDataBean> mList = response.body().getResponseData();
 
-                        if (mList != null && mList.size() > 0) {
+                       /* if (mList != null && mList.size() > 0) {
                             for (ContactListResponse.ResponseDataBean bean : mList) {
                                 if (bean != null && !TextUtils.isEmpty(bean.getUserstatus()) && bean.getUserstatus().equalsIgnoreCase(Constants.OUR_USERS_STATUS)) {
                                     responseDataBeanList.add(bean);
                                 }
                             }
-                        }
+                        }*/
 
 
-                        usersAdapter = new UsersAdapter(getActivity(), responseDataBeanList, CountryList);
+                        usersAdapter = new UsersAdapter(getActivity(), mList);
                         rv_users.setAdapter(usersAdapter);
 
                     }
@@ -289,4 +293,9 @@ public class UsersFragment extends Fragment {
     }
 
 
+    @Override
+    public void onResponseGetContact(JSONArray jsonArray) {
+        Log.d("JSON---",jsonArray.toString());
+        getContactList(jsonArray.toString());
+    }
 }

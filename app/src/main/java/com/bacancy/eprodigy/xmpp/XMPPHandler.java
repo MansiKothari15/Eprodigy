@@ -3,7 +3,9 @@ package com.bacancy.eprodigy.xmpp;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
@@ -641,7 +643,7 @@ public class XMPPHandler {
 //            new Thread(new Runnable() {
 //                @Override
 //                public void run() {
-                    if (!connected && !isconnecting) connect();
+            if (!connected && !isconnecting) connect();
 //                }
 //            }).start();
 
@@ -882,7 +884,18 @@ public class XMPPHandler {
         }
 
         final Message message = new Message();
-        message.setBody(chatMessage.getChatText());
+        if (chatMessage.getMsgType() == Constants.MY_CONTACT
+                && chatMessage.isMine()
+                && !TextUtils.isEmpty(chatMessage.getSharedContactSenderName())
+                && !TextUtils.isEmpty(chatMessage.getSharedContactSenderNumber())) {
+            message.setBody(chatMessage.getSharedContactSenderName() + Constants.CONTACT_SPLIT_KEY + chatMessage.getSharedContactSenderNumber());
+            Log.e(TAG,"Contact");
+        } else {
+            Log.e(TAG,"Message");
+            message.setBody(chatMessage.getChatText());
+        }
+
+
         message.setType(Message.Type.chat);
 
         try {
@@ -1303,9 +1316,9 @@ public class XMPPHandler {
                     }
                     final String fromJID = presence.getFrom().asBareJid().toString();
 
-            /* We got a request (subscription req). We need to send back "subscribe/subscribed"or "unsubscribe" based on
-             * user choice. We will show user asking him to "accept" or "reject".
-             */
+                    /* We got a request (subscription req). We need to send back "subscribe/subscribed"or "unsubscribe" based on
+                     * user choice. We will show user asking him to "accept" or "reject".
+                     */
                     //@see: http://xmpp.org/rfcs/rfc6121.html#sub-request
                     if (presence.getType() == Presence.Type.subscribe) {
 
@@ -1357,8 +1370,8 @@ public class XMPPHandler {
         }
 
         /* This is a good place to know whenever a user went online/offline. Use this method
-                 * to call any of your singleton, pub-subs etc to let know your UI to change user presence
-                 */
+         * to call any of your singleton, pub-subs etc to let know your UI to change user presence
+         */
         @Override
         public void presenceChanged(Presence presence) {
             if (debug)

@@ -3,7 +3,20 @@ package com.bacancy.eprodigy.utils;
 
 public class Constants {
 
+    /*Message Types*/
+
+
     public static final String OUR_USERS_STATUS = "1";
+    public static final String CONTACT_SPLIT_KEY = ",";
+
+    public static final int MY_MESSAGE = 0;
+    public static final int OTHER_MESSAGE = 1;
+    public static final int MY_IMAGE =2;
+    public static final int OTHER_IMAGE = 3;
+    public static final int MY_CONTACT = 4;
+    public static final int OTHER_CONTACT = 5;
+
+
     //XMPP Connection specific constants
     public static final String XMPP_DOMAIN = "localhost";
     public static final String XMPP_HOST = "158.69.205.234";
