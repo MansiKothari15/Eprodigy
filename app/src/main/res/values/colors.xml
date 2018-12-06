@@ -7,4 +7,5 @@
     <color name="black">#000000</color>
     <color name="grey">#b3b0b0</color>
     <color name="blue">#4383A2</color>
+    <color name="trans60_colorGrayOne">#99767676</color>
 </resources>

@@ -14,16 +14,18 @@ import android.widget.TextView;
 
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder> {
 
     ArrayList<String> phoneNumberList;
-    ArrayList<String> UserNameList;
+    List<ContactListResponse.ResponseDataBean> UserNameList;
     Activity activity;
 
-    public UsersAdapter(Activity activity,ArrayList<String> UserNameList,ArrayList<String> phoneNumberList) {
+    public UsersAdapter(Activity activity, List<ContactListResponse.ResponseDataBean> UserNameList, ArrayList<String> phoneNumberList) {
         this.activity = activity;
         this.UserNameList = UserNameList;
         this.phoneNumberList = phoneNumberList;
@@ -55,7 +57,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
     @Override
     public void onBindViewHolder(@NonNull UsersAdapter.MyViewHolder holder, final int position) {
 
-        holder.tv_name.setText(UserNameList.get(position));
+        final ContactListResponse.ResponseDataBean dataBean=UserNameList.get(position);
+        holder.tv_name.setText(dataBean.getDisplayname());
         holder.tv_country.setText(phoneNumberList.get(position));
         holder.ll_main.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +66,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
 
                 Intent i = new Intent(activity,SingleChatActivity.class);
                 Bundle b = new Bundle();
-                b.putString("name",UserNameList.get(position));
+                b.putString("name",dataBean.getName());
                 i.putExtras(b);
                 activity.startActivity(i);
             }
@@ -75,7 +78,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
         return UserNameList.size();
     }
 
-    public void filterList(ArrayList<String> filterdNames) {
+    public void filterList(List<ContactListResponse.ResponseDataBean> filterdNames) {
         this.UserNameList = filterdNames;
         notifyDataSetChanged();
     }

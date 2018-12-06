@@ -1,6 +1,25 @@
 <resources>
     <string name="app_name">eProdigy</string>
 
+
+    <!--permission-->
+    <string name="tedpermission_setting">Setup</string>
+    <string name="tedpermission_close">Close</string>
+    <string name="tedpermission_confirm">Confirm</string>
+    <string name="custom_close_text">Custom Close</string>
+    <string name="rationale_title">Permission required</string>
+    <string name="rationale_message">we need permission for write <b>storage</b> and find your <b>location</b></string>
+    <string name="reject_message">If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]</string>
+    <string name="denied_message">Permission denied</string>
+    <string name="btn_go_title">Go</string>
+
+
+
+    <string name="no_internet_title">No Internet Connection</string>
+    <string name="no_internet_msg">It looks like your <b>internet</b> connection is off. Please turn it on and try again</string>
+
+
+    <string name="loading_str">Loading...</string>
     <string name="registration_label1">Verify your number</string>
     <string name="verification_label1">Verify Mobile</string>
     <string name="registration_label2">Please enter your mobile number to get verification code. Carrier rates may apply.</string>

@@ -3,6 +3,7 @@ package com.bacancy.eprodigy.utils;
 
 public class Constants {
 
+    public static final String OUR_USERS_STATUS = "1";
     //XMPP Connection specific constants
     public static final String XMPP_DOMAIN = "localhost";
     public static final String XMPP_HOST = "158.69.205.234";

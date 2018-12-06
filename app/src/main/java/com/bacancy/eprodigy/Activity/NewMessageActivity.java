@@ -131,7 +131,7 @@ public class NewMessageActivity extends BaseActivity {
         }
 
         //calling a method of the adapter class and passing the filtered list
-        usersAdapter.filterList(filterdNames);
+        // usersAdapter.filterList(filterdNames);
     }
 
     /**
@@ -214,8 +214,8 @@ public class NewMessageActivity extends BaseActivity {
                     pCur.close();
                 }
             }
-            usersAdapter = new UsersAdapter(NewMessageActivity.this,UserNameList,phoneNumberList);
-            rv_newChat.setAdapter(usersAdapter);
+            // usersAdapter = new UsersAdapter(NewMessageActivity.this,UserNameList,phoneNumberList);
+            // rv_newChat.setAdapter(usersAdapter);
         }
         if(cur!=null){
             cur.close();

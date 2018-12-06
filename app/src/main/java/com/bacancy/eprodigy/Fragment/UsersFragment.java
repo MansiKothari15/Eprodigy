@@ -17,6 +17,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,9 +29,11 @@ import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
+import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.Pref;
 
 import org.json.JSONArray;
@@ -41,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -60,6 +64,8 @@ public class UsersFragment extends Fragment {
     EditText edt_search;
     ImageView img_clear;
 
+    List<ContactListResponse.ResponseDataBean> responseDataBeanList = new ArrayList<>();
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_users, container, false);
@@ -68,13 +74,16 @@ public class UsersFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        rv_users = (RecyclerView)view.findViewById(R.id.rv_users);
+
+        ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
+
+        rv_users = (RecyclerView) view.findViewById(R.id.rv_users);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rv_users.setLayoutManager(mLayoutManager);
         rv_users.setItemAnimator(new DefaultItemAnimator());
 
         img_clear = (ImageView) view.findViewById(R.id.img_clear);
-        edt_search = (EditText)view.findViewById(R.id.edt_search);
+        edt_search = (EditText) view.findViewById(R.id.edt_search);
         //adding a TextChangedListener
         //to call a method whenever there is some change on the EditText
         edt_search.addTextChangedListener(new TextWatcher() {
@@ -111,16 +120,16 @@ public class UsersFragment extends Fragment {
         ArrayList<String> filterdNames = new ArrayList<>();
 
         //looping through existing elements
-        for (String s : UserNameList) {
+        for (ContactListResponse.ResponseDataBean sDataBean : responseDataBeanList) {
             //if the existing elements contains the search input
-            if (s.toLowerCase().contains(text.toLowerCase())) {
+            if (sDataBean.getName().toLowerCase().contains(text.toLowerCase())) {
                 //adding the element to filtered list
-                filterdNames.add(s);
+                responseDataBeanList.add(sDataBean);
             }
         }
 
         //calling a method of the adapter class and passing the filtered list
-        usersAdapter.filterList(filterdNames);
+        usersAdapter.filterList(responseDataBeanList);
     }
 
     /**
@@ -202,65 +211,81 @@ public class UsersFragment extends Fragment {
                         CountryList.add(country);
                         UserNameList.add(name);
                         EmailList.add(email);
-                        Log.d("params---",phoneNumberList.size()+" "+UserNameList.size()+ " " +EmailList.size());
+                        Log.d("params---", phoneNumberList.size() + " " + UserNameList.size() + " " + EmailList.size());
                     }
                     pCur.close();
                 }
             }
 
-            JSONArray jsonArray = new JSONArray();
-            for (int i = 0; i < UserNameList.size(); i++) {
-                JSONObject student1 = new JSONObject();
-                try {
-                    student1.put("name", UserNameList.get(i));
-                    student1.put("email", EmailList.get(i));
-                    student1.put("phone", phoneNumberList.get(i));
 
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                jsonArray.put(student1);
-            }
-            Log.d("JSON---",jsonArray.toString());
-            getContactList(jsonArray.toString());
-
-            usersAdapter = new UsersAdapter(getActivity(),UserNameList,CountryList);
-            rv_users.setAdapter(usersAdapter);
         }
-        if(cur!=null){
+        if (cur != null) {
             cur.close();
         }
+
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < UserNameList.size(); i++) {
+            JSONObject student1 = new JSONObject();
+            try {
+                student1.put("name", UserNameList.get(i));
+                student1.put("email", EmailList.get(i));
+                student1.put("phone", phoneNumberList.get(i));
+
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            jsonArray.put(student1);
+        }
+        Log.d("JSON---", jsonArray.toString());
+
+        getContactList(jsonArray.toString());
     }
 
     private void getContactList(String contact_list) {
+        if (((BaseActivity) getActivity()).validateInternetConn(getActivity())) {
 
-        String username = Pref.getValue(getActivity(), AppConfing.USERNAME, "");
-        String login_token = Pref.getValue(getActivity(), AppConfing.LOGIN_TOKEN, "");
+            String username = Pref.getValue(getActivity(), AppConfing.USERNAME, "");
+            String login_token = Pref.getValue(getActivity(), AppConfing.LOGIN_TOKEN, "");
 
-        HashMap<String, String> data = new HashMap<>();
-        data.put("username", username);
-        data.put("login_token", login_token);
-        data.put("contacts_list", contact_list);
-        Log.d("Params---",username + " " + login_token);
+            HashMap<String, String> data = new HashMap<>();
+            data.put("username", username);
+            data.put("login_token", login_token);
+            data.put("contacts_list", contact_list);
+
+            Log.d("Params---", username + " " + login_token);
 
 
-        Call<ContactListResponse> phone_contact_list_call = ApiClient.getClient().contactList(data);
-        phone_contact_list_call.enqueue(new Callback<ContactListResponse>() {
-            @Override
-            public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.d("ContactListResponse",response.toString());
+            Call<ContactListResponse> phone_contact_list_call = ApiClient.getClient().contactList(data);
+            phone_contact_list_call.enqueue(new Callback<ContactListResponse>() {
+                @Override
+                public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
+                    if (response.isSuccessful()) {
+                        Log.d("ContactListResponse", response.toString());
+                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponseData();
 
+                        if (mList != null && mList.size() > 0) {
+                            for (ContactListResponse.ResponseDataBean bean : mList) {
+                                if (bean != null && !TextUtils.isEmpty(bean.getUserstatus()) && bean.getUserstatus().equalsIgnoreCase(Constants.OUR_USERS_STATUS)) {
+                                    responseDataBeanList.add(bean);
+                                }
+                            }
+                        }
+
+
+                        usersAdapter = new UsersAdapter(getActivity(), responseDataBeanList, CountryList);
+                        rv_users.setAdapter(usersAdapter);
+
+                    }
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ContactListResponse> call, Throwable t) {
-
-
-            }
-        });
+                @Override
+                public void onFailure(Call<ContactListResponse> call, Throwable t) {
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+                }
+            });
+        }
     }
 
 
