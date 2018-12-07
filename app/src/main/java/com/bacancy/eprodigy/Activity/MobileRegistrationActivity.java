@@ -85,7 +85,7 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
             public void onResponse(Call<CountryResponse> call, Response<CountryResponse> response) {
 
                 Log.d("CountryResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 CountryCodeArrayList.clear();
 //                CountryCodeArrayList.add("+1");
                 if (response.isSuccessful()) {
@@ -108,14 +108,14 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
             @Override
             public void onFailure(Call<CountryResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }
 
     public void getRegister() {
 
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         final String uniqueID = UUID.randomUUID().toString();
         final String phoneNo = edt_phoneNo.getText().toString();
@@ -139,7 +139,7 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
 
                 Log.d("RegisterResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 if (response.isSuccessful()) {
                     Pref.setValue(MobileRegistrationActivity.this,"auth_id",String.valueOf(response.body().getAuthyId()));
                     Pref.setValue(MobileRegistrationActivity.this,"device_token",uniqueID);
@@ -153,7 +153,7 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }

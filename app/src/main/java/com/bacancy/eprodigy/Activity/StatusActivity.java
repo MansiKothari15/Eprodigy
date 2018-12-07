@@ -68,7 +68,7 @@ public class StatusActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void statusUpdate(){
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -82,7 +82,7 @@ public class StatusActivity extends BaseActivity implements View.OnClickListener
         call.enqueue(new Callback<StatusUpdateResponse>() {
             @Override
             public void onResponse(Call<StatusUpdateResponse> call, Response<StatusUpdateResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("StatusUpdateResponse", response.toString());
 
             }
@@ -90,7 +90,7 @@ public class StatusActivity extends BaseActivity implements View.OnClickListener
             @Override
             public void onFailure(Call<StatusUpdateResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }

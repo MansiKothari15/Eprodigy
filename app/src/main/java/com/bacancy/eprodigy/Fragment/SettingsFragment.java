@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.AccountDetailActivity;
+import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Activity.EditUsernameActivity;
 import com.bacancy.eprodigy.Activity.MobileRegistrationActivity;
 import com.bacancy.eprodigy.Activity.StatusActivity;
@@ -36,7 +37,6 @@ import com.bacancy.eprodigy.ResponseModel.ProfileUploadResponse;
 import com.bacancy.eprodigy.ResponseModel.UserDetailResponse;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
-import com.bacancy.eprodigy.utils.ProgressUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -55,7 +55,7 @@ import retrofit2.Response;
 public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     TextView tv_logout,tv_chats,tv_account,tv_username,tv_phoneNo,tv_status;
-    public ProgressUtils progressUtils ;
+
     ImageView img_edit,img_profile;
     RelativeLayout rv_status;
     private static final String IMAGE_DIRECTORY = "/eProdigy";
@@ -69,7 +69,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        progressUtils = new ProgressUtils(getActivity());
+
         tv_username = (TextView)view.findViewById(R.id.tv_username);
         tv_phoneNo = (TextView)view.findViewById(R.id.tv_phoneNo);
         tv_status = (TextView)view.findViewById(R.id.tv_status);
@@ -257,7 +257,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     private void uploadProfile(File file){
 
-        progressUtils.showProgressDialog("Please wait...");
+        ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
 
         String username = Pref.getValue(getActivity(), AppConfing.USERNAME, "");
         String login_token = Pref.getValue(getActivity(), AppConfing.LOGIN_TOKEN, "");
@@ -273,7 +273,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         call.enqueue(new Callback<ProfileUploadResponse>() {
             @Override
             public void onResponse(Call<ProfileUploadResponse> call, Response<ProfileUploadResponse> response) {
-                progressUtils.dismissProgressDialog();
+
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
                 Log.d("ProfileResponse", response.toString());
                 String profilePic = response.body().getProfilepicture();
                 String displayName = response.body().getUserdata().getDisplayname();
@@ -285,7 +286,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onFailure(Call<ProfileUploadResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
             }
         });
 
@@ -293,7 +294,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     private void userDetails(){
 
-        progressUtils.showProgressDialog("Please wait...");
+
+        ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
+
         String login_token = Pref.getValue(getActivity(),"login_token","");
         String username = Pref.getValue(getActivity(),"username","");
 
@@ -307,7 +310,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             public void onResponse(Call<UserDetailResponse> call, Response<UserDetailResponse> response) {
 
                 Log.d("UserDetailResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
                 tv_username.setText(response.body().getUserdata().getDisplayname());
                 tv_phoneNo.setText(response.body().getUserdata().getPhoneNumber());
                 tv_status.setText(response.body().getUserdata().getUserstatus());
@@ -317,7 +320,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onFailure(Call<UserDetailResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
             }
         });
 
@@ -325,7 +328,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
 
     private void logOut(){
-        progressUtils.showProgressDialog("Please wait...");
+        ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
         String login_token = Pref.getValue(getActivity(),"login_token","");
         String username = Pref.getValue(getActivity(),"username","");
 
@@ -339,7 +342,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             public void onResponse(Call<LogoutResponse> call, Response<LogoutResponse> response) {
 
                 Log.d("logoutResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
 
                 if (response.isSuccessful()) {
                     Pref.setValue(getActivity(),"verified","0");
@@ -353,7 +356,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onFailure(Call<LogoutResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
             }
         });
     }

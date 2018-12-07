@@ -211,7 +211,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
 
     private void uploadProfile(File file){
 
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -227,7 +227,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
         call.enqueue(new Callback<ProfileUploadResponse>() {
             @Override
             public void onResponse(Call<ProfileUploadResponse> call, Response<ProfileUploadResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("ProfileResponse", response.toString());
                 String profilePic = response.body().getProfilepicture();
                 String displayName = response.body().getUserdata().getDisplayname();
@@ -239,7 +239,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void onFailure(Call<ProfileUploadResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
 
@@ -247,7 +247,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
 
 
     private void updateUserDisplayName() {
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -261,7 +261,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
         call.enqueue(new Callback<UserDisplayNameResponse>() {
             @Override
             public void onResponse(Call<UserDisplayNameResponse> call, Response<UserDisplayNameResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("UsernameResponse", response.toString());
                 Pref.setValue(UserDetailsActivity.this,"DisplayName",edt_username.getText().toString());
                 Toast.makeText(UserDetailsActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
@@ -274,7 +274,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void onFailure(Call<UserDisplayNameResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
 

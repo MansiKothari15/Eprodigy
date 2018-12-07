@@ -50,6 +50,7 @@
         <activity android:name=".Activity.CallVerificationActivity"/>
         <activity android:name=".Activity.EditUsernameActivity"/>
         <activity android:name=".Activity.ContactListActivity"/>
+        <activity android:name=".Activity.ChatContactDetailActivity"/>
 
         <service android:name=".xmpp.XMPPService" />
 

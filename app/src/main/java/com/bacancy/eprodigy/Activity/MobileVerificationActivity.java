@@ -86,7 +86,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
     }
 
     public void resendToken(){
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
         String auth_id = Pref.getValue(MobileVerificationActivity.this,"auth_id","");
 
         HashMap<String, String> data = new HashMap<>();
@@ -98,7 +98,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
             public void onResponse(Call<ResendCodeResponse> call, Response<ResendCodeResponse> response) {
 
                 Log.d("ResendTokenResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
 
                 if (response.isSuccessful()) {
                     Toast.makeText(MobileVerificationActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
@@ -109,7 +109,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
             @Override
             public void onFailure(Call<ResendCodeResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }
@@ -117,7 +117,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
 
     public void getVerifyUser() {
 
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String verifyToken = edt_1.getText().toString()+edt_2.getText().toString()+edt_3.getText().toString()
                 +edt_4.getText().toString()+edt_5.getText().toString()+edt_6.getText().toString()+edt_7.getText().toString();
@@ -149,7 +149,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
             public void onResponse(Call<VerifyUserResponse> call, Response<VerifyUserResponse> response) {
 
                 Log.d("VerifyUserResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
 
                 if (response.body().getStatus() == 200) {
 
@@ -170,7 +170,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
             @Override
             public void onFailure(Call<VerifyUserResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }

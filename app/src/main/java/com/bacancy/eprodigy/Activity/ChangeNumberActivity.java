@@ -93,7 +93,7 @@ public class ChangeNumberActivity extends BaseActivity implements View.OnClickLi
             public void onResponse(Call<CountryResponse> call, Response<CountryResponse> response) {
 
                 Log.d("CountryResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 CountryCodeArrayList.clear();
 
                 if (response.isSuccessful()) {
@@ -116,13 +116,14 @@ public class ChangeNumberActivity extends BaseActivity implements View.OnClickLi
             @Override
             public void onFailure(Call<CountryResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }
 
     private void changeMobileNo(){
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
+
         String login_token = Pref.getValue(this,"login_token","");
         String username = Pref.getValue(this,"username","");
         String countryCode = sp_countrycode.getSelectedItem().toString();
@@ -140,7 +141,7 @@ public class ChangeNumberActivity extends BaseActivity implements View.OnClickLi
             public void onResponse(Call<MobileNumberChangeResponse> call, Response<MobileNumberChangeResponse> response) {
 
                 Log.d("MobileNoResponse", response.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 String new_auth_id = String.valueOf(response.body().getUserdata().getNewauthyId());
                 Pref.setValue(ChangeNumberActivity.this,"new_auth_id",new_auth_id);
                 String old_auth_id = String.valueOf(response.body().getUserdata().getOldauthyId());
@@ -155,7 +156,7 @@ public class ChangeNumberActivity extends BaseActivity implements View.OnClickLi
             @Override
             public void onFailure(Call<MobileNumberChangeResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }

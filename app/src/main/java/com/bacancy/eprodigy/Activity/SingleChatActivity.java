@@ -212,7 +212,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void mediaUpload(File file) {
 
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -231,7 +231,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         call.enqueue(new Callback<MediaUploadResponse>() {
             @Override
             public void onResponse(Call<MediaUploadResponse> call, Response<MediaUploadResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("MediaUploadResponse", response.toString());
 
             }
@@ -239,7 +239,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             @Override
             public void onFailure(Call<MediaUploadResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }
@@ -263,7 +263,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void getLastSeen() {
 
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -276,7 +276,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         call.enqueue(new Callback<LastSeenResponse>() {
             @Override
             public void onResponse(Call<LastSeenResponse> call, Response<LastSeenResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("LastSeenResponse", response.toString());
 
             }
@@ -284,7 +284,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             @Override
             public void onFailure(Call<LastSeenResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
     }

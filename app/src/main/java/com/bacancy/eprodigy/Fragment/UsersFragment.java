@@ -34,6 +34,7 @@ import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.interfaces.MyContactListener;
+import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.tasks.GetMyContactTask;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.Pref;
@@ -52,21 +53,23 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UsersFragment extends Fragment implements MyContactListener {
+public class UsersFragment extends Fragment implements MyContactListener, PermissionListener {
 
     private String TAG = "UsersFragment";
-    // Request code for READ_CONTACTS. It can be any number > 0.
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    PermissionListener permissionListenerIntr;
     RecyclerView rv_users;
     UsersAdapter usersAdapter;
-    ArrayList<String> phoneNumberList = new ArrayList<>();
-    ArrayList<String> CountryList = new ArrayList<>();
-    ArrayList<String> UserNameList = new ArrayList<>();
-    ArrayList<String> EmailList = new ArrayList<>();
+
     EditText edt_search;
     ImageView img_clear;
 
     List<ContactListResponse.ResponseDataBean> responseDataBeanList = new ArrayList<>();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        permissionListenerIntr = this;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -86,6 +89,7 @@ public class UsersFragment extends Fragment implements MyContactListener {
 
         img_clear = (ImageView) view.findViewById(R.id.img_clear);
         edt_search = (EditText) view.findViewById(R.id.edt_search);
+
         //adding a TextChangedListener
         //to call a method whenever there is some change on the EditText
         edt_search.addTextChangedListener(new TextWatcher() {
@@ -113,9 +117,8 @@ public class UsersFragment extends Fragment implements MyContactListener {
             }
         });
 
-        showContacts();
+        ((BaseActivity) getActivity()).initPermission(getActivity(), permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
     }
-
 
     private void filter(String text) {
         //new array list that will hold the filtered data
@@ -134,118 +137,6 @@ public class UsersFragment extends Fragment implements MyContactListener {
         usersAdapter.filterList(responseDataBeanList);
     }
 
-    /**
-     * Show the contacts in the ListView.
-     */
-    private void showContacts() {
-        // Check the SDK version and whether the permission is already granted or not.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
-        } else {
-            // Android version is lesser than 6.0 or the permission is already granted.
-            getDeviceContactList();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                showContacts();
-            } else {
-                Toast.makeText(getActivity(), "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void getDeviceContactList() {
-        GetMyContactTask getMyContactTask=new GetMyContactTask(getContext(),this);
-        getMyContactTask.execute();
-       /* ContentResolver cr = getActivity().getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
-
-        if ((cur != null ? cur.getCount() : 0) > 0) {
-            while (cur != null && cur.moveToNext()) {
-                String id = cur.getString(
-                        cur.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cur.getString(cur.getColumnIndex(
-                        ContactsContract.Contacts.DISPLAY_NAME));
-                Bitmap bp = BitmapFactory.decodeResource(getActivity().getResources(),
-                        R.mipmap.profile_pic);
-
-                if (cur.getInt(cur.getColumnIndex(
-                        ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    Cursor pCur = cr.query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
-                    while (pCur.moveToNext()) {
-                        String phoneNo = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        String image_uri = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                        String country = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY));
-                        String email = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        Log.e("Email", email);
-
-                        if (image_uri != null) {
-
-                            try {
-                                bp = MediaStore.Images.Media
-                                        .getBitmap(getActivity().getContentResolver(),
-                                                Uri.parse(image_uri));
-
-                            } catch (FileNotFoundException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-                        Log.i(TAG, "Name: " + name);
-                        Log.i(TAG, "Phone Number: " + phoneNo);
-                        phoneNumberList.add(phoneNo);
-                        CountryList.add(country);
-                        UserNameList.add(name);
-                        EmailList.add(email);
-                        Log.d("params---", phoneNumberList.size() + " " + UserNameList.size() + " " + EmailList.size());
-                    }
-                    pCur.close();
-                }
-            }
-
-
-        }
-        if (cur != null) {
-            cur.close();
-        }
-
-        JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < UserNameList.size(); i++) {
-            JSONObject student1 = new JSONObject();
-            try {
-                student1.put("name", UserNameList.get(i));
-                student1.put("email", EmailList.get(i));
-                student1.put("phone", phoneNumberList.get(i));
-
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            jsonArray.put(student1);
-        }
-        Log.d("JSON---", jsonArray.toString());*/
-
-
-    }
-
     private void getContactList(String contact_list) {
         if (((BaseActivity) getActivity()).validateInternetConn(getActivity())) {
 
@@ -258,7 +149,6 @@ public class UsersFragment extends Fragment implements MyContactListener {
             data.put("contacts_list", contact_list);
 
             Log.d("Params---", username + " " + login_token);
-
 
             Call<ContactListResponse> phone_contact_list_call = ApiClient.getClient().contactList(data);
             phone_contact_list_call.enqueue(new Callback<ContactListResponse>() {
@@ -292,10 +182,27 @@ public class UsersFragment extends Fragment implements MyContactListener {
         }
     }
 
+    @Override
+    public void onPermissionGranted() {
+        ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
+        new GetMyContactTask(getActivity(), new MyContactListener() {
+            @Override
+            public void onResponseGetContact(JSONArray jsonArray) {
+
+                Log.d("JSON---", jsonArray.toString());
+                getContactList(jsonArray.toString());
+            }
+        }).execute();
+    }
+
+    @Override
+    public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+        ((BaseActivity) getActivity()).initPermission(getActivity(), permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
+    }
 
     @Override
     public void onResponseGetContact(JSONArray jsonArray) {
-        Log.d("JSON---",jsonArray.toString());
+        Log.d("JSON---", jsonArray.toString());
         getContactList(jsonArray.toString());
     }
 }

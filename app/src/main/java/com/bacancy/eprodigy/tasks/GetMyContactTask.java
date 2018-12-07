@@ -8,6 +8,7 @@ import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.bacancy.eprodigy.interfaces.MyContactListener;
+import com.bacancy.eprodigy.interfaces.MyContactListenerTwo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,26 +16,41 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray>{
-    String TAG="GetMyContact";
+public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
+    String TAG = "GetMyContact";
     Context mContext;
-    MyContactListener contactListener;
+    MyContactListener contactListener=null;
+    MyContactListenerTwo contactListenerTwo=null;
 
-    ArrayList<String> phoneNumberList = new ArrayList<>();
-    ArrayList<String> UserNameList = new ArrayList<>();
+    ArrayList<String> phoneNumberList;
+    ArrayList<String> UserNameList;
 
-    ArrayList<String> CountryList = new ArrayList<>();
-    ArrayList<String> EmailList = new ArrayList<>();
+    ArrayList<String> CountryList;
+    ArrayList<String> EmailList;
 
     public GetMyContactTask(Context mContext, MyContactListener contactListener) {
 
         phoneNumberList = new ArrayList<>();
-       CountryList = new ArrayList<>();
-      UserNameList = new ArrayList<>();
-    EmailList = new ArrayList<>();
+        CountryList = new ArrayList<>();
+        UserNameList = new ArrayList<>();
+        EmailList = new ArrayList<>();
 
         this.mContext = mContext;
         this.contactListener = contactListener;
+        this.contactListenerTwo=null;
+
+    }
+
+    public GetMyContactTask(Context mContext, MyContactListenerTwo contactListenerTwo) {
+
+        phoneNumberList = new ArrayList<>();
+        CountryList = new ArrayList<>();
+        UserNameList = new ArrayList<>();
+        EmailList = new ArrayList<>();
+
+        this.mContext = mContext;
+        this.contactListenerTwo = contactListenerTwo;
+        this.contactListener=null;
     }
 
     @Override
@@ -118,8 +134,7 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray>{
             jsonArrayContactList.put(student1);
         }
 
-        if (jsonArrayContactList!=null)
-        {
+        if (jsonArrayContactList != null) {
             return jsonArrayContactList;
         }
 
@@ -129,6 +144,11 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray>{
     @Override
     protected void onPostExecute(JSONArray jsonArrayContactList) {
 
-        contactListener.onResponseGetContact(jsonArrayContactList);
+        if (contactListener != null) {
+            contactListener.onResponseGetContact(jsonArrayContactList);
+        } else if (contactListenerTwo != null) {
+            contactListenerTwo.onResponseGetContact(UserNameList, phoneNumberList);
+        }
+
     }
 }

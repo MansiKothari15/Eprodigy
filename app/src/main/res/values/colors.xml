@@ -8,4 +8,9 @@
     <color name="grey">#b3b0b0</color>
     <color name="blue">#4383A2</color>
     <color name="trans60_colorGrayOne">#99767676</color>
+    <color name="green_shade_1">#73B45B</color>
+    <color name="green_shade_3">#5DA671</color>
+    <color name="green_shade_2">#65AB66</color>
+
+
 </resources>

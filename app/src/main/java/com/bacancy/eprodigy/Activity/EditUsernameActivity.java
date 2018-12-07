@@ -70,7 +70,7 @@ public class EditUsernameActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void updateUserDisplayName() {
-        progressUtils.showProgressDialog("Please wait...");
+        showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -84,7 +84,7 @@ public class EditUsernameActivity extends BaseActivity implements View.OnClickLi
         call.enqueue(new Callback<UserDisplayNameResponse>() {
             @Override
             public void onResponse(Call<UserDisplayNameResponse> call, Response<UserDisplayNameResponse> response) {
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
                 Log.d("UsernameResponse", response.toString());
                 Pref.setValue(EditUsernameActivity.this,"DisplayName",edt_username.getText().toString());
                 Toast.makeText(EditUsernameActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
@@ -93,7 +93,7 @@ public class EditUsernameActivity extends BaseActivity implements View.OnClickLi
             @Override
             public void onFailure(Call<UserDisplayNameResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
-                progressUtils.dismissProgressDialog();
+                dismissLoadingDialog();
             }
         });
 

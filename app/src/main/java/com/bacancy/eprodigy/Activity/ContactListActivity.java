@@ -24,7 +24,10 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.Adapters.ContactListAdapter;
 import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.interfaces.MyContactListener;
+import com.bacancy.eprodigy.interfaces.MyContactListenerTwo;
 import com.bacancy.eprodigy.permission.PermissionListener;
+import com.bacancy.eprodigy.tasks.GetMyContactTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,10 +43,7 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
     Activity mActivity;
     TextView tv_label,tv_right,tv_left,tv_back;
     RecyclerView rv_contacts;
-    ArrayList<String> phoneNumberList = new ArrayList<>();
-    ArrayList<String> CountryList = new ArrayList<>();
-    ArrayList<String> UserNameList = new ArrayList<>();
-    ArrayList<String> EmailList = new ArrayList<>();
+
 
     private String TAG = "ContactListActivity";
 
@@ -53,8 +53,8 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_contactlist);
         mActivity=this;
         permissionListenerIntr=(PermissionListener)this;
-        initPermission(mActivity,  permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
         init();
+        initPermission(mActivity,  permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
     }
 
     private void init() {
@@ -85,88 +85,7 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
         tv_back.setVisibility(View.VISIBLE);
     }
 
-    private void getDeviceContactList() {
-        ContentResolver cr = this.getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
 
-        if ((cur != null ? cur.getCount() : 0) > 0) {
-            while (cur != null && cur.moveToNext()) {
-                String id = cur.getString(
-                        cur.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cur.getString(cur.getColumnIndex(
-                        ContactsContract.Contacts.DISPLAY_NAME));
-                Bitmap bp = BitmapFactory.decodeResource(this.getResources(),
-                        R.mipmap.profile_pic);
-
-                if (cur.getInt(cur.getColumnIndex(
-                        ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    Cursor pCur = cr.query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
-                    while (pCur.moveToNext()) {
-                        String phoneNo = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        String image_uri = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                        String country = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY));
-                        String email = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        Log.e("Email", email);
-
-                        if (image_uri != null) {
-
-                            try {
-                                bp = MediaStore.Images.Media
-                                        .getBitmap(this.getContentResolver(),
-                                                Uri.parse(image_uri));
-
-                            } catch (FileNotFoundException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                        }
-//                        Log.i(TAG, "Name: " + name);
-//                        Log.i(TAG, "Phone Number: " + phoneNo);
-                        phoneNumberList.add(phoneNo);
-                        CountryList.add(country);
-                        UserNameList.add(name);
-                        EmailList.add(email);
-                        Log.d("params---",phoneNumberList.size()+" "+UserNameList.size()+ " " +EmailList.size());
-                    }
-                    pCur.close();
-                }
-            }
-
-            JSONArray jsonArray = new JSONArray();
-            for (int i = 0; i < UserNameList.size(); i++) {
-                JSONObject student1 = new JSONObject();
-                try {
-                    student1.put("name", UserNameList.get(i));
-                    student1.put("email", EmailList.get(i));
-                    student1.put("phone", phoneNumberList.get(i));
-
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                jsonArray.put(student1);
-            }
-            Log.d("JSON---",jsonArray.toString());
-
-            ContactListAdapter usersAdapter = new ContactListAdapter(this,UserNameList,phoneNumberList);
-            rv_contacts.setAdapter(usersAdapter);
-        }
-
-        if(cur!=null){
-            cur.close();
-        }
-    }
 
     @Override
     public void onClick(View view) {
@@ -180,7 +99,16 @@ public class ContactListActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onPermissionGranted() {
-        getDeviceContactList();
+        showLoadingDialog(mActivity);
+        new GetMyContactTask(mActivity, new MyContactListenerTwo() {
+            @Override
+            public void onResponseGetContact(ArrayList<String> contactNameList, ArrayList<String> phoneNumberList) {
+                dismissLoadingDialog();
+                ContactListAdapter usersAdapter = new ContactListAdapter(mActivity,contactNameList,phoneNumberList);
+                rv_contacts.setAdapter(usersAdapter);
+            }
+        }).execute();
+
     }
 
     @Override

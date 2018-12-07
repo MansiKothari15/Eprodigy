@@ -18,7 +18,6 @@ import com.bacancy.eprodigy.utils.ImageSelectUtils;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 
-import com.bacancy.eprodigy.utils.ProgressUtils;
 
 
 /**
@@ -29,7 +28,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public ImageSelectUtils imageSelectUtils;
     PermissionActivity permissionActivity;
-    public ProgressUtils progressUtils;
+
     public Activity activity;
     CustomProgressDialog customProgressDialog;
 
@@ -38,7 +37,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         imageSelectUtils = new ImageSelectUtils(BaseActivity.this);
         permissionActivity = new PermissionActivity(BaseActivity.this);
-        progressUtils = new ProgressUtils(BaseActivity.this);
+
 
         customProgressDialog = new CustomProgressDialog();
         this.activity = this;
@@ -79,7 +78,7 @@ public class BaseActivity extends AppCompatActivity {
 
             return true;
         } else {
-
+            dismissLoadingDialog();
             showNoInternetDialog(mActivity, false);
         }
         return false;
