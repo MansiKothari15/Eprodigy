@@ -6,6 +6,8 @@ import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -71,11 +74,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
 
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
-    ImageView img_profile, img_add, imgSend, img_camera;
+    ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
     String username, password, ChatUserId;
@@ -88,7 +94,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3;
+    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3, AUDIO = 4;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
@@ -96,6 +102,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private String sharedContactSenderNumber = "";
     private String sharedContactSenderName = "";
     private String sharedContactSenderImage = "";
+
+    String AudioSavePathInDevice = null;
+    MediaRecorder mediaRecorder ;
+    String RandomAudioFileName = "ABCDE";
+    MediaPlayer mediaPlayer ;
+    Random random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +165,53 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         img_add.setOnClickListener(this);
         imgSend.setOnClickListener(this);
         img_camera.setOnClickListener(this);
+        img_audio = (ImageView) findViewById(R.id.img_audio);
+        img_audio.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(checkPermission()) {
+
+                    AudioSavePathInDevice =
+                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+                                    CreateRandomAudioFileName(5) + "AudioRecording.3gp";
+
+                    MediaRecorderReady();
+
+                    try {
+                        mediaRecorder.prepare();
+                        mediaRecorder.start();
+                    } catch (IllegalStateException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+
+                    Toast.makeText(SingleChatActivity.this, "Recording started",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    requestPermission();
+                }
+                return true;
+            }
+
+        });
+
+        img_audio.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                view.onTouchEvent(motionEvent);
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    mediaRecorder.stop();
+                    sendAudio();
+
+                }
+                return true;
+            }
+        });
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -184,6 +243,45 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             }
         });
         LoadData();
+    }
+
+    public void sendAudio(){
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, AUDIO);
+    }
+
+    public void MediaRecorderReady(){
+        mediaRecorder=new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        mediaRecorder.setOutputFile(AudioSavePathInDevice);
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(SingleChatActivity.this, new
+                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, AUDIO);
+    }
+
+    public String CreateRandomAudioFileName(int string){
+        StringBuilder stringBuilder = new StringBuilder( string );
+        int i = 0 ;
+        while(i < string ) {
+            stringBuilder.append(RandomAudioFileName.
+                    charAt(random.nextInt(RandomAudioFileName.length())));
+
+            i++ ;
+        }
+        return stringBuilder.toString();
+    }
+
+    public boolean checkPermission() {
+        int result = ContextCompat.checkSelfPermission(getApplicationContext(),
+                WRITE_EXTERNAL_STORAGE);
+        int result1 = ContextCompat.checkSelfPermission(getApplicationContext(),
+                RECORD_AUDIO);
+        return result == PackageManager.PERMISSION_GRANTED &&
+                result1 == PackageManager.PERMISSION_GRANTED;
     }
 
     private void LoadData() {
@@ -553,6 +651,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     sharedContactSenderNumber = "";
                     sharedContactSenderImage = "";
                 }
+                break;
+            case AUDIO:
+                Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 sharedContactSenderName = "";
