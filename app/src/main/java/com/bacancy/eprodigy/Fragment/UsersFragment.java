@@ -166,9 +166,10 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                             }
                         }*/
 
-
-                        usersAdapter = new UsersAdapter(getActivity(), mList);
-                        rv_users.setAdapter(usersAdapter);
+                        if (mList != null && mList.size() > 0) {
+                            usersAdapter = new UsersAdapter(getActivity(), mList);
+                            rv_users.setAdapter(usersAdapter);
+                        }
 
                     }
                     ((BaseActivity) getActivity()).dismissLoadingDialog();
