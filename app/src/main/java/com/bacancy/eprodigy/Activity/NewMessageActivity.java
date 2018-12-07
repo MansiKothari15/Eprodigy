@@ -183,7 +183,7 @@ public class NewMessageActivity extends BaseActivity implements PermissionListen
                 public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
                     if (response.isSuccessful()) {
                         Log.d("ContactListResponse", response.toString());
-                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponseData();
+                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
 
                        /* if (mList != null && mList.size() > 0) {
                             for (ContactListResponse.ResponseDataBean bean : mList) {

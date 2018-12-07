@@ -156,18 +156,18 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                 public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
                     if (response.isSuccessful()) {
                         Log.d("ContactListResponse", response.toString());
-                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponseData();
+                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
 
-                       /* if (mList != null && mList.size() > 0) {
+                        if (mList != null && mList.size() > 0) {
                             for (ContactListResponse.ResponseDataBean bean : mList) {
-                                if (bean != null && !TextUtils.isEmpty(bean.getUserstatus()) && bean.getUserstatus().equalsIgnoreCase(Constants.OUR_USERS_STATUS)) {
+                                if (bean != null && bean.getStatus()==Constants.OUR_USERS_STATUS) {
                                     responseDataBeanList.add(bean);
                                 }
                             }
-                        }*/
+                        }
 
                         if (mList != null && mList.size() > 0) {
-                            usersAdapter = new UsersAdapter(getActivity(), mList);
+                            usersAdapter = new UsersAdapter(getActivity(), responseDataBeanList);
                             rv_users.setAdapter(usersAdapter);
                         }
 

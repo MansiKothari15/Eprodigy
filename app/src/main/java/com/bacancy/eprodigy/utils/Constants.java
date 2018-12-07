@@ -6,7 +6,7 @@ public class Constants {
     /*Message Types*/
 
 
-    public static final String OUR_USERS_STATUS = "1";
+    public static final int OUR_USERS_STATUS = 1;
     public static final String CONTACT_SPLIT_KEY = ",";
 
     public static final int MY_MESSAGE = 0;

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bacancy.eprodigy.interfaces.MyContactListener;
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
     String TAG = "GetMyContact";
     Context mContext;
-    MyContactListener contactListener=null;
-    MyContactListenerTwo contactListenerTwo=null;
+    MyContactListener contactListener = null;
+    MyContactListenerTwo contactListenerTwo = null;
 
     ArrayList<String> phoneNumberList;
     ArrayList<String> UserNameList;
@@ -37,7 +38,7 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
 
         this.mContext = mContext;
         this.contactListener = contactListener;
-        this.contactListenerTwo=null;
+        this.contactListenerTwo = null;
 
     }
 
@@ -50,7 +51,7 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
 
         this.mContext = mContext;
         this.contactListenerTwo = contactListenerTwo;
-        this.contactListener=null;
+        this.contactListener = null;
     }
 
     @Override
@@ -102,8 +103,16 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
                             }
                         }*/
                         Log.i(TAG, "Name: " + name);
-                        Log.i(TAG, "Phone Number: " + phoneNo);
-                        phoneNumberList.add(phoneNo);
+
+
+                            Log.i(TAG, "Phone Number: " + phoneNo);
+
+                            String ph=phoneNo.replace("(","");
+                            String ph2=ph.replace(")","");
+                            String ph3=ph2.replace("-","");
+                            String ph4=ph3.replace(" ","");
+                            phoneNumberList.add(ph4);
+
                         CountryList.add(country);
                         UserNameList.add(name);
                         EmailList.add(email);
