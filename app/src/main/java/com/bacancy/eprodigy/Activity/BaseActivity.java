@@ -2,18 +2,29 @@ package com.bacancy.eprodigy.Activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
+import com.bacancy.eprodigy.API.AppConfing;
+import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.Models.UserPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
+import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.permission.MyPermission;
 import com.bacancy.eprodigy.permission.PermissionActivity;
 import com.bacancy.eprodigy.permission.PermissionListener;
@@ -176,5 +187,76 @@ public class BaseActivity extends AppCompatActivity {
         return false;
     }
 
+
+    private static int getNotificationIcon() {
+        boolean useWhiteIcon = (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP);
+        return useWhiteIcon ? R.mipmap.add_btn : R.mipmap.add_btn;
+    }
+
+
+    private static String displayName = "";
+    static String channelId = "channel-01";
+    static String channelName = "Channel Name";
+    static int importance = NotificationManager.IMPORTANCE_HIGH;
+    public static void SendNotification(Context mContext, ChatPojo chatPojo) {
+
+        UserPojo singleUser = DataManager.getInstance().getUser(chatPojo.getChatSender());
+        if (singleUser != null) {
+            displayName = singleUser.getDisplayname();
+        }
+
+        NotificationManager notificationManager =
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int num = (int) System.currentTimeMillis();
+
+        Intent intent = new Intent(mContext, SingleChatActivity.class);
+        intent.putExtra(AppConfing.CHAT_USER_NAME, chatPojo.getChatSender());
+        intent.putExtra(AppConfing.DISPLAY_NAME, displayName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext.getApplicationContext(),
+                0 /* Request code */,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(
+                    channelId, channelName, importance);
+            notificationManager.createNotificationChannel(mChannel);
+            notificationBuilder = new NotificationCompat.Builder(mContext, channelId);
+            notificationBuilder.setChannelId(channelId);
+
+        } else {
+            notificationBuilder = new NotificationCompat.Builder(mContext);
+
+        }
+
+
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_MAX); //HIGH, MAX, FULL_SCREEN and setDefaults(Notification.DEFAULT_ALL) will make it a Heads Up Display Style
+        notificationBuilder.setDefaults(Notification.DEFAULT_ALL); // also requires VIBRATE permission
+        notificationBuilder.setSmallIcon(getNotificationIcon());
+        notificationBuilder.setColor(mContext.getResources().getColor(R.color.colorPrimary));
+        notificationBuilder.setContentTitle(displayName);
+        notificationBuilder.setContentText(chatPojo.getChatText());
+        notificationBuilder.setAutoCancel(true);
+        notificationBuilder.setSound(defaultSoundUri);
+        notificationBuilder.setContentIntent(pendingIntent);
+//        notificationBuilder.setNumber(4);
+
+//        Notification notification = new NotificationCompat.InboxStyle(notificationBuilder)
+//                .addLine(chatPojo.getChatText())
+////                .addLine("Second Message")
+////                .addLine("Third Message")
+////                .addLine("Fourth Message")
+//                .setBigContentTitle(displayName)
+//                .setSummaryText("+3 more")
+//                .build();
+
+
+        notificationManager.notify(num /* ID of list_menu */, notificationBuilder.build());
+    }
 
 }

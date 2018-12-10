@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -103,11 +104,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private String sharedContactSenderName = "";
     private String sharedContactSenderImage = "";
 
-    String AudioSavePathInDevice = null;
+    String AudioSavePathInDevice = "";
     MediaRecorder mediaRecorder ;
     String RandomAudioFileName = "ABCDEFGHIJKLM";
     MediaPlayer mediaPlayer ;
     Random random;
+
+    private boolean ifshow = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -351,6 +354,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         super.onResume();
         //Here we bind our event listener (XmppCustomEventListener)
         xmppEventReceiver.setListener(xmppCustomEventListener);
+        ifshow = false;
 
     }
 
@@ -405,14 +409,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             LogM.e("onNewMessageReceived ChatActivity");
 
-//            if (ifshow) BaseActivity.SendNotification(ChatActivity.this, chatPojo);
-
-            chatPojoArrayList.add(chatPojo);
-            String username = "TestUser";
-            mMessageAdapter = new ChatAdapter(mActivity, chatPojoArrayList, username);
-            rv_singleChat.setAdapter(mMessageAdapter);
-
-
+             if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
 
         }
 
@@ -509,8 +506,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 break;
 
                 case Constants.TYPE_AUDIO:
-                    if (AudioSavePathInDevice.trim().isEmpty()) {
+                    if (TextUtils.isEmpty(AudioSavePathInDevice)) {
+
                         Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
+
                         return;
                     } else {
                         chatPojo.setSendAudioPath(AudioSavePathInDevice);
@@ -533,10 +532,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             if (MyApplication.getmService().xmpp.sendMessage(chatPojo)) {
                 DataManager.getInstance().AddChat(chatPojo);
                 edtMessage.setText("");
-                chatPojoArrayList.add(chatPojo);
-                String username = "TestUser";
-                mMessageAdapter = new ChatAdapter(this, chatPojoArrayList, username);
-                rv_singleChat.setAdapter(mMessageAdapter);
 
                 if (mMessageAdapter.getItemCount() > 2)
                     rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
@@ -752,5 +747,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 takePhoto();
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        ifshow = true;
     }
 }
