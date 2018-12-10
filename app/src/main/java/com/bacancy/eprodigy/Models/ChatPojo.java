@@ -6,6 +6,9 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by bacancy on 27/2/18.
  */
@@ -248,4 +251,7 @@ public class ChatPojo implements Parcelable {
         parcel.writeString(sharedContactRecvNumber);
         parcel.writeString(sharedContactRecvImage);
     }
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.bacancy.eprodigy.utils;
 
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import java.text.DateFormat;
@@ -14,7 +15,10 @@ public class SCUtils {
 
     //use either formatted_date or time_ago (below)
     public static String formatted_date(String timestamp) {
-
+        if (TextUtils.isEmpty(timestamp))
+        {
+            return "";
+        }
 //        timestamp = "2013-11-14 13:00:00";
 
         SimpleDateFormat sdfformate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.getDefault());
@@ -31,6 +35,11 @@ public class SCUtils {
         }
 
             return localTime.toLowerCase();
+    }
+    public  static  String getCurrentTimeStamp()
+    {
+        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return s.format(new Date());
     }
 
 

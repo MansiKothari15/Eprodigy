@@ -22,6 +22,7 @@ import java.util.List;
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder> {
 
 
+
     List<ContactListResponse.ResponseDataBean> UserNameList;
     Activity activity;
 
@@ -67,6 +68,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
                 Intent i = new Intent(activity,SingleChatActivity.class);
                 Bundle b = new Bundle();
                 b.putString("name",dataBean.getName());
+                b.putString("receiverJid",dataBean.getUsername());
                 i.putExtras(b);
                 activity.startActivity(i);
             }

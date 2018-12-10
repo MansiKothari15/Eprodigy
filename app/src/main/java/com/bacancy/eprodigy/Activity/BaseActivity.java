@@ -2,22 +2,27 @@ package com.bacancy.eprodigy.Activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.permission.MyPermission;
 import com.bacancy.eprodigy.permission.PermissionActivity;
 import com.bacancy.eprodigy.permission.PermissionListener;
+import com.bacancy.eprodigy.utils.AlertUtils;
+import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.ImageSelectUtils;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
-
+import com.bacancy.eprodigy.utils.Pref;
 
 
 /**
@@ -85,7 +90,6 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * no internet dialog
      */
@@ -123,6 +127,7 @@ public class BaseActivity extends AppCompatActivity {
 
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionActivity.onPermissionsResult(requestCode, permissions, grantResults);
@@ -142,4 +147,34 @@ public class BaseActivity extends AppCompatActivity {
             customProgressDialog.dismissCustomDialog();
         }
     }
+
+    public boolean validateUser(final Activity mActivity, int responseStatus, String message) {
+        if (responseStatus == Constants.SESSION_TIME_OUT_STATUS) {
+            dismissLoadingDialog();
+            //   AlertUtils.showSimpleAlert(mContext, TextUtils.isEmpty(message)?mContext.getString(R.string.session_time_out):message);
+
+            AlertDialog dialog = new AlertDialog.Builder(mActivity)
+                    .setIcon(0).setMessage(TextUtils.isEmpty(message) ? mActivity.getString(R.string.session_time_out) : message)
+                    .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    //clear session
+                    Pref.setValue(mActivity, "verified", "0");
+
+                    Intent intent = new Intent(mActivity, MobileRegistrationActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    mActivity.startActivity(intent);
+                    mActivity.finish();
+
+                }
+            }).show();
+            AlertUtils.changeDefaultColor(dialog);
+
+            return true;
+        }
+        return false;
+    }
+
+
 }

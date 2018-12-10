@@ -45,6 +45,8 @@
     <string name="privacy_text">If you turn off read receipts, you won\'t be able to see read receipts from other people. Read receipts are always send for group chats.</string>
 
     <!-- Error messages -->
+    <string name="server_error">Server error, Please try after sometime.</string>
+    <string name="session_time_out">Your account was logged into from another device OR Session time out - Please login again.</string>
     <string name="e_no_internet_title">No Connection</string>
     <string name="e_no_internet">You are browsing Offline. Please check your Internet connection!</string>
     <string name="e_required">This field is required</string>

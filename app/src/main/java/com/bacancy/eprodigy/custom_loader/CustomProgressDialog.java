@@ -26,6 +26,7 @@ public class CustomProgressDialog {
 
         dialog = dialogBuilder.create();
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setCancelable(false);
         dialog.show();
     }
 

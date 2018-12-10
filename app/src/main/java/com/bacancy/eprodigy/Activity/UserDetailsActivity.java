@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.Activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,6 +26,7 @@ import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ProfileUploadResponse;
 import com.bacancy.eprodigy.ResponseModel.UserDisplayNameResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.squareup.picasso.Picasso;
@@ -44,7 +46,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserDetailsActivity extends BaseActivity implements View.OnClickListener {
-
+    Activity mActivity;
     Button btn_username;
     ImageView img_profile;
     private static final String IMAGE_DIRECTORY = "/eProdigy";
@@ -55,6 +57,7 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userdetail);
+        mActivity=this;
         init();
     }
 
@@ -227,13 +230,25 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
         call.enqueue(new Callback<ProfileUploadResponse>() {
             @Override
             public void onResponse(Call<ProfileUploadResponse> call, Response<ProfileUploadResponse> response) {
-                dismissLoadingDialog();
-                Log.d("ProfileResponse", response.toString());
-                String profilePic = response.body().getProfilepicture();
-                String displayName = response.body().getUserdata().getDisplayname();
-                Pref.setValue(UserDetailsActivity.this,"ProfilePic",profilePic);
 
-                Toast.makeText(UserDetailsActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    if (validateUser(mActivity,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+                    dismissLoadingDialog();
+                    Log.d("ProfileResponse", response.toString());
+                    String profilePic = response.body().getProfilepicture();
+                    String displayName = response.body().getUserdata().getDisplayname();
+                    Pref.setValue(UserDetailsActivity.this, "ProfilePic", profilePic);
+
+                    Toast.makeText(UserDetailsActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                }
             }
 
             @Override
@@ -261,14 +276,33 @@ public class UserDetailsActivity extends BaseActivity implements View.OnClickLis
         call.enqueue(new Callback<UserDisplayNameResponse>() {
             @Override
             public void onResponse(Call<UserDisplayNameResponse> call, Response<UserDisplayNameResponse> response) {
-                dismissLoadingDialog();
-                Log.d("UsernameResponse", response.toString());
-                Pref.setValue(UserDetailsActivity.this,"DisplayName",edt_username.getText().toString());
-                Toast.makeText(UserDetailsActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
 
-                Intent i = new Intent(UserDetailsActivity.this,MainActivity.class);
-                startActivity(i);
-                finish();
+
+
+                if (response.isSuccessful()) {
+
+
+                    if (validateUser(mActivity,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+                    dismissLoadingDialog();
+                    Log.d("UsernameResponse", response.toString());
+                    Pref.setValue(UserDetailsActivity.this,"DisplayName",edt_username.getText().toString());
+                    Toast.makeText(UserDetailsActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+
+                    Intent i = new Intent(UserDetailsActivity.this,MainActivity.class);
+                    startActivity(i);
+                    finish();
+
+
+
+                }
+                else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                }
             }
 
             @Override

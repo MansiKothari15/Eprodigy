@@ -16,6 +16,7 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ResendCodeResponse;
 import com.bacancy.eprodigy.ResponseModel.VerifyUserResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -148,21 +149,33 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
             @Override
             public void onResponse(Call<VerifyUserResponse> call, Response<VerifyUserResponse> response) {
 
-                Log.d("VerifyUserResponse", response.toString());
-                dismissLoadingDialog();
+                if (response.isSuccessful()) {
+                    dismissLoadingDialog();
+                    Log.d("VerifyUserResponse", response.toString());
+                    if (validateUser(MobileVerificationActivity.this,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
 
-                if (response.body().getStatus() == 200) {
 
-                    Pref.setValue(MobileVerificationActivity.this,"login_token",response.body().getUserdata().getLoginToken());
-                    Pref.setValue(MobileVerificationActivity.this,"username",response.body().getUserdata().getUsername());
-                    Pref.setValue(MobileVerificationActivity.this,"verified",response.body().getUserdata().getVerified());
-                    Pref.setValue(MobileVerificationActivity.this,"password",response.body().getUserdata().getPassword());
+                    if (response.body().getStatus() == 200) {
 
-                    Intent i = new Intent(MobileVerificationActivity.this,UserDetailsActivity.class);
-                    startActivity(i);
-                    finish();
-                }else {
-                    Toast.makeText(MobileVerificationActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        Pref.setValue(MobileVerificationActivity.this,"login_token",response.body().getUserdata().getLoginToken());
+                        Pref.setValue(MobileVerificationActivity.this,"username",response.body().getUserdata().getUsername());
+                        Pref.setValue(MobileVerificationActivity.this,"verified",response.body().getUserdata().getVerified());
+                        Pref.setValue(MobileVerificationActivity.this,"password",response.body().getUserdata().getPassword());
+
+                        Intent i = new Intent(MobileVerificationActivity.this,UserDetailsActivity.class);
+                        startActivity(i);
+                        finish();
+                    }else {
+                        Toast.makeText(MobileVerificationActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else {
+                     dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(MobileVerificationActivity.this,getString(R.string.server_error));
                 }
 
             }

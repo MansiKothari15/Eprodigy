@@ -32,10 +32,12 @@ public class SplashActivity extends Activity {
                 String verified = Pref.getValue(SplashActivity.this,"verified","");
                 if(verified.equals("1")) {
                     Intent i = new Intent(SplashActivity.this, MessagingActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
                     finish();
                 }else {
                     Intent i = new Intent(SplashActivity.this, MobileRegistrationActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
                     finish();
                 }

@@ -36,6 +36,7 @@ import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.interfaces.MyContactListener;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.tasks.GetMyContactTask;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -155,6 +156,11 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                 @Override
                 public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
                     if (response.isSuccessful()) {
+                        if (((BaseActivity) getActivity()).validateUser(getActivity(),
+                                response.body().getStatus(),
+                                response.body().getMessage())) {
+                            return;
+                        }
                         Log.d("ContactListResponse", response.toString());
                         List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
 
@@ -171,7 +177,11 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                             rv_users.setAdapter(usersAdapter);
                         }
 
+                    } else {
+                        ((BaseActivity) getActivity()).dismissLoadingDialog();
+                        AlertUtils.showSimpleAlert(getActivity(), getActivity().getString(R.string.server_error));
                     }
+
                     ((BaseActivity) getActivity()).dismissLoadingDialog();
                 }
 

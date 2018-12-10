@@ -52,6 +52,7 @@ import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
 import org.jivesoftware.smackx.vcardtemp.VCardManager;
 import org.jivesoftware.smackx.vcardtemp.packet.VCard;
+import org.json.JSONObject;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
@@ -858,10 +859,12 @@ public class XMPPHandler {
     public boolean sendMessage(ChatPojo chatMessage) throws SmackException {
         String body = gson.toJson(chatMessage);
 
+
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
             chat_created_for.put(chatMessage.getChatRecv(), false);
 
         if (!chat_created_for.get(chatMessage.getChatRecv())) {
+
             Log.e(TAG, "jusabtsend:" + chatMessage.getChatRecv());
 
 
@@ -884,16 +887,9 @@ public class XMPPHandler {
         }
 
         final Message message = new Message();
-        if (chatMessage.getMsgType() == Constants.MY_CONTACT
-                && chatMessage.isMine()
-                && !TextUtils.isEmpty(chatMessage.getSharedContactSenderName())
-                && !TextUtils.isEmpty(chatMessage.getSharedContactSenderNumber())) {
-            message.setBody(chatMessage.getSharedContactSenderName() + Constants.CONTACT_SPLIT_KEY + chatMessage.getSharedContactSenderNumber());
-            Log.e(TAG,"Contact");
-        } else {
-            Log.e(TAG,"Message");
-            message.setBody(chatMessage.getChatText());
-        }
+        Log.e(TAG, "Message");
+        message.setBody(body);
+
 
 
         message.setType(Message.Type.chat);
@@ -1129,7 +1125,6 @@ public class XMPPHandler {
 
                 if (message.getType() == Message.Type.chat && message.getBody() != null) {
 
-
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                     LogM.e("from: " + message.getFrom());
                     LogM.e("xml: " + message.getType().toString());
@@ -1138,17 +1133,19 @@ public class XMPPHandler {
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                     String username = from.toString().replace("@", "").replace(AppConfing.SERVICE, "");
-                    updateDB(username, message.getBody(), username);
-
 
                     //Now our message is in our representation, we can send it to our list to add newly received message
+
+                    Gson gson = new Gson();
+                    ChatPojo chatMessage = gson.fromJson(message.getBody(), ChatPojo.class);
+
+                    updateDB(username, chatMessage, username);
 
                 } else if (message.getType() == Message.Type.error) {
                     Toast.makeText(service, "error type", Toast.LENGTH_SHORT).show();
 
                 } else if (message.getType() == Message.Type.groupchat) {
                     Toast.makeText(service, "groupchat type", Toast.LENGTH_SHORT).show();
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1159,22 +1156,31 @@ public class XMPPHandler {
 
     }
 
-    private void updateDB(String username, String msg, String s) {
+    private void updateDB(String username, ChatPojo chatPojo, String s) {
 
-        ChatPojo chatPojo = new ChatPojo();
+        /*ChatPojo chatPojo = new ChatPojo();
 //        chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);//to
         chatPojo.setChatId(s);//to
         chatPojo.setChatSender(username);//from
         chatPojo.setChatRecv(mUser);
         chatPojo.setChatText(msg);
         chatPojo.setShowing(false);
-        chatPojo.setChatTimestamp(SCUtils.getNow());
+        chatPojo.setChatTimestamp(SCUtils.getNow());*/
+
+
 //        DataManager.getInstance().AddChat(chatPojo);
 //
 //        DataManager.getInstance().updateTimestamp(username, SCUtils.getNow());
 
-        addMessage(chatPojo);
 
+        Log.e(TAG, "updateDB>" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
+
+        chatPojo.setChatId(s);//to
+        chatPojo.setChatRecv(mUser);//to
+        chatPojo.setChatSender(username);//from
+        chatPojo.setMine(false);
+
+        addMessage(chatPojo);
 
     }
 

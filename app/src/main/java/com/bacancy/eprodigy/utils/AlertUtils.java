@@ -41,7 +41,16 @@ public class AlertUtils {
 	 * @param message Message
 	 * @return AlertDialog
 	 */
+
+	public static AlertDialog simpleAlertDialog;
+	public static AlertDialog simpleAlertDialog2;
 	public static AlertDialog showSimpleAlert(Context context, String message) {
+
+		if (simpleAlertDialog!=null && simpleAlertDialog.isShowing())
+		{
+			 return simpleAlertDialog;
+		}
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setIcon(0);
         builder.setTitle("");
@@ -49,9 +58,9 @@ public class AlertUtils {
 		builder.setMessage(message);
 		builder.setNeutralButton(context.getString(R.string.ok), null);
 
-		AlertDialog dialog = builder.show();
-		changeDefaultColor(dialog);
-		return dialog;
+		simpleAlertDialog = builder.show();
+		changeDefaultColor(simpleAlertDialog);
+		return simpleAlertDialog;
 	}
 
 
@@ -63,7 +72,13 @@ public class AlertUtils {
      * @param listener DialogInterface.OnClickListener for ok button click
      * @return AlertDialog
      */
-    public static AlertDialog showSimpleAlert(Context context, String title, String message, final OnClickListener listener) {
+    public static AlertDialog showSimpleAlert(Context context, String title, String message, final DialogInterface.OnClickListener listener) {
+
+		if (simpleAlertDialog2!=null && simpleAlertDialog2.isShowing())
+		{
+			return simpleAlertDialog2;
+		}
+
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setIcon(0);
         builder.setTitle(title);
@@ -77,9 +92,9 @@ public class AlertUtils {
 				}
 			}
 		});
-        AlertDialog dialog = builder.show();
-        changeDefaultColor(dialog);
-        return dialog;
+		simpleAlertDialog2 = builder.show();
+        changeDefaultColor(simpleAlertDialog2);
+        return simpleAlertDialog2;
     }
 
     public static void showToast(Context context, String message)

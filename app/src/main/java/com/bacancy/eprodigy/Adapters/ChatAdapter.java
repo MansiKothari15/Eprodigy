@@ -39,7 +39,7 @@ import java.util.List;
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<HeaderHolder> {
-
+    int MY_MESSAGE = 0,OTHER_MESSAGE = 1,MY_IMAGE =2,OTHER_IMAGE = 3,MY_CONTACT = 4,OTHER_CONTACT = 5,MY_LOCATION=6,OTHER_LOCATION=7,MY_AUDIO=8,OTHER_AUDIO=9;
     private Context context;
     private List<ChatPojo> mLists;
     private SparseBooleanArray mSelectedItemsIds;
@@ -83,19 +83,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        if (i == Constants.MY_MESSAGE) {
+        if (i ==  MY_MESSAGE) {
             return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.my_message, viewGroup, false));
-        } else if (i == Constants.OTHER_MESSAGE) {
+        } else if (i ==  OTHER_MESSAGE) {
             return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.their_message, viewGroup, false));
-        } else if (i == Constants.MY_IMAGE) {
+        } else if (i ==  MY_IMAGE) {
             return new ChatImageHolder(LayoutInflater.from(context).inflate(R.layout.outgoing_imageview, viewGroup, false));
-        } else if (i == Constants.OTHER_IMAGE) {
+        } else if (i ==  OTHER_IMAGE) {
             return new ChatImageRecvHOlder(LayoutInflater.from(context).inflate(R.layout.incoming_imageview, viewGroup, false));
-        } else if (i == Constants.MY_CONTACT) {
+        } else if (i ==  MY_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
             return new SendContactHolder(layoutView);
-        }else if (i == Constants.OTHER_CONTACT) {
-            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
+        }else if (i ==  OTHER_CONTACT) {
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_contact, viewGroup, false);
             return new RecvContactHolder(layoutView);
         } else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
@@ -110,7 +110,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
         final ChatPojo chatPojo = mLists.get(position);
-        String formatted_date = SCUtils.formatted_date(chatPojo.getChatTimestamp());
+
+        String formatted_date="";
+
+
+        if (chatPojo.isMine())
+        {
+            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(chatPojo.getChatTimestamp()))?"":chatPojo.getChatTimestamp());
+        }
+        else
+        {
+             String current_time_stamp = SCUtils.getCurrentTimeStamp();
+            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(current_time_stamp))?"":current_time_stamp);
+        }
+
 
         if (holder instanceof ChatHolderFrom) {
 
@@ -187,8 +200,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
         }else if (holder instanceof RecvContactHolder) {
 
-            String name=chatPojo.getSharedContactRecvName();
-            String cono=chatPojo.getSharedContactRecvNumber();
+            String name=chatPojo.getSharedContactSenderName();
+            String cono=chatPojo.getSharedContactSenderNumber();
             // String image=chatPojo.getSharedContactRecvImage();
 
             if (!TextUtils.isEmpty(name)
@@ -202,7 +215,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 ((RecvContactHolder) holder).tv_contact_name_incoming.setText(name);
                 ((RecvContactHolder) holder).tv_phone_incoming.setText(cono);
-                ((RecvContactHolder) holder).tv_contact_name_incoming.setOnClickListener(new View.OnClickListener() {
+                ((RecvContactHolder) holder).rl_contact_incoming.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         ChatContactDetailActivity.StartChatContactDetailActivity(context,chatPojo);
@@ -253,26 +266,61 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     @Override
     public int getItemViewType(int position) {
-        /*ChatPojo item = mLists.get(position);
 
-        if (item.getChatSender().equalsIgnoreCase(mUsername))
+        ChatPojo item = mLists.get(position);
+        int mType=item.getMsgType();
+        boolean isMy=item.isMine();
+
+        if (mType==Constants.TYPE_MESSAGE && isMy)
+        {
             return MY_MESSAGE;
-        else if (!item.getChatImage().equals("") && !item.getChatImage().isEmpty()) {
-            return IMAGE_OUTGOING;
-        } else if (!item.getChatImage().equals("") && !item.getChatImage().isEmpty()) {
-            return CONTACT_OUTGOING;
-        } else return OTHER_MESSAGE;*/
-
-        return mLists.get(position).getMsgType();
-
-
+        }
+        else if (mType==Constants.TYPE_MESSAGE && !isMy)
+        {
+            return OTHER_MESSAGE;
+        }
+        else if (mType==Constants.TYPE_CONTACT && isMy)
+        {
+            return MY_CONTACT;
+        }
+        else if (mType==Constants.TYPE_CONTACT && !isMy)
+        {
+            return OTHER_CONTACT;
+        }
+        else if (mType==Constants.TYPE_IMAGE && isMy)
+        {
+            return MY_IMAGE;
+        }
+        else if (mType==Constants.TYPE_IMAGE && !isMy)
+        {
+            return OTHER_IMAGE;
+        }
+        else if (mType==Constants.TYPE_LOCATION && isMy)
+        {
+            return MY_LOCATION;
+        }
+        else if (mType==Constants.TYPE_LOCATION && !isMy)
+        {
+            return OTHER_LOCATION;
+        }
+        else if (mType==Constants.TYPE_AUDIO && isMy)
+        {
+            return MY_AUDIO;
+        }
+        else if (mType==Constants.TYPE_AUDIO && !isMy)
+        {
+            return OTHER_AUDIO;
+        }
+        else
+        {
+            return 100;
+        }
     }
 
     //Toggle selection methods
     public void toggleSelection(int position) {
         selectView(position, !mSelectedItemsIds.get(position));
     }
-
 
     //Remove selected selections
     public void removeSelection() {

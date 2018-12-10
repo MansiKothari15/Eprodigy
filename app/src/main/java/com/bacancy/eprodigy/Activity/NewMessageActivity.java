@@ -35,6 +35,7 @@ import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.interfaces.MyContactListener;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.tasks.GetMyContactTask;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Pref;
 
 import org.json.JSONArray;
@@ -181,7 +182,14 @@ public class NewMessageActivity extends BaseActivity implements PermissionListen
             phone_contact_list_call.enqueue(new Callback<ContactListResponse>() {
                 @Override
                 public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
+
                     if (response.isSuccessful()) {
+                        if (validateUser(NewMessageActivity.this,
+                                response.body().getStatus(),
+                                response.body().getMessage())) {
+                            return;
+                        }
+                        dismissLoadingDialog();
                         Log.d("ContactListResponse", response.toString());
                         List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
 
@@ -197,6 +205,10 @@ public class NewMessageActivity extends BaseActivity implements PermissionListen
                         usersAdapter = new UsersAdapter(mActivity, mList);
                         rv_newChat.setAdapter(usersAdapter);
 
+                    }
+                    else {
+                        dismissLoadingDialog();
+                        AlertUtils.showSimpleAlert(NewMessageActivity.this, getString(R.string.server_error));
                     }
                     dismissLoadingDialog();
                 }

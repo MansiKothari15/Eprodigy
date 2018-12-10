@@ -6,15 +6,18 @@ public class Constants {
     /*Message Types*/
 
 
+    public static final int SUCCESS_STATUS = 101;
+    public static final int SESSION_TIME_OUT_STATUS = 401;
     public static final int OUR_USERS_STATUS = 1;
     public static final String CONTACT_SPLIT_KEY = ",";
 
-    public static final int MY_MESSAGE = 0;
-    public static final int OTHER_MESSAGE = 1;
-    public static final int MY_IMAGE =2;
-    public static final int OTHER_IMAGE = 3;
-    public static final int MY_CONTACT = 4;
-    public static final int OTHER_CONTACT = 5;
+    public static final int TYPE_MESSAGE = 111;
+    public static final int TYPE_CONTACT = 112;
+    public static final int TYPE_IMAGE =113;
+    public static final int TYPE_LOCATION =114;
+    public static final int TYPE_AUDIO =115;
+    public static final int TYPE_VIDEO =116;
+
 
 
     //XMPP Connection specific constants

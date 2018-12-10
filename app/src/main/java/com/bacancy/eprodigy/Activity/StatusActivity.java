@@ -14,6 +14,7 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.StatusUpdateResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -82,8 +83,26 @@ public class StatusActivity extends BaseActivity implements View.OnClickListener
         call.enqueue(new Callback<StatusUpdateResponse>() {
             @Override
             public void onResponse(Call<StatusUpdateResponse> call, Response<StatusUpdateResponse> response) {
-                dismissLoadingDialog();
-                Log.d("StatusUpdateResponse", response.toString());
+
+                if (response.isSuccessful()) {
+
+
+                    if (validateUser(StatusActivity.this,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+                    dismissLoadingDialog();
+                    Log.d("StatusUpdateResponse", response.toString());
+
+
+
+                }
+                else {
+                     dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(StatusActivity.this, getString(R.string.server_error));
+                }
+
 
             }
 

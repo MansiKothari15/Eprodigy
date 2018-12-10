@@ -1,5 +1,6 @@
 package com.bacancy.eprodigy.Activity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UserDisplayNameResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -25,11 +27,13 @@ public class EditUsernameActivity extends BaseActivity implements View.OnClickLi
 
     TextView tv_label,tv_back,tv_right,tv_done;
     EditText edt_username;
+    Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edituser);
+        mActivity=this;
         init();
     }
 
@@ -84,10 +88,29 @@ public class EditUsernameActivity extends BaseActivity implements View.OnClickLi
         call.enqueue(new Callback<UserDisplayNameResponse>() {
             @Override
             public void onResponse(Call<UserDisplayNameResponse> call, Response<UserDisplayNameResponse> response) {
-                dismissLoadingDialog();
-                Log.d("UsernameResponse", response.toString());
-                Pref.setValue(EditUsernameActivity.this,"DisplayName",edt_username.getText().toString());
-                Toast.makeText(EditUsernameActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+
+                if (response.isSuccessful()) {
+                    dismissLoadingDialog();
+
+                    if (validateUser(mActivity,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+
+                    Log.d("UsernameResponse", response.toString());
+                    Pref.setValue(EditUsernameActivity.this,"DisplayName",edt_username.getText().toString());
+                    Toast.makeText(EditUsernameActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+
+
+
+                }
+                else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                }
+
+
             }
 
             @Override

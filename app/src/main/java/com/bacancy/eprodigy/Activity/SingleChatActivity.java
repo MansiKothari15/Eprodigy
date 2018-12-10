@@ -78,13 +78,13 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
-
+    Activity mActivity;
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String username, password, ChatUserId;
+    String username, password, ChatUserId,mName;
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -113,6 +113,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
+        mActivity=this;
         startXmppService();
         xmppEventReceiver = mChatApp.getEventReceiver();
 
@@ -205,6 +206,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 view.onTouchEvent(motionEvent);
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+
+                    if (mediaRecorder!=null)
                     mediaRecorder.stop();
                     sendAudio();
 
@@ -215,8 +218,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            ChatUserId = extras.getString("name");
-            tv_label.setText(ChatUserId);
+            mName = extras.getString("name");
+            ChatUserId = extras.getString("receiverJid");
+            tv_label.setText(mName);
         }
         hideCustomToolbar();
 
@@ -374,6 +378,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         call.enqueue(new Callback<LastSeenResponse>() {
             @Override
             public void onResponse(Call<LastSeenResponse> call, Response<LastSeenResponse> response) {
+
                 dismissLoadingDialog();
                 Log.d("LastSeenResponse", response.toString());
 
@@ -392,12 +397,22 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         //Event Listeners
         public void onNewMessageReceived(ChatPojo chatPojo) {
 
+            Log.e("ad","onNewMessageReceived>>"+chatPojo.toString());
+
             chatPojo.setShowing(true);
+            chatPojo.setMine(false);
             DataManager.getInstance().AddChat(chatPojo);
 
             LogM.e("onNewMessageReceived ChatActivity");
 
 //            if (ifshow) BaseActivity.SendNotification(ChatActivity.this, chatPojo);
+
+            chatPojoArrayList.add(chatPojo);
+            String username = "TestUser";
+            mMessageAdapter = new ChatAdapter(mActivity, chatPojoArrayList, username);
+            rv_singleChat.setAdapter(mMessageAdapter);
+
+
 
         }
 
@@ -464,7 +479,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
 
         switch (msgType) {
-            case Constants.MY_MESSAGE:
+            case Constants.TYPE_MESSAGE:
                 if (edtMessage.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
                     return;
@@ -473,7 +488,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
-            case Constants.MY_IMAGE:
+            case Constants.TYPE_IMAGE:
                 if (selectedImagePath.trim().isEmpty()) {
                     Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
                     return;
@@ -482,7 +497,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
-            case Constants.MY_CONTACT:
+            case Constants.TYPE_CONTACT:
                 if (sharedContactSenderName.trim().isEmpty() || sharedContactSenderNumber.trim().isEmpty()) {
                     Toast.makeText(this, "Please select contact", Toast.LENGTH_SHORT).show();
                     return;
@@ -526,48 +541,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
-   /* private void SendMessage(String imageUrl) {
 
-        Log.d("imageUrl---", imageUrl);
-        if (edtMessage.getText().toString().trim().isEmpty() && imageUrl.equals("")) {
-            Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
-
-        } else {
-
-            ChatUserId = ChatUserId.replace(" ", "");
-            Log.d("ChatUserId", ChatUserId);
-
-            ChatPojo chatPojo = new ChatPojo();
-            chatPojo.setChatId(ChatUserId);//to
-            chatPojo.setChatSender(username);//from
-            chatPojo.setChatRecv(ChatUserId);
-            chatPojo.setShowing(true);
-            chatPojo.setChatText(edtMessage.getText().toString().trim());//message
-            chatPojo.setChatTimestamp(SCUtils.getNow());
-            chatPojo.setChatImage(imageUrl);
-
-            try {
-                if (MyApplication.getmService().xmpp.sendMessage(chatPojo)) {
-                    DataManager.getInstance().AddChat(chatPojo);
-                    edtMessage.setText("");
-                    chatPojoArrayList.add(chatPojo);
-                    String username = "TestUser";
-                    mMessageAdapter = new ChatAdapter(this, chatPojoArrayList, username);
-                    rv_singleChat.setAdapter(mMessageAdapter);
-
-                    if (mMessageAdapter.getItemCount() > 2)
-                        rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
-                }
-
-            } catch (SmackException e) {
-                e.printStackTrace();
-                Toast.makeText(SingleChatActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-    }*/
 
     private void startXmppService() {
+
 
         //Start XMPP Service (if not running already)
         if (!XMPPService.isServiceRunning) {
@@ -643,7 +620,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     sharedContactSenderImage="";
                     Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
 
-                    SendMsg(Constants.MY_CONTACT);
+                    SendMsg(Constants.TYPE_CONTACT);
 
                 } else {
 
@@ -682,7 +659,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             selectedImagePath = yourUri.toString();
 
 
-            SendMsg(Constants.MY_IMAGE);
+            SendMsg(Constants.TYPE_IMAGE);
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
             MediaScannerConnection.scanFile(this,
@@ -744,7 +721,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             case R.id.imgSend:
 
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
-                    SendMsg(Constants.MY_MESSAGE);
+                    SendMsg(Constants.TYPE_MESSAGE);
                 } else {
                     AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
 

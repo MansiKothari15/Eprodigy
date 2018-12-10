@@ -2,6 +2,7 @@ package com.bacancy.eprodigy.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +16,7 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.CountryResponse;
 import com.bacancy.eprodigy.ResponseModel.RegisterResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -34,6 +36,8 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
     ArrayList<String> CountryCodeArrayList = new ArrayList<>();
     ArrayList<String> CountryNameArrayList = new ArrayList<>();
 
+    int indiaCodePos=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,9 +46,9 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
     }
 
     private void init() {
-        edt_phoneNo = (EditText)findViewById(R.id.edt_phoneNo);
-        sp_countrycode = (Spinner)findViewById(R.id.sp_countrycode);
-        btn_continue = (Button)findViewById(R.id.btn_continue);
+        edt_phoneNo = (EditText) findViewById(R.id.edt_phoneNo);
+        sp_countrycode = (Spinner) findViewById(R.id.sp_countrycode);
+        btn_continue = (Button) findViewById(R.id.btn_continue);
         btn_continue.setOnClickListener(this);
 
         getCountryList();
@@ -65,18 +69,18 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btn_continue:
-                if(edt_phoneNo.getText().length() != 0){
+                if (edt_phoneNo.getText().length() != 0) {
                     getRegister();
-                }else {
+                } else {
                     Toast.makeText(this, "Phone number is required.", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
     }
 
-    public void getCountryList(){
+    public void getCountryList() {
 
         HashMap<String, String> data = new HashMap<>();
         Call<CountryResponse> call = ApiClient.getClient().country(data);
@@ -93,14 +97,24 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
                     for (int i = 0; i < response.body().getResponseData().size(); i++) {
                         CountryCodeArrayList.add(response.body().getResponseData().get(i).getPhonecode());
                         CountryNameArrayList.add(response.body().getResponseData().get(i).getNicename());
+
+                        //default
+                        if (!TextUtils.isEmpty(response.body().getResponseData().get(i).getPhonecode())
+                                && response.body().getResponseData().get(i).getPhonecode().equalsIgnoreCase("91")) {
+                              indiaCodePos = i;
+                        }
                     }
 
                     ArrayAdapter<String> adapter =
-                            new ArrayAdapter<String>(getApplicationContext(),  android.R.layout.simple_spinner_dropdown_item, CountryCodeArrayList);
-                    adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
+                            new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, CountryCodeArrayList);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
                     sp_countrycode.setAdapter(adapter);
+                    sp_countrycode.setSelection( indiaCodePos);
 
+                } else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(MobileRegistrationActivity.this, getString(R.string.server_error));
                 }
 
             }
@@ -121,11 +135,11 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
         final String phoneNo = edt_phoneNo.getText().toString();
         final String countryCode = sp_countrycode.getSelectedItem().toString();
         String countryName = CountryNameArrayList.get(sp_countrycode.getSelectedItemPosition());
-        Log.d("params---",uniqueID +" "+ phoneNo +" "+ countryCode +" "+ countryName);
+        Log.d("params---", uniqueID + " " + phoneNo + " " + countryCode + " " + countryName);
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("username","xxx");
-        data.put("email_id","xxx@gmail.com");
+        data.put("username", "xxx");
+        data.put("email_id", "xxx@gmail.com");
         data.put("password", "12345678");
         data.put("phone_number", phoneNo);
         data.put("device_token", uniqueID);
@@ -141,12 +155,15 @@ public class MobileRegistrationActivity extends BaseActivity implements View.OnC
                 Log.d("RegisterResponse", response.toString());
                 dismissLoadingDialog();
                 if (response.isSuccessful()) {
-                    Pref.setValue(MobileRegistrationActivity.this,"auth_id",String.valueOf(response.body().getAuthyId()));
-                    Pref.setValue(MobileRegistrationActivity.this,"device_token",uniqueID);
-                    Pref.setValue(MobileRegistrationActivity.this,"phone_number",phoneNo);
-                    Pref.setValue(MobileRegistrationActivity.this,"country_code",countryCode);
-                    Intent i = new Intent(MobileRegistrationActivity.this,MobileVerificationActivity.class);
+                    Pref.setValue(MobileRegistrationActivity.this, "auth_id", String.valueOf(response.body().getAuthyId()));
+                    Pref.setValue(MobileRegistrationActivity.this, "device_token", uniqueID);
+                    Pref.setValue(MobileRegistrationActivity.this, "phone_number", phoneNo);
+                    Pref.setValue(MobileRegistrationActivity.this, "country_code", countryCode);
+                    Intent i = new Intent(MobileRegistrationActivity.this, MobileVerificationActivity.class);
                     startActivity(i);
+                } else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(MobileRegistrationActivity.this, getString(R.string.server_error));
                 }
             }
 

@@ -50,8 +50,8 @@ public class ChatContactDetailActivity extends BaseActivity implements View.OnCl
             ChatPojo chatPojo = getIntent().getExtras().getParcelable(CHAT_DATA);
 
             String formatted_date = SCUtils.formatted_date(chatPojo.getChatTimestamp());
-            String name = chatPojo.isMine() ? chatPojo.getSharedContactSenderName() : chatPojo.getSharedContactRecvName();
-            String cono = chatPojo.isMine() ? chatPojo.getSharedContactSenderNumber() : chatPojo.getSharedContactRecvNumber();
+            String name =  chatPojo.getSharedContactSenderName() ;
+            String cono =  chatPojo.getSharedContactSenderNumber();
            // String image = chatPojo.isMine() ? chatPojo.getSharedContactSenderImage() : chatPojo.getSharedContactRecvImage();
             
             if (chatPojo.isMine() && (!TextUtils.isEmpty(name)

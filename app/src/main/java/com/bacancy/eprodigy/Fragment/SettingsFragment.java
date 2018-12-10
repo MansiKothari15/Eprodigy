@@ -35,6 +35,7 @@ import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.LogoutResponse;
 import com.bacancy.eprodigy.ResponseModel.ProfileUploadResponse;
 import com.bacancy.eprodigy.ResponseModel.UserDetailResponse;
+import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
@@ -54,9 +55,9 @@ import retrofit2.Response;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {
 
-    TextView tv_logout,tv_chats,tv_account,tv_username,tv_phoneNo,tv_status;
+    TextView tv_logout, tv_chats, tv_account, tv_username, tv_phoneNo, tv_status;
 
-    ImageView img_edit,img_profile;
+    ImageView img_edit, img_profile;
     RelativeLayout rv_status;
     private static final String IMAGE_DIRECTORY = "/eProdigy";
     private int GALLERY = 1, CAMERA = 2;
@@ -70,20 +71,20 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        tv_username = (TextView)view.findViewById(R.id.tv_username);
-        tv_phoneNo = (TextView)view.findViewById(R.id.tv_phoneNo);
-        tv_status = (TextView)view.findViewById(R.id.tv_status);
-        tv_logout = (TextView)view.findViewById(R.id.tv_logout);
-        tv_chats = (TextView)view.findViewById(R.id.tv_chats);
-        tv_account = (TextView)view.findViewById(R.id.tv_account);
+        tv_username = (TextView) view.findViewById(R.id.tv_username);
+        tv_phoneNo = (TextView) view.findViewById(R.id.tv_phoneNo);
+        tv_status = (TextView) view.findViewById(R.id.tv_status);
+        tv_logout = (TextView) view.findViewById(R.id.tv_logout);
+        tv_chats = (TextView) view.findViewById(R.id.tv_chats);
+        tv_account = (TextView) view.findViewById(R.id.tv_account);
         tv_logout.setOnClickListener(this);
         tv_chats.setOnClickListener(this);
         tv_account.setOnClickListener(this);
-        img_edit = (ImageView)view.findViewById(R.id.img_edit);
-        img_profile = (ImageView)view.findViewById(R.id.img_profile);
+        img_edit = (ImageView) view.findViewById(R.id.img_edit);
+        img_profile = (ImageView) view.findViewById(R.id.img_profile);
         img_edit.setOnClickListener(this);
         img_profile.setOnClickListener(this);
-        rv_status = (RelativeLayout)view.findViewById(R.id.rv_status);
+        rv_status = (RelativeLayout) view.findViewById(R.id.rv_status);
         rv_status.setOnClickListener(this);
 
         userDetails();
@@ -91,7 +92,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.tv_logout:
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                 // set title
@@ -100,15 +101,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 alertDialogBuilder
                         .setMessage("Do you want to exit?")
                         .setCancelable(false)
-                        .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
                                 // if this button is clicked, close
                                 // current activity
                                 logOut();
                             }
                         })
-                        .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
                                 // if this button is clicked, just close
                                 // the dialog box and do nothing
                                 dialog.cancel();
@@ -124,30 +125,30 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             case R.id.tv_chats:
                 break;
             case R.id.tv_account:
-                Intent i = new Intent(getActivity(),AccountDetailActivity.class);
+                Intent i = new Intent(getActivity(), AccountDetailActivity.class);
                 startActivity(i);
                 break;
             case R.id.img_edit:
-                Intent ii = new Intent(getActivity(),EditUsernameActivity.class);
+                Intent ii = new Intent(getActivity(), EditUsernameActivity.class);
                 startActivity(ii);
                 break;
             case R.id.img_profile:
                 showPictureDialog();
                 break;
             case R.id.rv_status:
-                Intent i3 = new Intent(getActivity(),StatusActivity.class);
+                Intent i3 = new Intent(getActivity(), StatusActivity.class);
                 startActivity(i3);
                 break;
         }
     }
 
 
-    private void showPictureDialog(){
+    private void showPictureDialog() {
         android.support.v7.app.AlertDialog.Builder pictureDialog = new android.support.v7.app.AlertDialog.Builder(getActivity());
         pictureDialog.setTitle("Select Action");
         String[] pictureDialogItems = {
                 "Select photo from gallery",
-                "Capture photo from camera" };
+                "Capture photo from camera"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -155,15 +156,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                         switch (which) {
                             case 0:
                                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
-                                }else {
+                                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                                } else {
                                     choosePhotoFromGallary();
                                 }
                                 break;
                             case 1:
                                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 1);
-                                }else {
+                                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                                } else {
                                     takePhotoFromCamera();
                                 }
 
@@ -181,7 +182,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 choosePhotoFromGallary();
             }
-        }else if(requestCode == 1){
+        } else if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 takePhotoFromCamera();
@@ -255,7 +256,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         return "";
     }
 
-    private void uploadProfile(File file){
+    private void uploadProfile(File file) {
 
         ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
 
@@ -267,20 +268,38 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
-        Log.d("Params->",userName.toString()+" "+loginToken.toString());
+        Log.d("Params->", userName.toString() + " " + loginToken.toString());
 
-        Call<ProfileUploadResponse> call = ApiClient.getClient().profileUpload(userName,loginToken,body);
+        Call<ProfileUploadResponse> call = ApiClient.getClient().profileUpload(userName, loginToken, body);
         call.enqueue(new Callback<ProfileUploadResponse>() {
             @Override
             public void onResponse(Call<ProfileUploadResponse> call, Response<ProfileUploadResponse> response) {
 
-                ((BaseActivity) getActivity()).dismissLoadingDialog();
-                Log.d("ProfileResponse", response.toString());
-                String profilePic = response.body().getProfilepicture();
-                String displayName = response.body().getUserdata().getDisplayname();
-                Pref.setValue(getActivity(),"ProfilePic",profilePic);
+                if (response.isSuccessful()) {
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
 
-                Toast.makeText(getActivity(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    if (((BaseActivity) getActivity()).validateUser(getActivity(),
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+
+                    Log.d("ProfileResponse", response.toString());
+                    String profilePic = response.body().getProfilepicture();
+                    String displayName = response.body().getUserdata().getDisplayname();
+                    Pref.setValue(getActivity(), "ProfilePic", profilePic);
+
+                    Toast.makeText(getActivity(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
+
+
+                }
+                else {
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(getActivity(), getActivity().getString(R.string.server_error));
+                }
+
+
+
             }
 
             @Override
@@ -292,28 +311,45 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private void userDetails(){
+    private void userDetails() {
 
 
         ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
 
-        String login_token = Pref.getValue(getActivity(),"login_token","");
-        String username = Pref.getValue(getActivity(),"username","");
+        String login_token = Pref.getValue(getActivity(), "login_token", "");
+        String username = Pref.getValue(getActivity(), "username", "");
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("login_token",login_token);
-        data.put("username",username);
+        data.put("login_token", login_token);
+        data.put("username", username);
 
         Call<UserDetailResponse> call = ApiClient.getClient().userDetails(data);
         call.enqueue(new Callback<UserDetailResponse>() {
             @Override
             public void onResponse(Call<UserDetailResponse> call, Response<UserDetailResponse> response) {
 
-                Log.d("UserDetailResponse", response.toString());
-                ((BaseActivity) getActivity()).dismissLoadingDialog();
-                tv_username.setText(response.body().getUserdata().getDisplayname());
-                tv_phoneNo.setText(response.body().getUserdata().getPhoneNumber());
-                tv_status.setText(response.body().getUserdata().getUserstatus());
+                if (response.isSuccessful()) {
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+
+                    if (((BaseActivity) getActivity()).validateUser(getActivity(),
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+
+                    Log.d("UserDetailResponse", response.toString());
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+                    tv_username.setText(response.body().getUserdata().getDisplayname());
+                    tv_phoneNo.setText(response.body().getUserdata().getPhoneNumber());
+                    tv_status.setText(response.body().getUserdata().getUserstatus());
+
+                } else {
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(getActivity(), getActivity().getString(R.string.server_error));
+                }
+
 
             }
 
@@ -327,14 +363,14 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    private void logOut(){
+    private void logOut() {
         ((BaseActivity) getActivity()).showLoadingDialog(getActivity());
-        String login_token = Pref.getValue(getActivity(),"login_token","");
-        String username = Pref.getValue(getActivity(),"username","");
+        String login_token = Pref.getValue(getActivity(), "login_token", "");
+        String username = Pref.getValue(getActivity(), "username", "");
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("login_token",login_token);
-        data.put("username",username);
+        data.put("login_token", login_token);
+        data.put("username", username);
 
         Call<LogoutResponse> call = ApiClient.getClient().logout(data);
         call.enqueue(new Callback<LogoutResponse>() {
@@ -342,14 +378,26 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             public void onResponse(Call<LogoutResponse> call, Response<LogoutResponse> response) {
 
                 Log.d("logoutResponse", response.toString());
-                ((BaseActivity) getActivity()).dismissLoadingDialog();
+
 
                 if (response.isSuccessful()) {
-                    Pref.setValue(getActivity(),"verified","0");
+                    ((BaseActivity) getActivity()).dismissLoadingDialog();
+
+                    if (((BaseActivity) getActivity()).validateUser(getActivity(),
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+
+                    Pref.setValue(getActivity(), "verified", "0");
                     Intent i = new Intent(getActivity(), MobileRegistrationActivity.class);
                     startActivity(i);
                     getActivity().finish();
                 }
+             else {
+                ((BaseActivity) getActivity()).dismissLoadingDialog();
+                AlertUtils.showSimpleAlert(getActivity(), getActivity().getString(R.string.server_error));
+            }
 
             }
 
