@@ -39,6 +39,17 @@ public class ChatPojo implements Parcelable {
     @ColumnInfo(name = "chatImage")
     private String chatImage;
 
+    @ColumnInfo(name = "sendAudioPath")
+    private String sendAudioPath;
+
+    public String getSendAudioPath() {
+        return sendAudioPath;
+    }
+
+    public void setSendAudioPath(String sendAudioPath) {
+        this.sendAudioPath = sendAudioPath;
+    }
+
     @ColumnInfo(name = "sharedContactSenderName")
     private String sharedContactSenderName;
 

@@ -2,25 +2,31 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:background="@drawable/rounded_rectangle_white"
-        android:id="@+id/ll_contact_incoming"
+        android:id="@+id/ll_audio_incoming"
         android:layout_width="wrap_content"
         android:padding="@dimen/normal_margin"
         android:orientation="horizontal"
         android:layout_height="wrap_content">
 
+        <ImageView
+            android:id="@+id/img_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"/>
+
     </LinearLayout>
     <TextView
         android:layout_marginLeft="@dimen/normal_margin"
-        android:layout_alignRight="@id/ll_contact_incoming"
-        android:layout_below="@id/ll_contact_incoming"
+        android:layout_alignRight="@id/ll_audio_incoming"
+        android:layout_below="@id/ll_audio_incoming"
         android:id="@+id/tv_time_incoming"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
         android:layout_marginRight="5dp"
         android:gravity="right"
         android:alpha="0.9"

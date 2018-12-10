@@ -94,7 +94,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3, AUDIO = 4;
+    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
@@ -105,7 +105,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     String AudioSavePathInDevice = null;
     MediaRecorder mediaRecorder ;
-    String RandomAudioFileName = "ABCDE";
+    String RandomAudioFileName = "ABCDEFGHIJKLM";
     MediaPlayer mediaPlayer ;
     Random random;
 
@@ -148,7 +148,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        random = new Random();
         tv_label = (TextView) findViewById(R.id.tv_label);
         tv_newMessage = (TextView) findViewById(R.id.tv_right);
         tv_createGroup = (TextView) findViewById(R.id.tv_left);
@@ -250,8 +250,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     public void sendAudio(){
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, AUDIO);
+        Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
+        SendMsg(Constants.MY_AUDIO);
     }
 
     public void MediaRecorderReady(){
@@ -264,7 +264,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(SingleChatActivity.this, new
-                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, AUDIO);
+                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.MY_AUDIO);
     }
 
     public String CreateRandomAudioFileName(int string){
@@ -508,6 +508,15 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
+                case Constants.MY_AUDIO:
+                    if (AudioSavePathInDevice.trim().isEmpty()) {
+                        Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else {
+                        chatPojo.setSendAudioPath(AudioSavePathInDevice);
+                    }
+                    break;
+
            /* default:
                 if (edtMessage.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
@@ -628,9 +637,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     sharedContactSenderNumber = "";
                     sharedContactSenderImage = "";
                 }
-                break;
-            case AUDIO:
-                Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 sharedContactSenderName = "";
