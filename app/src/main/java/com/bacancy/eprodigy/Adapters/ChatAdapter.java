@@ -1,7 +1,7 @@
 package com.bacancy.eprodigy.Adapters;
 
 import android.content.Context;
-import android.content.Intent;
+import android.media.MediaPlayer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -9,7 +9,6 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ActorDiffCallback;
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
@@ -19,6 +18,7 @@ import com.bacancy.eprodigy.Adapters.viewholder.ChatImageHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatImageRecvHOlder;
 import com.bacancy.eprodigy.Adapters.viewholder.HeaderHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.RecvContactHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.SendAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
@@ -97,7 +97,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         }else if (i == Constants.OTHER_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
             return new RecvContactHolder(layoutView);
-        } else if (i == HEADER_MESSAGE) {
+        } else if(i == Constants.MY_AUDIO){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
+            return new SendAudioHolder(layoutView);
+        }else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
         } else {
@@ -212,6 +215,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
 
 
+        } else if (holder instanceof SendAudioHolder){
+
+            final String audioPath = chatPojo.getSendAudioPath();
+            ((SendAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    audioPlayer(audioPath);
+                }
+            });
+
         } else if (holder instanceof HeaderHolder) {
 
             ChatPojo bean = mLists.get(position);
@@ -238,6 +251,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 //                .setBackgroundColor(mSelectedItemsIds.get(position) ? 0x9934B5E4
 //                        : Color.TRANSPARENT);
 
+    }
+
+    public void audioPlayer(String path){
+        //set up MediaPlayer
+        MediaPlayer mp = new MediaPlayer();
+
+        try {
+            mp.setDataSource(path);
+            mp.prepare();
+            mp.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

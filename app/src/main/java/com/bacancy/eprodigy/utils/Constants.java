@@ -15,6 +15,8 @@ public class Constants {
     public static final int OTHER_IMAGE = 3;
     public static final int MY_CONTACT = 4;
     public static final int OTHER_CONTACT = 5;
+    public static final int MY_AUDIO = 6;
+    public static final int OTHER_AUDIO = 7;
 
 
     //XMPP Connection specific constants
