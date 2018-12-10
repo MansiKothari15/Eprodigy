@@ -251,7 +251,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     public void sendAudio(){
         Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
-        SendMsg(Constants.MY_AUDIO);
+        SendMsg(Constants.TYPE_AUDIO);
     }
 
     public void MediaRecorderReady(){
@@ -264,7 +264,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(SingleChatActivity.this, new
-                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.MY_AUDIO);
+                String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.TYPE_AUDIO);
     }
 
     public String CreateRandomAudioFileName(int string){
@@ -508,7 +508,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
-                case Constants.MY_AUDIO:
+                case Constants.TYPE_AUDIO:
                     if (AudioSavePathInDevice.trim().isEmpty()) {
                         Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
                         return;

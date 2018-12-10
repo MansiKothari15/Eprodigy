@@ -97,7 +97,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         }else if (i ==  OTHER_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_contact, viewGroup, false);
             return new RecvContactHolder(layoutView);
-        } else if(i == Constants.MY_AUDIO){
+        } else if(i == MY_AUDIO){
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
             return new SendAudioHolder(layoutView);
         }else if (i == HEADER_MESSAGE) {
