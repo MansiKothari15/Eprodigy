@@ -75,6 +75,18 @@ public class ChatPojo implements Parcelable {
     @ColumnInfo(name = "isMine")
     private boolean isMine=false;
 
+    @ColumnInfo(name = "locationAddressTitle")
+    private String locationAddressTitle;
+
+    @ColumnInfo(name = "locationAddressDesc")
+    private String locationAddressDesc;
+
+    @ColumnInfo(name = "locationAddressLatitude")
+    private String locationAddressLatitude;
+
+    @ColumnInfo(name = "locationAddressLongitude")
+    private String locationAddressLongitude;
+
     public ChatPojo(){
     }
 
@@ -95,6 +107,10 @@ public class ChatPojo implements Parcelable {
         sharedContactRecvName = in.readString();
         sharedContactRecvNumber = in.readString();
         sharedContactRecvImage = in.readString();
+        locationAddressTitle = in.readString();
+        locationAddressDesc = in.readString();
+        locationAddressLatitude = in.readString();
+        locationAddressLongitude = in.readString();
     }
 
     public static final Creator<ChatPojo> CREATOR = new Creator<ChatPojo>() {
@@ -238,6 +254,38 @@ public class ChatPojo implements Parcelable {
         this.sharedContactSenderNumber = sharedContactSenderNumber;
     }
 
+    public String getLocationAddressTitle() {
+        return locationAddressTitle;
+    }
+
+    public void setLocationAddressTitle(String locationAddressTitle) {
+        this.locationAddressTitle = locationAddressTitle;
+    }
+
+    public String getLocationAddressDesc() {
+        return locationAddressDesc;
+    }
+
+    public void setLocationAddressDesc(String locationAddressDesc) {
+        this.locationAddressDesc = locationAddressDesc;
+    }
+
+    public String getLocationAddressLatitude() {
+        return locationAddressLatitude;
+    }
+
+    public void setLocationAddressLatitude(String locationAddressLatitude) {
+        this.locationAddressLatitude = locationAddressLatitude;
+    }
+
+    public String getLocationAddressLongitude() {
+        return locationAddressLongitude;
+    }
+
+    public void setLocationAddressLongitude(String locationAddressLongitude) {
+        this.locationAddressLongitude = locationAddressLongitude;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -261,6 +309,12 @@ public class ChatPojo implements Parcelable {
         parcel.writeString(sharedContactRecvName);
         parcel.writeString(sharedContactRecvNumber);
         parcel.writeString(sharedContactRecvImage);
+        parcel.writeString(locationAddressTitle);
+        parcel.writeString(locationAddressDesc);
+        parcel.writeString(locationAddressLatitude);
+        parcel.writeString(locationAddressLongitude);
+
+
     }
 
 

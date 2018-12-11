@@ -9,14 +9,17 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatImageHolder;
-import com.bacancy.eprodigy.Adapters.viewholder.ChatImageRecvHOlder;
+import com.bacancy.eprodigy.Adapters.viewholder.ChatImageRecvHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.HeaderHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.LocationFromHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.LocationToHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.RecvContactHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
@@ -91,7 +94,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (i ==  MY_IMAGE) {
             return new ChatImageHolder(LayoutInflater.from(context).inflate(R.layout.outgoing_imageview, viewGroup, false));
         } else if (i ==  OTHER_IMAGE) {
-            return new ChatImageRecvHOlder(LayoutInflater.from(context).inflate(R.layout.incoming_imageview, viewGroup, false));
+            return new ChatImageRecvHolder(LayoutInflater.from(context).inflate(R.layout.incoming_imageview, viewGroup, false));
         } else if (i ==  MY_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
             return new SendContactHolder(layoutView);
@@ -101,7 +104,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if(i == MY_AUDIO){
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
             return new SendAudioHolder(layoutView);
-        }else if (i == HEADER_MESSAGE) {
+        }
+        else if(i == MY_LOCATION){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_location, viewGroup, false);
+            return new LocationFromHolder(layoutView);
+        }
+        else if(i == OTHER_LOCATION){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_location, viewGroup, false);
+            return new LocationToHolder(layoutView);
+        }
+        else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
         } else {
@@ -164,16 +176,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                         .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .into(((ChatImageHolder) holder).img_outgoing);
             }
-        } else if (holder instanceof ChatImageRecvHOlder) {
+        } else if (holder instanceof ChatImageRecvHolder) {
             if (!TextUtils.isEmpty(chatPojo.getChatImage())) {
 
 
-                ((ChatImageRecvHOlder) holder).tvTime.setText(formatted_date);
+                ((ChatImageRecvHolder) holder).tvTime.setText(formatted_date);
 
                 Picasso.with(context).load(chatPojo.getChatImage())
                         .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .error(context.getResources().getDrawable(R.mipmap.profile_pic))
-                        .into(((ChatImageRecvHOlder) holder).img_incoming);
+                        .into(((ChatImageRecvHolder) holder).img_incoming);
             }
         } else if (holder instanceof SendContactHolder) {
 
@@ -239,7 +251,76 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 }
             });
 
-        } else if (holder instanceof HeaderHolder) {
+        }
+        else if (holder instanceof LocationFromHolder) {
+
+            String title=chatPojo.getLocationAddressTitle();
+            String desc=chatPojo.getLocationAddressDesc();
+            String strLatitude=chatPojo.getLocationAddressLatitude();
+            String strLongitude=chatPojo.getLocationAddressLongitude();
+
+            //  String image=chatPojo.getSharedContactSenderImage();
+
+            if (!TextUtils.isEmpty(title)
+                    && !TextUtils.isEmpty(desc)
+                    && !TextUtils.isEmpty(strLatitude)
+                    && !TextUtils.isEmpty(strLongitude)
+                    ) {
+
+                ((LocationFromHolder) holder).tv_time_location_outgoing.setText(formatted_date);
+                  /*  Picasso.with(context).load(image)
+                            .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .into(((LocationFromHolder) holder).img_contact_outgoing);*/
+
+                ((LocationFromHolder) holder).tv_title_location_outgoing.setText(title);
+                ((LocationFromHolder) holder).tv_desc_location_outgoing.setText(desc);
+                ((LocationFromHolder) holder).rl_location_outgoing.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(context, "Location clicked", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+
+
+        }
+        else if (holder instanceof LocationToHolder) {
+
+            String title=chatPojo.getLocationAddressTitle();
+            String desc=chatPojo.getLocationAddressDesc();
+            String strLatitude=chatPojo.getLocationAddressLatitude();
+            String strLongitude=chatPojo.getLocationAddressLongitude();
+
+            //  String image=chatPojo.getSharedContactSenderImage();
+
+            if (!TextUtils.isEmpty(title)
+                    && !TextUtils.isEmpty(desc)
+                    && !TextUtils.isEmpty(strLatitude)
+                    && !TextUtils.isEmpty(strLongitude)
+                    ) {
+
+                ((LocationToHolder) holder).tv_time_location_incoming.setText(formatted_date);
+                  /*  Picasso.with(context).load(image)
+                            .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .error(context.getResources().getDrawable(R.mipmap.profile_pic))
+                            .into(((LocationToHolder) holder).img_contact_outgoing);*/
+
+                ((LocationToHolder) holder).tv_title_location_incoming.setText(title);
+                ((LocationToHolder) holder).tv_desc_location_incoming.setText(desc);
+                ((LocationToHolder) holder).rl_location_incoming.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(context, "Location clicked", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+
+
+        }
+        else if (holder instanceof HeaderHolder) {
 
             ChatPojo bean = mLists.get(position);
 

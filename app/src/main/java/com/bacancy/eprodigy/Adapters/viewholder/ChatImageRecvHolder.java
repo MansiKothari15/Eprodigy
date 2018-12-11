@@ -8,11 +8,11 @@ import android.widget.TextView;
 
 import com.bacancy.eprodigy.R;
 
-public class ChatImageRecvHOlder extends RecyclerView.ViewHolder{
+public class ChatImageRecvHolder extends RecyclerView.ViewHolder{
     public ImageView img_incoming;
     public TextView tvTime;
 
-    public ChatImageRecvHOlder(View itemView) {
+    public ChatImageRecvHolder(View itemView) {
         super(itemView);
         img_incoming = (ImageView) itemView.findViewById(R.id.img_incoming);
         tvTime = itemView.findViewById(R.id.tv_time);
