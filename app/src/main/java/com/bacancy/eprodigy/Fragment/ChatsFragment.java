@@ -22,8 +22,10 @@ import android.widget.TextView;
 import com.bacancy.eprodigy.Activity.NewMessageActivity;
 import com.bacancy.eprodigy.Adapters.ChatListAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.Models.UserPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.db.DataManager;
+import com.bacancy.eprodigy.utils.Pref;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +35,9 @@ public class ChatsFragment extends Fragment {
     TextView tv_noChat;
     RecyclerView rv_chat;
     ChatListAdapter chatListAdapter;
-    ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
+    List<ChatPojo> recentChatlist = new ArrayList<ChatPojo>();
     List<String> chatUserList = new ArrayList<>();
-    String ChatUserId;
+
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
 
     EditText edt_search;
@@ -105,13 +107,20 @@ public class ChatsFragment extends Fragment {
     }
 
     private void LoadData() {
-        chatUserList = DataManager.getInstance().getChatUserList();
+        String username = Pref.getValue(getActivity(), "username", "");
+        List<String> mlistId=new ArrayList<>();
+        mlistId.add(username);
+         DataManager.getInstance().getRecentChatUserListById(mlistId);
         Log.d("chatUserList--",chatUserList.toString());
         if(chatUserList.size() != 0){
             tv_noChat.setVisibility(View.INVISIBLE);
         }
+        else
+        {
+            tv_noChat.setVisibility(View.VISIBLE);
+        }
 
-        DataManager.getInstance().getAll(ChatUserId).observe(getActivity(), new Observer<List<ChatPojo>>() {
+        DataManager.getInstance().getAll(username).observe(getActivity(), new Observer<List<ChatPojo>>() {
             @Override
             public void onChanged(@Nullable List<ChatPojo> chatPojos) {
                 conversation_ArrayList = chatPojos;
@@ -122,5 +131,8 @@ public class ChatsFragment extends Fragment {
         rv_chat.setAdapter(chatListAdapter);
 
     }
+
+
+
 
 }
