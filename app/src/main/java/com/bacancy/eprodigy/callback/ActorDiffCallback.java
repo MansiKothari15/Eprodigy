@@ -1,7 +1,8 @@
-package com.bacancy.eprodigy.API;
+package com.bacancy.eprodigy.callback;
 
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
+
 
 import com.bacancy.eprodigy.Models.ChatPojo;
 

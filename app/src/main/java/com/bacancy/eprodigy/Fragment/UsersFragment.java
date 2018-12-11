@@ -92,22 +92,23 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
         edt_search = (EditText) view.findViewById(R.id.edt_search);
 
         //adding a TextChangedListener
-        //to call a method whenever there is some change on the EditText
         edt_search.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                img_clear.setVisibility(!TextUtils.isEmpty(charSequence.toString()) ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 //after the change calling the method and passing the search input
-                filter(editable.toString());
+
+                if (usersAdapter!=null) {
+                    usersAdapter.getFilter().filter(editable);
+                }
             }
         });
 
@@ -121,22 +122,7 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
         ((BaseActivity) getActivity()).initPermission(getActivity(), permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
     }
 
-    private void filter(String text) {
-        //new array list that will hold the filtered data
-        ArrayList<String> filterdNames = new ArrayList<>();
 
-        //looping through existing elements
-        for (ContactListResponse.ResponseDataBean sDataBean : responseDataBeanList) {
-            //if the existing elements contains the search input
-            if (sDataBean.getName().toLowerCase().contains(text.toLowerCase())) {
-                //adding the element to filtered list
-                responseDataBeanList.add(sDataBean);
-            }
-        }
-
-        //calling a method of the adapter class and passing the filtered list
-        usersAdapter.filterList(responseDataBeanList);
-    }
 
     private void getContactList(String contact_list) {
         if (((BaseActivity) getActivity()).validateInternetConn(getActivity())) {

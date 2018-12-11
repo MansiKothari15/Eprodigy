@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,17 +21,53 @@ import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder> {
+public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder> implements Filterable{
 
 
 
-    List<ContactListResponse.ResponseDataBean> UserNameList;
+    List<ContactListResponse.ResponseDataBean> mList;
+    List<ContactListResponse.ResponseDataBean> mListFiltered;
     Activity activity;
 
-    public UsersAdapter(Activity activity, List<ContactListResponse.ResponseDataBean> UserNameList) {
+    public UsersAdapter(Activity activity, List<ContactListResponse.ResponseDataBean> mList) {
         this.activity = activity;
-        this.UserNameList = UserNameList;
+        this.mList = mList;
+        this.mListFiltered = mList;
 
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    mListFiltered = mList;
+                } else {
+                    List<ContactListResponse.ResponseDataBean> filteredList = new ArrayList<>();
+                    for (ContactListResponse.ResponseDataBean row : mList) {
+
+                        if (row.getName().toLowerCase().contains(charString.toLowerCase().trim())
+                                || row.getPhone().contains(charString.toLowerCase().trim())) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    mListFiltered = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mListFiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mListFiltered = (List<ContactListResponse.ResponseDataBean>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -58,7 +96,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
     @Override
     public void onBindViewHolder(@NonNull UsersAdapter.MyViewHolder holder, final int position) {
 
-        final ContactListResponse.ResponseDataBean dataBean=UserNameList.get(position);
+        final ContactListResponse.ResponseDataBean dataBean=mListFiltered.get(position);
         holder.tv_name.setText(dataBean.getName());
          holder.tv_country.setText(dataBean.getPhone());
         holder.ll_main.setOnClickListener(new View.OnClickListener() {
@@ -77,11 +115,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
 
     @Override
     public int getItemCount() {
-        return UserNameList.size();
+        return mListFiltered.size();
     }
 
-    public void filterList(List<ContactListResponse.ResponseDataBean> filterdNames) {
-        this.UserNameList = filterdNames;
-        notifyDataSetChanged();
-    }
+
 }

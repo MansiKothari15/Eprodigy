@@ -18,6 +18,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -122,13 +123,15 @@ public class NewMessageActivity extends BaseActivity implements PermissionListen
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                img_clear.setVisibility(!TextUtils.isEmpty(charSequence.toString()) ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 //after the change calling the method and passing the search input
-                filter(editable.toString());
+                if (usersAdapter!=null) {
+                    usersAdapter.getFilter().filter(editable);
+                }
             }
         });
 
@@ -141,27 +144,6 @@ public class NewMessageActivity extends BaseActivity implements PermissionListen
 
     }
 
-
-    private void filter(String text) {
-        //new array list that will hold the filtered data
-        ArrayList<String> filterdNames = new ArrayList<>();
-
-        //looping through existing elements
-        for (ContactListResponse.ResponseDataBean sDataBean : responseDataBeanList) {
-            //if the existing elements contains the search input
-            if (sDataBean.getName().toLowerCase().contains(text.toLowerCase())) {
-                //adding the element to filtered list
-                responseDataBeanList.add(sDataBean);
-            }
-        }
-
-        //calling a method of the adapter class and passing the filtered list
-        usersAdapter.filterList(responseDataBeanList);
-    }
-
-    /**
-     * Show the contacts in the ListView.
-     */
 
 
     private void getContactList(String contact_list) {

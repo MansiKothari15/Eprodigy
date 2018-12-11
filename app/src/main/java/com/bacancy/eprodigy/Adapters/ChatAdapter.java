@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bacancy.eprodigy.API.ActorDiffCallback;
+
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
@@ -22,6 +22,7 @@ import com.bacancy.eprodigy.Adapters.viewholder.SendAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.callback.ActorDiffCallback;
 import com.bacancy.eprodigy.custom.StickyHeaderAdapter;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
