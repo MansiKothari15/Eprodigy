@@ -85,7 +85,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String username, password, ChatUserId, mName;
+    String username, password, ChatUserId,mName;
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -105,9 +105,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private String sharedContactSenderImage = "";
 
     String AudioSavePathInDevice = "";
-    MediaRecorder mediaRecorder;
+    MediaRecorder mediaRecorder ;
     String RandomAudioFileName = "ABCDEFGHIJKLM";
-    MediaPlayer mediaPlayer;
+    MediaPlayer mediaPlayer ;
     Random random;
 
     private boolean ifshow = false;
@@ -116,7 +116,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
-        mActivity = this;
+        mActivity=this;
         startXmppService();
         xmppEventReceiver = mChatApp.getEventReceiver();
 
@@ -173,7 +173,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         img_audio.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                if (checkPermission()) {
+                if(checkPermission()) {
 
                     AudioSavePathInDevice =
                             Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
@@ -210,8 +210,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 
-                    if (mediaRecorder != null)
-                        mediaRecorder.stop();
+                    if (mediaRecorder!=null)
+                    mediaRecorder.stop();
                     sendAudio();
 
                 }
@@ -252,13 +252,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         LoadData();
     }
 
-    public void sendAudio() {
-        Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
+    public void sendAudio(){
         SendMsg(Constants.TYPE_AUDIO);
     }
 
-    public void MediaRecorderReady() {
-        mediaRecorder = new MediaRecorder();
+    public void MediaRecorderReady(){
+        mediaRecorder=new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
@@ -270,14 +269,14 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.TYPE_AUDIO);
     }
 
-    public String CreateRandomAudioFileName(int string) {
-        StringBuilder stringBuilder = new StringBuilder(string);
-        int i = 0;
-        while (i < string) {
+    public String CreateRandomAudioFileName(int string){
+        StringBuilder stringBuilder = new StringBuilder( string );
+        int i = 0 ;
+        while(i < string ) {
             stringBuilder.append(RandomAudioFileName.
                     charAt(random.nextInt(RandomAudioFileName.length())));
 
-            i++;
+            i++ ;
         }
         return stringBuilder.toString();
     }
@@ -401,7 +400,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         //Event Listeners
         public void onNewMessageReceived(ChatPojo chatPojo) {
 
-            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
+            Log.e("ad","onNewMessageReceived>>"+chatPojo.toString());
 
             chatPojo.setShowing(true);
             chatPojo.setMine(false);
@@ -409,7 +408,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             LogM.e("onNewMessageReceived ChatActivity");
 
-            if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
+             if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
 
         }
 
@@ -505,21 +504,15 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
-            case Constants.TYPE_AUDIO:
-                if (TextUtils.isEmpty(AudioSavePathInDevice)) {
+                case Constants.TYPE_AUDIO:
+                    if (TextUtils.isEmpty(AudioSavePathInDevice)) {
 
-                    Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
 
-                    return;
-                } else {
-                    chatPojo.setSendAudioPath(AudioSavePathInDevice);
-                }
-                break;
-                case Constants.TYPE_LOCATION:
-                    chatPojo.setLocationAddressTitle("Bacancy Technology");
-                    chatPojo.setLocationAddressDesc("Ravija Plaza, 1207,1208 Times Square I, Opposite Rambag, Near, Thaltej - Shilaj Rd, Thaltej, Ahmedabad, Gujarat 380059");
-                    chatPojo.setLocationAddressLatitude("23.0498");
-                    chatPojo.setLocationAddressLongitude("72.4988836");
+                        return;
+                    } else {
+                        chatPojo.setSendAudioPath(AudioSavePathInDevice);
+                    }
                     break;
 
            /* default:
@@ -550,6 +543,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
 
     }
+
 
 
     private void startXmppService() {
@@ -626,7 +620,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                     sharedContactSenderName = data.getStringExtra("name");
                     sharedContactSenderNumber = data.getStringExtra("phone");
-                    sharedContactSenderImage = "";
+                    sharedContactSenderImage="";
                     Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
 
                     SendMsg(Constants.TYPE_CONTACT);
@@ -705,8 +699,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             case R.id.menu_document:
                                 return true;
                             case R.id.menu_location:
-
-                                SendMsg(Constants.TYPE_LOCATION);
                                 return true;
                             case R.id.menu_contact:
                                 Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
