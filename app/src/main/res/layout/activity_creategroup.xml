@@ -45,6 +45,18 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_group"
+        android:scrollbars="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/normal_margin"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/grey"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_groupContacts"
         android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -253,7 +253,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     public void sendAudio(){
-        Toast.makeText(this, "Audio Shared!!", Toast.LENGTH_SHORT).show();
         SendMsg(Constants.TYPE_AUDIO);
     }
 
