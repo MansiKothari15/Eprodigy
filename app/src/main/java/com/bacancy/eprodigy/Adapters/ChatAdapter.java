@@ -275,6 +275,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 ((LocationFromHolder) holder).tv_title_location_outgoing.setText(title);
                 ((LocationFromHolder) holder).tv_desc_location_outgoing.setText(desc);
+
+
+
                 ((LocationFromHolder) holder).rl_location_outgoing.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

@@ -514,7 +514,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                         chatPojo.setSendAudioPath(AudioSavePathInDevice);
                     }
                     break;
-
+            case Constants.TYPE_LOCATION:
+                chatPojo.setLocationAddressTitle("Bacancy Technology");
+                chatPojo.setLocationAddressDesc("Ravija Plaza, 1207,1208 Times Square I, Opposite Rambag, Near, Thaltej - Shilaj Rd, Thaltej, Ahmedabad, Gujarat 380059");
+                chatPojo.setLocationAddressLatitude("23.0498");
+                chatPojo.setLocationAddressLongitude("72.4988836");
+                break;
            /* default:
                 if (edtMessage.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
@@ -699,6 +704,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             case R.id.menu_document:
                                 return true;
                             case R.id.menu_location:
+                                SendMsg(Constants.TYPE_LOCATION);
                                 return true;
                             case R.id.menu_contact:
                                 Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
