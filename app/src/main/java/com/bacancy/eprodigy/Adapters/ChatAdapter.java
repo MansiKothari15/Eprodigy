@@ -27,6 +27,8 @@ import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.callback.ActorDiffCallback;
 import com.bacancy.eprodigy.custom.StickyHeaderAdapter;
+import com.bacancy.eprodigy.customMapView.MapScale;
+import com.bacancy.eprodigy.customMapView.MapType;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.squareup.picasso.Picasso;
@@ -43,7 +45,7 @@ import java.util.List;
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<HeaderHolder> {
-    int MY_MESSAGE = 0,OTHER_MESSAGE = 1,MY_IMAGE =2,OTHER_IMAGE = 3,MY_CONTACT = 4,OTHER_CONTACT = 5,MY_LOCATION=6,OTHER_LOCATION=7,MY_AUDIO=8,OTHER_AUDIO=9;
+    int MY_MESSAGE = 0, OTHER_MESSAGE = 1, MY_IMAGE = 2, OTHER_IMAGE = 3, MY_CONTACT = 4, OTHER_CONTACT = 5, MY_LOCATION = 6, OTHER_LOCATION = 7, MY_AUDIO = 8, OTHER_AUDIO = 9;
     private Context context;
     private List<ChatPojo> mLists;
     private SparseBooleanArray mSelectedItemsIds;
@@ -87,33 +89,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        if (i ==  MY_MESSAGE) {
+        if (i == MY_MESSAGE) {
             return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.my_message, viewGroup, false));
-        } else if (i ==  OTHER_MESSAGE) {
+        } else if (i == OTHER_MESSAGE) {
             return new ChatHolderFrom(LayoutInflater.from(context).inflate(R.layout.their_message, viewGroup, false));
-        } else if (i ==  MY_IMAGE) {
+        } else if (i == MY_IMAGE) {
             return new ChatImageHolder(LayoutInflater.from(context).inflate(R.layout.outgoing_imageview, viewGroup, false));
-        } else if (i ==  OTHER_IMAGE) {
+        } else if (i == OTHER_IMAGE) {
             return new ChatImageRecvHolder(LayoutInflater.from(context).inflate(R.layout.incoming_imageview, viewGroup, false));
-        } else if (i ==  MY_CONTACT) {
+        } else if (i == MY_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_contact, viewGroup, false);
             return new SendContactHolder(layoutView);
-        }else if (i ==  OTHER_CONTACT) {
+        } else if (i == OTHER_CONTACT) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_contact, viewGroup, false);
             return new RecvContactHolder(layoutView);
-        } else if(i == MY_AUDIO){
+        } else if (i == MY_AUDIO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
             return new SendAudioHolder(layoutView);
-        }
-        else if(i == MY_LOCATION){
+        } else if (i == MY_LOCATION) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_location, viewGroup, false);
             return new LocationFromHolder(layoutView);
-        }
-        else if(i == OTHER_LOCATION){
+        } else if (i == OTHER_LOCATION) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_location, viewGroup, false);
             return new LocationToHolder(layoutView);
-        }
-        else if (i == HEADER_MESSAGE) {
+        } else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
         } else {
@@ -127,17 +126,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
         final ChatPojo chatPojo = mLists.get(position);
 
-        String formatted_date="";
+        String formatted_date = "";
 
 
-        if (chatPojo.isMine())
-        {
-            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(chatPojo.getChatTimestamp()))?"":chatPojo.getChatTimestamp());
-        }
-        else
-        {
-             String current_time_stamp = SCUtils.getCurrentTimeStamp();
-            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(current_time_stamp))?"":current_time_stamp);
+        if (chatPojo.isMine()) {
+            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(chatPojo.getChatTimestamp())) ? "" : chatPojo.getChatTimestamp());
+        } else {
+            String current_time_stamp = SCUtils.getCurrentTimeStamp();
+            formatted_date = SCUtils.formatted_date((TextUtils.isEmpty(current_time_stamp)) ? "" : current_time_stamp);
         }
 
 
@@ -189,8 +185,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
         } else if (holder instanceof SendContactHolder) {
 
-            String name=chatPojo.getSharedContactSenderName();
-            String cono=chatPojo.getSharedContactSenderNumber();
+            String name = chatPojo.getSharedContactSenderName();
+            String cono = chatPojo.getSharedContactSenderNumber();
             //  String image=chatPojo.getSharedContactSenderImage();
 
             if (!TextUtils.isEmpty(chatPojo.getSharedContactSenderName())
@@ -207,17 +203,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 ((SendContactHolder) holder).rl_contact_outgoing.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ChatContactDetailActivity.StartChatContactDetailActivity(context,chatPojo);
+                        ChatContactDetailActivity.StartChatContactDetailActivity(context, chatPojo);
                     }
                 });
             }
 
 
+        } else if (holder instanceof RecvContactHolder) {
 
-        }else if (holder instanceof RecvContactHolder) {
-
-            String name=chatPojo.getSharedContactSenderName();
-            String cono=chatPojo.getSharedContactSenderNumber();
+            String name = chatPojo.getSharedContactSenderName();
+            String cono = chatPojo.getSharedContactSenderNumber();
             // String image=chatPojo.getSharedContactRecvImage();
 
             if (!TextUtils.isEmpty(name)
@@ -234,14 +229,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 ((RecvContactHolder) holder).rl_contact_incoming.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ChatContactDetailActivity.StartChatContactDetailActivity(context,chatPojo);
+                        ChatContactDetailActivity.StartChatContactDetailActivity(context, chatPojo);
                     }
                 });
 
             }
 
 
-        } else if (holder instanceof SendAudioHolder){
+        } else if (holder instanceof SendAudioHolder) {
 
             final String audioPath = chatPojo.getSendAudioPath();
             ((SendAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
@@ -251,18 +246,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 }
             });
 
-        }
-        else if (holder instanceof LocationFromHolder) {
+        } else if (holder instanceof LocationFromHolder) {
 
-            String title=chatPojo.getLocationAddressTitle();
-            String desc=chatPojo.getLocationAddressDesc();
-            String strLatitude=chatPojo.getLocationAddressLatitude();
-            String strLongitude=chatPojo.getLocationAddressLongitude();
+            String title = chatPojo.getLocationAddressTitle();
+            String desc = chatPojo.getLocationAddressDesc();
+            String strLatitude = chatPojo.getLocationAddressLatitude();
+            String strLongitude = chatPojo.getLocationAddressLongitude();
 
             //  String image=chatPojo.getSharedContactSenderImage();
 
-            if (!TextUtils.isEmpty(title)
-                    && !TextUtils.isEmpty(desc)
+            if (!TextUtils.isEmpty(desc)
                     && !TextUtils.isEmpty(strLatitude)
                     && !TextUtils.isEmpty(strLongitude)
                     ) {
@@ -273,9 +266,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                             .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                             .into(((LocationFromHolder) holder).img_contact_outgoing);*/
 
-                ((LocationFromHolder) holder).tv_title_location_outgoing.setText(title);
-                ((LocationFromHolder) holder).tv_desc_location_outgoing.setText(desc);
 
+
+                /*googleMapView.setMapType(MapType.SATELLITE);
+                googleMapView.setMapScale(MapScale.HIGH);
+                googleMapView.setMapZoom(15);
+                googleMapView.setMapWidth(350);
+                googleMapView.setMapHeight(350);
+                googleMapView.setLocation(location);
+                googleMapView.setZoomable(activity);*/
+
+
+
+                if (TextUtils.isEmpty(title)) {
+                    ((LocationFromHolder) holder).tv_title_location_outgoing.setVisibility(View.GONE);
+                } else {
+                    ((LocationFromHolder) holder).tv_title_location_outgoing.setVisibility(View.VISIBLE);
+                    ((LocationFromHolder) holder).tv_title_location_outgoing.setText(title);
+                }
+
+
+                ((LocationFromHolder) holder).tv_desc_location_outgoing.setText(desc);
 
 
                 ((LocationFromHolder) holder).rl_location_outgoing.setOnClickListener(new View.OnClickListener() {
@@ -287,19 +298,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
 
 
+        } else if (holder instanceof LocationToHolder) {
 
-        }
-        else if (holder instanceof LocationToHolder) {
-
-            String title=chatPojo.getLocationAddressTitle();
-            String desc=chatPojo.getLocationAddressDesc();
-            String strLatitude=chatPojo.getLocationAddressLatitude();
-            String strLongitude=chatPojo.getLocationAddressLongitude();
+            String title = chatPojo.getLocationAddressTitle();
+            String desc = chatPojo.getLocationAddressDesc();
+            String strLatitude = chatPojo.getLocationAddressLatitude();
+            String strLongitude = chatPojo.getLocationAddressLongitude();
 
             //  String image=chatPojo.getSharedContactSenderImage();
 
-            if (!TextUtils.isEmpty(title)
-                    && !TextUtils.isEmpty(desc)
+            if (!TextUtils.isEmpty(desc)
                     && !TextUtils.isEmpty(strLatitude)
                     && !TextUtils.isEmpty(strLongitude)
                     ) {
@@ -310,7 +318,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                             .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                             .into(((LocationToHolder) holder).img_contact_outgoing);*/
 
-                ((LocationToHolder) holder).tv_title_location_incoming.setText(title);
+
+
+
+                if (TextUtils.isEmpty(title)) {
+                    ((LocationToHolder) holder).tv_title_location_incoming.setVisibility(View.GONE);
+                } else {
+                    ((LocationToHolder) holder).tv_title_location_incoming.setVisibility(View.VISIBLE);
+                    ((LocationToHolder) holder).tv_title_location_incoming.setText(title);
+                }
+
                 ((LocationToHolder) holder).tv_desc_location_incoming.setText(desc);
                 ((LocationToHolder) holder).rl_location_incoming.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -321,9 +338,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
 
 
-
-        }
-        else if (holder instanceof HeaderHolder) {
+        } else if (holder instanceof HeaderHolder) {
 
             ChatPojo bean = mLists.get(position);
 
@@ -351,7 +366,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     }
 
-    public void audioPlayer(String path){
+    public void audioPlayer(String path) {
         //set up MediaPlayer
         MediaPlayer mp = new MediaPlayer();
 
@@ -379,51 +394,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     public int getItemViewType(int position) {
 
         ChatPojo item = mLists.get(position);
-        int mType=item.getMsgType();
-        boolean isMy=item.isMine();
+        int mType = item.getMsgType();
+        boolean isMy = item.isMine();
 
-        if (mType==Constants.TYPE_MESSAGE && isMy)
-        {
+        if (mType == Constants.TYPE_MESSAGE && isMy) {
             return MY_MESSAGE;
-        }
-        else if (mType==Constants.TYPE_MESSAGE && !isMy)
-        {
+        } else if (mType == Constants.TYPE_MESSAGE && !isMy) {
             return OTHER_MESSAGE;
-        }
-        else if (mType==Constants.TYPE_CONTACT && isMy)
-        {
+        } else if (mType == Constants.TYPE_CONTACT && isMy) {
             return MY_CONTACT;
-        }
-        else if (mType==Constants.TYPE_CONTACT && !isMy)
-        {
+        } else if (mType == Constants.TYPE_CONTACT && !isMy) {
             return OTHER_CONTACT;
-        }
-        else if (mType==Constants.TYPE_IMAGE && isMy)
-        {
+        } else if (mType == Constants.TYPE_IMAGE && isMy) {
             return MY_IMAGE;
-        }
-        else if (mType==Constants.TYPE_IMAGE && !isMy)
-        {
+        } else if (mType == Constants.TYPE_IMAGE && !isMy) {
             return OTHER_IMAGE;
-        }
-        else if (mType==Constants.TYPE_LOCATION && isMy)
-        {
+        } else if (mType == Constants.TYPE_LOCATION && isMy) {
             return MY_LOCATION;
-        }
-        else if (mType==Constants.TYPE_LOCATION && !isMy)
-        {
+        } else if (mType == Constants.TYPE_LOCATION && !isMy) {
             return OTHER_LOCATION;
-        }
-        else if (mType==Constants.TYPE_AUDIO && isMy)
-        {
+        } else if (mType == Constants.TYPE_AUDIO && isMy) {
             return MY_AUDIO;
-        }
-        else if (mType==Constants.TYPE_AUDIO && !isMy)
-        {
+        } else if (mType == Constants.TYPE_AUDIO && !isMy) {
             return OTHER_AUDIO;
-        }
-        else
-        {
+        } else {
             return 100;
         }
     }

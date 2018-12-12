@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bacancy.eprodigy">
-    <!--http://maps.google.com/maps/api/staticmap?center=22.9732342,72.6216622&zoom=15&size=200x200&sensor=false-->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- http://maps.google.com/maps/api/staticmap?center=22.9732342,72.6216622&zoom=15&size=200x200&sensor=false -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.STORAGE" />
 
     <application
@@ -25,37 +28,44 @@
             android:name=".permission.MyPermissionActivity"
             android:configChanges="mcc|mnc|locale|keyboard|keyboardHidden|screenLayout|fontScale|uiMode|orientation|screenSize|layoutDirection"
             android:screenOrientation="unspecified"
-            android:theme="@style/Theme.Transparent.Permission"
-            />
-        <activity android:name="com.bacancy.eprodigy.Activity.SplashActivity">
+            android:theme="@style/Theme.Transparent.Permission" />
+        <activity android:name=".Activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.MainActivity"/>
-        <activity android:name=".Activity.MobileRegistrationActivity"/>
-        <activity android:name=".Activity.MobileVerificationActivity"/>
-        <activity android:name=".Activity.MessagingActivity"
+        <activity android:name=".Activity.MainActivity" />
+        <activity android:name=".Activity.MobileRegistrationActivity" />
+        <activity android:name=".Activity.MobileVerificationActivity" />
+        <activity
+            android:name=".Activity.MessagingActivity"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".Activity.CreateGroupActivity"
+        <activity
+            android:name=".Activity.CreateGroupActivity"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".Activity.NewMessageActivity"/>
-        <activity android:name=".Activity.SingleChatActivity"/>
-        <activity android:name=".Activity.GroupSubjectActivity"/>
-        <activity android:name=".Activity.AccountDetailActivity"/>
-        <activity android:name=".Activity.ChangeNumberActivity"/>
-        <activity android:name=".Activity.PrivacyActivity"/>
-        <activity android:name=".Activity.StatusActivity"/>
-        <activity android:name=".Activity.UserDetailsActivity"/>
-        <activity android:name=".Activity.CallVerificationActivity"/>
-        <activity android:name=".Activity.EditUsernameActivity"/>
-        <activity android:name=".Activity.ContactListActivity"/>
-        <activity android:name=".Activity.ChatContactDetailActivity"/>
+        <activity android:name=".Activity.NewMessageActivity" />
+        <activity android:name=".Activity.SingleChatActivity" />
+        <activity android:name=".Activity.GroupSubjectActivity" />
+        <activity android:name=".Activity.AccountDetailActivity" />
+        <activity android:name=".Activity.ChangeNumberActivity" />
+        <activity android:name=".Activity.PrivacyActivity" />
+        <activity android:name=".Activity.StatusActivity" />
+        <activity android:name=".Activity.UserDetailsActivity" />
+        <activity android:name=".Activity.CallVerificationActivity" />
+        <activity android:name=".Activity.EditUsernameActivity" />
+        <activity android:name=".Activity.ContactListActivity" />
+        <activity android:name=".Activity.ChatContactDetailActivity" />
 
         <service android:name=".xmpp.XMPPService" />
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBYUqvyt15K1menjAA95lioQlsV8G0OKws"/>
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <!--AIzaSyBYUqvyt15K1menjAA95lioQlsV8G0OKws-->
     </application>
 
 </manifest>

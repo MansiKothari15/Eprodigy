@@ -37,11 +37,13 @@ import com.bacancy.eprodigy.Adapters.ChatAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
+import com.bacancy.eprodigy.Models.UserLocation;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.LastSeenResponse;
 import com.bacancy.eprodigy.ResponseModel.MediaUploadResponse;
 import com.bacancy.eprodigy.db.DataManager;
+import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.InternetUtils;
@@ -52,6 +54,12 @@ import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
 import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlacePicker;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
@@ -85,7 +93,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String username, password, ChatUserId,mName;
+    String username, password, ChatUserId, mName;
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -95,7 +103,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3;
+    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
@@ -103,20 +111,21 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private String sharedContactSenderNumber = "";
     private String sharedContactSenderName = "";
     private String sharedContactSenderImage = "";
-
+    UserLocation userLocation = null;
     String AudioSavePathInDevice = "";
-    MediaRecorder mediaRecorder ;
+    MediaRecorder mediaRecorder;
     String RandomAudioFileName = "ABCDEFGHIJKLM";
-    MediaPlayer mediaPlayer ;
+    MediaPlayer mediaPlayer;
     Random random;
 
     private boolean ifshow = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
-        mActivity=this;
+        mActivity = this;
         startXmppService();
         xmppEventReceiver = mChatApp.getEventReceiver();
 
@@ -173,7 +182,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         img_audio.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                if(checkPermission()) {
+                if (checkPermission()) {
 
                     AudioSavePathInDevice =
                             Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
@@ -210,8 +219,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 
-                    if (mediaRecorder!=null)
-                    mediaRecorder.stop();
+                    if (mediaRecorder != null)
+                        mediaRecorder.stop();
                     sendAudio();
 
                 }
@@ -252,12 +261,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         LoadData();
     }
 
-    public void sendAudio(){
+    public void sendAudio() {
         SendMsg(Constants.TYPE_AUDIO);
     }
 
-    public void MediaRecorderReady(){
-        mediaRecorder=new MediaRecorder();
+    public void MediaRecorderReady() {
+        mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
@@ -269,14 +278,14 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, Constants.TYPE_AUDIO);
     }
 
-    public String CreateRandomAudioFileName(int string){
-        StringBuilder stringBuilder = new StringBuilder( string );
-        int i = 0 ;
-        while(i < string ) {
+    public String CreateRandomAudioFileName(int string) {
+        StringBuilder stringBuilder = new StringBuilder(string);
+        int i = 0;
+        while (i < string) {
             stringBuilder.append(RandomAudioFileName.
                     charAt(random.nextInt(RandomAudioFileName.length())));
 
-            i++ ;
+            i++;
         }
         return stringBuilder.toString();
     }
@@ -400,7 +409,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         //Event Listeners
         public void onNewMessageReceived(ChatPojo chatPojo) {
 
-            Log.e("ad","onNewMessageReceived>>"+chatPojo.toString());
+            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
 
             chatPojo.setShowing(true);
             chatPojo.setMine(false);
@@ -408,7 +417,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             LogM.e("onNewMessageReceived ChatActivity");
 
-             if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
+            if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
 
         }
 
@@ -504,21 +513,25 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
 
-                case Constants.TYPE_AUDIO:
-                    if (TextUtils.isEmpty(AudioSavePathInDevice)) {
+            case Constants.TYPE_AUDIO:
+                if (TextUtils.isEmpty(AudioSavePathInDevice)) {
 
-                        Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
 
-                        return;
-                    } else {
-                        chatPojo.setSendAudioPath(AudioSavePathInDevice);
-                    }
-                    break;
+                    return;
+                } else {
+                    chatPojo.setSendAudioPath(AudioSavePathInDevice);
+                }
+                break;
             case Constants.TYPE_LOCATION:
-                chatPojo.setLocationAddressTitle("Bacancy Technology");
-                chatPojo.setLocationAddressDesc("Ravija Plaza, 1207,1208 Times Square I, Opposite Rambag, Near, Thaltej - Shilaj Rd, Thaltej, Ahmedabad, Gujarat 380059");
-                chatPojo.setLocationAddressLatitude("23.0498");
-                chatPojo.setLocationAddressLongitude("72.4988836");
+
+                if (userLocation != null) {
+                    chatPojo.setLocationAddressTitle(userLocation.getAddressTitle());
+                    chatPojo.setLocationAddressDesc(userLocation.getAddressDesc());
+                    chatPojo.setLocationAddressLatitude(userLocation.getAddressLatitude());
+                    chatPojo.setLocationAddressLongitude(userLocation.getAddressLongitude());
+                }
+
                 break;
            /* default:
                 if (edtMessage.getText().toString().trim().isEmpty()) {
@@ -548,7 +561,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
 
     }
-
 
 
     private void startXmppService() {
@@ -600,51 +612,87 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case TAKE_PICTURE:
-                if (resultCode == Activity.RESULT_OK) {
-                    Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                    saveImage(thumbnail);
+
+            case REQUEST_PLACE_PICKER:
+                if (resultCode == RESULT_OK) {
+                    Place place = PlacePicker.getPlace(data, mActivity);
+
+                    String mName=place.getName().toString();
+                  //  if (!TextUtils.isEmpty(mName) && SCUtils.isContainLatLng(mName))
+                    if (!TextUtils.isEmpty(mName) && mName.contains("°") && SCUtils.containsDigit(mName))
+                    {
+                        mName="";
+                    }
+                    userLocation = new UserLocation(SCUtils.validateStr(mName)
+                            , SCUtils.validateStr(place.getAddress().toString())
+                            , SCUtils.validateStr(String.valueOf(place.getLatLng().latitude))
+                            , SCUtils.validateStr(String.valueOf(place.getLatLng().longitude)));
+
+
+
+                    String toastMsg = String.format("Place: %s", place.getName());
+                    Log.e(TAG, toastMsg);
+
+
+
+                    SendMsg(Constants.TYPE_LOCATION);
+                } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                    Status status = PlaceAutocomplete.getStatus(this, data);
+                    // TODO: Handle the error.
+                    Log.e(TAG, status.getStatusMessage());
+
+                } else if (resultCode == RESULT_CANCELED) {
+                    Log.e(TAG, "the user cancelled the operation");
                 }
-                break;
-            case GALLERY:
-                if (data != null) {
-                    Uri contentURI = data.getData();
-                    try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                        String path = saveImage(bitmap);
+
+        break;
+        case TAKE_PICTURE:
+        if (resultCode == Activity.RESULT_OK) {
+            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+            saveImage(thumbnail);
+        }
+        break;
+        case GALLERY:
+        if (data != null) {
+            Uri contentURI = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
+                String path = saveImage(bitmap);
 //                        img_profile.setImageBitmap(bitmap);
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(SingleChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;
-            case SHARE_CONTACT:
-                if (data != null) {
-
-                    sharedContactSenderName = data.getStringExtra("name");
-                    sharedContactSenderNumber = data.getStringExtra("phone");
-                    sharedContactSenderImage="";
-                    Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
-
-                    SendMsg(Constants.TYPE_CONTACT);
-
-                } else {
-
-                    sharedContactSenderName = "";
-                    sharedContactSenderNumber = "";
-                    sharedContactSenderImage = "";
-                }
-                break;
-            default:
-                sharedContactSenderName = "";
-                sharedContactSenderNumber = "";
-                sharedContactSenderImage = "";
-                break;
-
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(SingleChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+            }
         }
+        break;
+        case SHARE_CONTACT:
+        if (data != null) {
+
+            sharedContactSenderName = data.getStringExtra("name");
+            sharedContactSenderNumber = data.getStringExtra("phone");
+            sharedContactSenderImage = "";
+            Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
+
+            SendMsg(Constants.TYPE_CONTACT);
+
+        } else {
+
+            sharedContactSenderName = "";
+            sharedContactSenderNumber = "";
+            sharedContactSenderImage = "";
+        }
+        break;
+
+        default:
+        sharedContactSenderName = "";
+        sharedContactSenderNumber = "";
+        sharedContactSenderImage = "";
+        break;
+
     }
+
+}
 
     public String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -704,7 +752,44 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             case R.id.menu_document:
                                 return true;
                             case R.id.menu_location:
-                                SendMsg(Constants.TYPE_LOCATION);
+
+
+                               /* initPermission(mActivity, new PermissionListener() {
+                                    @Override
+                                    public void onPermissionGranted() {
+                                        try {
+                                            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+                                            Intent intent = intentBuilder.build(mActivity);
+                                            // Start the intent by requesting a result,
+                                            // identified by a request code.
+                                            startActivityForResult(intent, REQUEST_PLACE_PICKER);
+
+                                        } catch (GooglePlayServicesRepairableException e) {
+                                            Log.e(TAG, e.toString(), e);
+                                        } catch (GooglePlayServicesNotAvailableException e) {
+                                            Log.e(TAG, e.toString(), e);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                                        Toast.makeText(mActivity, "PLease provide location permission.", Toast.LENGTH_SHORT).show();
+                                    }
+                                },true,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION);*/
+
+                               try {
+                                    PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+                                    Intent intent = intentBuilder.build(mActivity);
+                                    // Start the intent by requesting a result,
+                                    // identified by a request code.
+                                    startActivityForResult(intent, REQUEST_PLACE_PICKER);
+
+                                } catch (GooglePlayServicesRepairableException e) {
+                                    Log.e(TAG, e.toString(), e);
+                                } catch (GooglePlayServicesNotAvailableException e) {
+                                    Log.e(TAG, e.toString(), e);
+                                }
+
                                 return true;
                             case R.id.menu_contact:
                                 Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);

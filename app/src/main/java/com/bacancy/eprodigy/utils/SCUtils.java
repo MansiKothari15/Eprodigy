@@ -2,6 +2,7 @@ package com.bacancy.eprodigy.utils;
 
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -10,9 +11,50 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SCUtils {
 
+    public static String validateStr(String str)
+    {
+        return TextUtils.isEmpty(str)?"":str.trim();
+    }
+
+    public static boolean isContainLatLng(String str) {
+
+
+        Matcher matcher = null;
+        try {
+            Pattern pattern;
+            final String STR_PATTERN = "([0-9]*\\.?[0-9]*°[0-9]*\\.?[0-9]*'[0-9]*\\.?[0-9]*\"[A-Z]\\s)*";
+             //final String STR_PATTERN = "[0-9]*\\.?[0-9]*°[0-9]*\\.?[0-9]*'[0-9]*\\.?[0-9]*''[A-Z]";
+            pattern = Pattern.compile(STR_PATTERN);
+            matcher = pattern.matcher(str);
+            Log.e("ad","isContainLatLng>"+(matcher.matches()?"TRUE":"FALSE"));
+            return matcher.matches();
+        } catch (Exception e) {
+
+
+
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return false;
+    }public static boolean containsDigit(String s) {
+        boolean containsDigit = false;
+
+        if (s != null && !s.isEmpty()) {
+            for (char c : s.toCharArray()) {
+                if (containsDigit = Character.isDigit(c)) {
+                    break;
+                }
+            }
+        }
+        Log.e("ad","containsDigit>"+(containsDigit?"TRUE":"FALSE"));
+        return containsDigit;
+    }
     //use either formatted_date or time_ago (below)
     public static String formatted_date(String timestamp) {
         if (TextUtils.isEmpty(timestamp))

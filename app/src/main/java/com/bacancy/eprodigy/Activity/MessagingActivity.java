@@ -23,11 +23,11 @@ import com.bacancy.eprodigy.R;
 
 import java.lang.reflect.Field;
 
-public class MessagingActivity extends BaseActivity{
+public class MessagingActivity extends BaseActivity {
 
     private BottomNavigationView mBottomNav;
     private int mSelectedItem;
-    TextView tv_label,tv_newMessage,tv_createGroup,tv_back;
+    TextView tv_label, tv_newMessage, tv_createGroup, tv_back;
     private static final String SELECTED_ITEM = "arg_selected_item";
 
     @Override
@@ -41,8 +41,8 @@ public class MessagingActivity extends BaseActivity{
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        tv_label = (TextView)findViewById(R.id.tv_label);
-        tv_back = (TextView)findViewById(R.id.tv_back);
+        tv_label = (TextView) findViewById(R.id.tv_label);
+        tv_back = (TextView) findViewById(R.id.tv_back);
         tv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,21 +50,21 @@ public class MessagingActivity extends BaseActivity{
             }
         });
 
-        tv_newMessage = (TextView)findViewById(R.id.tv_right);
+        tv_newMessage = (TextView) findViewById(R.id.tv_right);
         tv_newMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MessagingActivity.this,NewMessageActivity.class);
+                Intent i = new Intent(MessagingActivity.this, NewMessageActivity.class);
                 startActivity(i);
             }
         });
 
-        tv_createGroup = (TextView)findViewById(R.id.tv_left);
+        tv_createGroup = (TextView) findViewById(R.id.tv_left);
         tv_createGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent i = new Intent(MessagingActivity.this,CreateGroupActivity.class);
+                Intent i = new Intent(MessagingActivity.this, CreateGroupActivity.class);
                 startActivity(i);
             }
         });
@@ -79,20 +79,23 @@ public class MessagingActivity extends BaseActivity{
             }
         });
 
-        MenuItem selectedItem;
+        MenuItem selectedItem=null;
         if (savedInstanceState != null) {
             mSelectedItem = savedInstanceState.getInt(SELECTED_ITEM, 0);
             selectedItem = mBottomNav.getMenu().findItem(mSelectedItem);
         } else {
             selectedItem = mBottomNav.getMenu().getItem(0);
-            Log.d("selectedItem",selectedItem.toString());
+            Log.d("selectedItem", selectedItem.toString());
         }
+
+        if (selectedItem!=null)
         selectFragment(selectedItem);
     }
 
     private void selectFragment(MenuItem item) {
         Fragment frag = null;
-
+        if (item == null)
+            return;
         switch (item.getItemId()) {
             case R.id.menu_user:
                 frag = new UsersFragment();
@@ -156,13 +159,13 @@ public class MessagingActivity extends BaseActivity{
         }
     }
 
-    public void setCustomToolbar(String title){
+    public void setCustomToolbar(String title) {
         tv_label.setText(title);
         tv_createGroup.setVisibility(View.VISIBLE);
         tv_newMessage.setVisibility(View.VISIBLE);
     }
 
-    public void hideCustomToolbar(){
+    public void hideCustomToolbar() {
         tv_newMessage.setVisibility(View.INVISIBLE);
         tv_createGroup.setVisibility(View.INVISIBLE);
     }

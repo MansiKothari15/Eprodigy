@@ -5,6 +5,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.bacancy.eprodigy.R;
 
@@ -26,6 +27,7 @@ public class CustomProgressDialog {
 
         dialog = dialogBuilder.create();
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().addFlags( WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON );
         dialog.setCancelable(false);
         dialog.show();
     }

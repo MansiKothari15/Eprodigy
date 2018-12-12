@@ -7,10 +7,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.customMapView.GoogleMapView;
 
 
 public class LocationFromHolder extends RecyclerView.ViewHolder {
     public RelativeLayout rl_location_outgoing;
+   // public ImageView img_contact_outgoing;
     public ImageView img_contact_outgoing;
     public TextView tv_title_location_outgoing, tv_desc_location_outgoing, tv_time_location_outgoing;
 

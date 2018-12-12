@@ -41,6 +41,7 @@ import com.bacancy.eprodigy.utils.Pref;
  */
 
 public class BaseActivity extends AppCompatActivity {
+    public String TAG = "BaseActivity";
 
     public ImageSelectUtils imageSelectUtils;
     PermissionActivity permissionActivity;
@@ -167,19 +168,19 @@ public class BaseActivity extends AppCompatActivity {
             AlertDialog dialog = new AlertDialog.Builder(mActivity)
                     .setIcon(0).setMessage(TextUtils.isEmpty(message) ? mActivity.getString(R.string.session_time_out) : message)
                     .setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                    //clear session
-                    Pref.setValue(mActivity, "verified", "0");
+                            //clear session
+                            Pref.setValue(mActivity, "verified", "0");
 
-                    Intent intent = new Intent(mActivity, MobileRegistrationActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    mActivity.startActivity(intent);
-                    mActivity.finish();
+                            Intent intent = new Intent(mActivity, MobileRegistrationActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            mActivity.startActivity(intent);
+                            mActivity.finish();
 
-                }
-            }).show();
+                        }
+                    }).show();
             AlertUtils.changeDefaultColor(dialog);
 
             return true;
@@ -198,6 +199,7 @@ public class BaseActivity extends AppCompatActivity {
     static String channelId = "channel-01";
     static String channelName = "Channel Name";
     static int importance = NotificationManager.IMPORTANCE_HIGH;
+
     public static void SendNotification(Context mContext, ChatPojo chatPojo) {
 
         UserPojo singleUser = DataManager.getInstance().getUser(chatPojo.getChatSender());
