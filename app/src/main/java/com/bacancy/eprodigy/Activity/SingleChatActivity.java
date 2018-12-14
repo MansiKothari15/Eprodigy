@@ -340,24 +340,20 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         for (int index = 0; index < mediaPath.size(); index++) {
             Log.d(TAG, "requestUpload:" + index + "  " + mediaPath.get(index).getImgPath());
             File file = new File(mediaPath.get(index).getImgPath());
+            String fileMimeType = SCUtils.getMimeTypeFomFile(file);
+            Log.e("ad", "mime type=" + fileMimeType);
 
-            RequestBody mBody = null;
-            if (msgType == Constants.TYPE_IMAGE) {
-                mBody = RequestBody.create(MediaType.parse("image/*"), file);//image/jpeg
-            } else if (msgType == Constants.TYPE_AUDIO) {
-                mBody = RequestBody.create(MediaType.parse("audio/m4a"), file);
-            } else if (msgType == Constants.TYPE_VIDEO) {
-                mBody = RequestBody.create(MediaType.parse("video/mp4"), file);
-            }
+            RequestBody mBody = RequestBody.create(MediaType.parse(fileMimeType), file);
+
             chatImagesParts[index] = MultipartBody.Part.createFormData("media" + (index + 1), file.getName(), mBody);
+
         }
 
-        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload2(userName, loginToken, mediaCount, chatImagesParts);
+        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload(userName, loginToken, mediaCount, chatImagesParts);
         call.enqueue(new Callback<MediaUploadResponse>() {
             @Override
             public void onResponse(Call<MediaUploadResponse> call, Response<MediaUploadResponse> response) {
                 dismissLoadingDialog();
-
 
                 Log.d("MediaUploadResponse", response.toString());
                 if (response.isSuccessful()) {
@@ -529,7 +525,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             case Constants.TYPE_IMAGE:
 
-                if (mediaPath != null && mediaPath.size() <= 0 && TextUtils.isEmpty(selectedImagePath)) {
+                if (mediaPath != null && mediaPath.size() == 0 && TextUtils.isEmpty(selectedImagePath)) {
                     Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
                     return;
                 } else {

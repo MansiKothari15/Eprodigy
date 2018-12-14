@@ -1,9 +1,14 @@
 package com.bacancy.eprodigy.utils;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,10 +20,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SCUtils {
+    public static String getMimeTypeFomFile(File file) {
+        if (file != null) {
 
-    public static String validateStr(String str)
-    {
-        return TextUtils.isEmpty(str)?"":str.trim();
+            Uri selectedUri = Uri.fromFile(file);
+            String fileExtension
+                    = MimeTypeMap.getFileExtensionFromUrl(selectedUri.toString());
+            String mimeType
+                    = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+
+            return mimeType;
+        } else {
+            return "";
+        }
+
+    }
+
+    public static String validateStr(String str) {
+        return TextUtils.isEmpty(str) ? "" : str.trim();
     }
 
     public static boolean isContainLatLng(String str) {
@@ -28,13 +47,12 @@ public class SCUtils {
         try {
             Pattern pattern;
             final String STR_PATTERN = "([0-9]*\\.?[0-9]*°[0-9]*\\.?[0-9]*'[0-9]*\\.?[0-9]*\"[A-Z]\\s)*";
-             //final String STR_PATTERN = "[0-9]*\\.?[0-9]*°[0-9]*\\.?[0-9]*'[0-9]*\\.?[0-9]*''[A-Z]";
+            //final String STR_PATTERN = "[0-9]*\\.?[0-9]*°[0-9]*\\.?[0-9]*'[0-9]*\\.?[0-9]*''[A-Z]";
             pattern = Pattern.compile(STR_PATTERN);
             matcher = pattern.matcher(str);
-            Log.e("ad","isContainLatLng>"+(matcher.matches()?"TRUE":"FALSE"));
+            Log.e("ad", "isContainLatLng>" + (matcher.matches() ? "TRUE" : "FALSE"));
             return matcher.matches();
         } catch (Exception e) {
-
 
 
             // TODO Auto-generated catch block
@@ -42,7 +60,9 @@ public class SCUtils {
         }
 
         return false;
-    }public static boolean containsDigit(String s) {
+    }
+
+    public static boolean containsDigit(String s) {
         boolean containsDigit = false;
 
         if (s != null && !s.isEmpty()) {
@@ -52,18 +72,18 @@ public class SCUtils {
                 }
             }
         }
-        Log.e("ad","containsDigit>"+(containsDigit?"TRUE":"FALSE"));
+        Log.e("ad", "containsDigit>" + (containsDigit ? "TRUE" : "FALSE"));
         return containsDigit;
     }
+
     //use either formatted_date or time_ago (below)
     public static String formatted_date(String timestamp) {
-        if (TextUtils.isEmpty(timestamp))
-        {
+        if (TextUtils.isEmpty(timestamp)) {
             return "";
         }
 //        timestamp = "2013-11-14 13:00:00";
 
-        SimpleDateFormat sdfformate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.getDefault());
+        SimpleDateFormat sdfformate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         // Calendar cal = Calendar.getInstance();
         // TimeZone tz = cal.getTimeZone();//get your local time zone.
         DateFormat sdfoutput = new SimpleDateFormat("hh:mma", Locale.getDefault()); //dd MMM yyyy KK:mma
@@ -76,10 +96,10 @@ public class SCUtils {
             e.printStackTrace();
         }
 
-            return localTime.toLowerCase();
+        return localTime.toLowerCase();
     }
-    public  static  String getCurrentTimeStamp()
-    {
+
+    public static String getCurrentTimeStamp() {
         SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return s.format(new Date());
     }
@@ -88,10 +108,10 @@ public class SCUtils {
     //use either formatted_date or time_ago (below)
     public static String formatted_date_only(String timestamp) {
 
-        SimpleDateFormat sdfformate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.getDefault());
+        SimpleDateFormat sdfformate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault());
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();//get your local time zone.
-        SimpleDateFormat sdfoutput = new SimpleDateFormat("dd MMM yyyy",Locale.getDefault()); //dd MMM yyyy KK:mma
+        SimpleDateFormat sdfoutput = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()); //dd MMM yyyy KK:mma
         sdfoutput.setTimeZone(tz);//set time zone.
         String localTime = "";
         try {
@@ -107,7 +127,7 @@ public class SCUtils {
 
     public static long getDatetoLong(String dateString) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy",Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
         Date date;
         try {
             date = sdf.parse(dateString);

@@ -12,6 +12,30 @@ import org.json.JSONObject;
 /**
  * Created by bacancy on 27/2/18.
  */
+
+/*{
+  "msgId": 1,
+ "chatId": "aaaa",
+ "chatText":"aaaa",
+ "chatTimestamp": "aaaa",
+ "chatSender": "aaaa",
+ "chatRecv":"aaaa",
+ "isShowing": true,
+ "chatImage": "aaaa",
+ "sendAudioPath": "aaaa",
+ "sharedContactSenderName": "aaaa",
+ "sharedContactSenderNumber":"aaaa",
+ "sharedContactSenderImage": "aaaa",,
+ "sharedContactRecvName": "aaaa",
+ "sharedContactRecvNumber":"aaaa",
+ "sharedContactRecvImage": "aaaa",
+ "msgType": "aaaa",
+ "isMine": false,
+ "locationAddressTitle": "aaaa",
+ "locationAddressDesc": "aaaa",
+ "locationAddressLatitude": "aaaa",
+ "locationAddressLongitude": "aaaa"
+} */
 @Entity(tableName = "ChatPojo")
 public class ChatPojo implements Parcelable {
 
