@@ -52,4 +52,12 @@
             android:layout_marginLeft="@dimen/padding_normal"
             android:text="Users : "/>
     </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_createdGroup"
+        android:scrollbars="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/normal_margin"/>
+
 </LinearLayout>
