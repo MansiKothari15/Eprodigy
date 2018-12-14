@@ -1,11 +1,11 @@
 package com.bacancy.eprodigy.Models;
 
-public class ChatImagesModel {
+public class ChatMediaModel {
 
     String imgName="";
     String imgPath="";
 
-    public ChatImagesModel(String imgName, String imgPath) {
+    public ChatMediaModel(String imgName, String imgPath) {
         this.imgName = imgName;
         this.imgPath = imgPath;
     }

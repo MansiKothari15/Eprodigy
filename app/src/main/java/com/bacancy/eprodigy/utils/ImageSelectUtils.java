@@ -2,7 +2,6 @@ package com.bacancy.eprodigy.utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
@@ -26,7 +25,7 @@ import android.widget.Toast;
 
 import com.bacancy.eprodigy.Activity.MainActivity;
 import com.bacancy.eprodigy.BuildConfig;
-import com.bacancy.eprodigy.Models.ChatImagesModel;
+import com.bacancy.eprodigy.Models.ChatMediaModel;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 
 import java.io.File;
@@ -46,7 +45,7 @@ import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
  * Created by Sumeet Bhut on 1/6/2016.
  */
 public class ImageSelectUtils {
-    ArrayList<ChatImagesModel> pathList = null;
+    ArrayList<ChatMediaModel> pathList = null;
     private static File filename;
     private final int ACTION_REQUEST_CAMERA = 1001;
     private final int ACTION_REQUEST_CROP = 1002;
@@ -78,7 +77,7 @@ public class ImageSelectUtils {
     }
 
     public interface SelectedMultipleImage {
-        void imagePath(ArrayList<ChatImagesModel> path);
+        void imagePath(ArrayList<ChatMediaModel> path);
 
         void imageSelectionFailure();
     }
@@ -309,7 +308,7 @@ public class ImageSelectUtils {
 //                        getImages(clipData.getItemCount(), clipData);
 
                     Log.e("ad", "getItemCount()=" + clipData.getItemCount());
-                    new AsyncTask<Void, Void, ArrayList<ChatImagesModel>>() {
+                    new AsyncTask<Void, Void, ArrayList<ChatMediaModel>>() {
 
                         @Override
                         protected void onPreExecute() {
@@ -319,7 +318,7 @@ public class ImageSelectUtils {
                         }
 
                         @Override
-                        protected ArrayList<ChatImagesModel> doInBackground(Void... voids) {
+                        protected ArrayList<ChatMediaModel> doInBackground(Void... voids) {
 
                             for (int i = 0; i < clipData.getItemCount(); i++) {
 
@@ -335,7 +334,7 @@ public class ImageSelectUtils {
                                 if (compress_image_path != null && compress_image_path.length() > 0 && pathList != null) {
 
 
-                                    ChatImagesModel imagesModel = new ChatImagesModel(compress_image_path.getName(), compress_image_path.getAbsolutePath());
+                                    ChatMediaModel imagesModel = new ChatMediaModel(compress_image_path.getName(), compress_image_path.getAbsolutePath());
                                     pathList.add(imagesModel);
                                 } else {
                                     if (selectedImagemListener != null) {
@@ -350,7 +349,7 @@ public class ImageSelectUtils {
                         }
 
                         @Override
-                        protected void onPostExecute(ArrayList<ChatImagesModel> mlist) {
+                        protected void onPostExecute(ArrayList<ChatMediaModel> mlist) {
                             super.onPostExecute(mlist);
                             if (selectedImagemListener != null) {
                                 selectedImagemListener.imagePath(compress_image_path.getAbsolutePath());
@@ -376,7 +375,7 @@ public class ImageSelectUtils {
                                 selectedImagemListener.imagePath(compress_image_path.getAbsolutePath());
                             } else if (selectedMultiImagemListener != null) {
                                 if (pathList != null) {
-                                    ChatImagesModel imagesModel = new ChatImagesModel(compress_image_path.getName(), compress_image_path.getAbsolutePath());
+                                    ChatMediaModel imagesModel = new ChatMediaModel(compress_image_path.getName(), compress_image_path.getAbsolutePath());
                                     pathList.add(imagesModel);
                                     selectedMultiImagemListener.imagePath(pathList);
                                 } else {

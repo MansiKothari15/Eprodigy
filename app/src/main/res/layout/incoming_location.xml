@@ -8,6 +8,7 @@
 
     android:orientation="vertical">
 
+
     <LinearLayout
         android:background="@drawable/rounded_rectangle_white"
         android:id="@+id/ll_location_incoming"

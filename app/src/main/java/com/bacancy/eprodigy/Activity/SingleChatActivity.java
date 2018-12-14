@@ -5,15 +5,12 @@ import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -34,7 +31,7 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.ChatAdapter;
-import com.bacancy.eprodigy.Models.ChatImagesModel;
+import com.bacancy.eprodigy.Models.ChatMediaModel;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
@@ -68,12 +65,9 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventList
 
 import org.jivesoftware.smack.SmackException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -110,7 +104,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
-    private ArrayList<ChatImagesModel> imagesPath = new ArrayList<>();
+    private ArrayList<ChatMediaModel> mediaPath = new ArrayList<>();
 
     private String sharedContactSenderNumber = "";
     private String sharedContactSenderName = "";
@@ -328,25 +322,34 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    private void mediaUpload() {
+    private void mediaUpload(final int msgType) {
 
         showLoadingDialog(mActivity);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
-        int mCount = imagesPath != null ? imagesPath.size() : 0;
+        int mCount = mediaPath != null ? mediaPath.size() : 0;
 
         RequestBody userName = RequestBody.create(MediaType.parse(""), username);
         RequestBody loginToken = RequestBody.create(MediaType.parse(""), login_token);
         RequestBody mediaCount = RequestBody.create(MediaType.parse(""), String.valueOf(mCount));
 
-        MultipartBody.Part[] chatImagesParts = new MultipartBody.Part[imagesPath.size()];
 
-        for (int index = 0; index < imagesPath.size(); index++) {
-            Log.d(TAG, "requestUploadSurvey: survey image " + index + "  " + imagesPath.get(index).getImgPath());
-            File file = new File(imagesPath.get(index).getImgPath());
-            RequestBody surveyBody = RequestBody.create(MediaType.parse("image/*"), file);
-            chatImagesParts[index] = MultipartBody.Part.createFormData("media" + (index + 1), file.getName(), surveyBody);
+        MultipartBody.Part[] chatImagesParts = new MultipartBody.Part[mediaPath.size()];
+        //MIME TYPE-http://blog.icodejava.com/tag/mime-type-multipartform-data/
+        for (int index = 0; index < mediaPath.size(); index++) {
+            Log.d(TAG, "requestUpload:" + index + "  " + mediaPath.get(index).getImgPath());
+            File file = new File(mediaPath.get(index).getImgPath());
+
+            RequestBody mBody = null;
+            if (msgType == Constants.TYPE_IMAGE) {
+                mBody = RequestBody.create(MediaType.parse("image/*"), file);//image/jpeg
+            } else if (msgType == Constants.TYPE_AUDIO) {
+                mBody = RequestBody.create(MediaType.parse("audio/m4a"), file);
+            } else if (msgType == Constants.TYPE_VIDEO) {
+                mBody = RequestBody.create(MediaType.parse("video/mp4"), file);
+            }
+            chatImagesParts[index] = MultipartBody.Part.createFormData("media" + (index + 1), file.getName(), mBody);
         }
 
         Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload2(userName, loginToken, mediaCount, chatImagesParts);
@@ -365,7 +368,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     }
                     if (response.body().getStatus() == Constants.RESPONSE_SUCCESS_STATUS) {
 
-                        sendMsg(Constants.TYPE_IMAGE);
+                        sendMsg(msgType);
 
                     } else {
                         dismissLoadingDialog();
@@ -526,7 +529,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             case Constants.TYPE_IMAGE:
 
-                if (imagesPath != null && imagesPath.size() <= 0 && TextUtils.isEmpty(selectedImagePath)) {
+                if (mediaPath != null && mediaPath.size() <= 0 && TextUtils.isEmpty(selectedImagePath)) {
                     Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -673,17 +676,17 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                     imageSelectUtils.selectMultiImageGallery(maxImageCount, new ImageSelectUtils.SelectedMultipleImage() {
                         @Override
-                        public void imagePath(ArrayList<ChatImagesModel> pathList) {
+                        public void imagePath(ArrayList<ChatMediaModel> pathList) {
                             Log.e(TAG, "takePhoto path list size=" + pathList.size());
-                            imagesPath = pathList;
-                            for (int i = 0; i < pathList.size(); i++) {
+                            mediaPath = pathList;
+
+                            //Api Call
+                            mediaUpload(Constants.TYPE_IMAGE);
+
+                            //testing-log
+                            /*for (int i = 0; i < pathList.size(); i++) {
                                 Log.e(TAG, "takePhoto=>" + i + "=" + pathList.get(i).getImgPath());
-                            }
-
-                            mediaUpload();
-                            //API CALL
-
-                            //sendMsg(Constants.TYPE_IMAGE);
+                            }*/
                         }
 
                         @Override
