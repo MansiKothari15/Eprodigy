@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.ChatAdapter;
+import com.bacancy.eprodigy.Models.ChatImagesModel;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
@@ -46,6 +47,7 @@ import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.ImageSelectUtils;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -88,6 +90,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
     Activity mActivity;
+    private ImageSelectUtils imageSelectUtils;
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
@@ -103,10 +106,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int TAKE_PICTURE = 1, GALLERY = 2, SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4;
+    private static final int REQUEST_CAMERA_PICTURE = 1, REQUEST_PICK_GALLERY = 2, REQUEST_SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
+    private ArrayList<ChatImagesModel> imagesPath = new ArrayList<>();
 
     private String sharedContactSenderNumber = "";
     private String sharedContactSenderName = "";
@@ -127,6 +131,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         setContentView(R.layout.fragment_singlechat);
         mActivity = this;
         startXmppService();
+        imageSelectUtils = new ImageSelectUtils(this);
         xmppEventReceiver = mChatApp.getEventReceiver();
 
         KeyboardVisibilityEvent.setEventListener(
@@ -262,7 +267,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     public void sendAudio() {
-        SendMsg(Constants.TYPE_AUDIO);
+        sendMsg(Constants.TYPE_AUDIO);
     }
 
     public void MediaRecorderReady() {
@@ -323,29 +328,55 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    private void mediaUpload(File file) {
+    private void mediaUpload() {
 
-        showLoadingDialog(this);
+        showLoadingDialog(mActivity);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
-        int mediacount = 1;
+        int mCount = imagesPath != null ? imagesPath.size() : 0;
 
         RequestBody userName = RequestBody.create(MediaType.parse(""), username);
         RequestBody loginToken = RequestBody.create(MediaType.parse(""), login_token);
-        RequestBody mediaCount = RequestBody.create(MediaType.parse(""), String.valueOf(mediacount));
+        RequestBody mediaCount = RequestBody.create(MediaType.parse(""), String.valueOf(mCount));
 
-        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        // MultipartBody.Part is used to send also the actual file name
-        MultipartBody.Part body = MultipartBody.Part.createFormData("media", file.getName(), requestFile);
-        Log.d("Params->", userName.toString() + " " + loginToken.toString() + " " + mediaCount + " " + body);
+        MultipartBody.Part[] chatImagesParts = new MultipartBody.Part[imagesPath.size()];
 
-        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload(userName, loginToken, mediaCount, body);
+        for (int index = 0; index < imagesPath.size(); index++) {
+            Log.d(TAG, "requestUploadSurvey: survey image " + index + "  " + imagesPath.get(index).getImgPath());
+            File file = new File(imagesPath.get(index).getImgPath());
+            RequestBody surveyBody = RequestBody.create(MediaType.parse("image/*"), file);
+            chatImagesParts[index] = MultipartBody.Part.createFormData("media" + (index + 1), file.getName(), surveyBody);
+        }
+
+        Call<MediaUploadResponse> call = ApiClient.getClient().mediaUpload2(userName, loginToken, mediaCount, chatImagesParts);
         call.enqueue(new Callback<MediaUploadResponse>() {
             @Override
             public void onResponse(Call<MediaUploadResponse> call, Response<MediaUploadResponse> response) {
                 dismissLoadingDialog();
+
+
                 Log.d("MediaUploadResponse", response.toString());
+                if (response.isSuccessful()) {
+                    if (validateUser(mActivity,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+                    if (response.body().getStatus() == Constants.RESPONSE_SUCCESS_STATUS) {
+
+                        sendMsg(Constants.TYPE_IMAGE);
+
+                    } else {
+                        dismissLoadingDialog();
+                        String msg = response.body().getMessage();
+                        AlertUtils.showSimpleAlert(mActivity, TextUtils.isEmpty(msg) ? mActivity.getString(R.string.server_error) : msg);
+                    }
+
+                } else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                }
 
             }
 
@@ -462,7 +493,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     };
 
-    private void SendMsg(int msgType) {
+    private void sendMsg(int msgType) {
 
         if (!InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
             AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
@@ -485,7 +516,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
         switch (msgType) {
             case Constants.TYPE_MESSAGE:
-                if (edtMessage.getText().toString().trim().isEmpty()) {
+                if (TextUtils.isEmpty(edtMessage.getText().toString().trim())) {
                     Toast.makeText(this, "Please enter message", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -494,7 +525,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 break;
 
             case Constants.TYPE_IMAGE:
-                if (selectedImagePath.trim().isEmpty()) {
+
+                if (imagesPath != null && imagesPath.size() <= 0 && TextUtils.isEmpty(selectedImagePath)) {
                     Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -503,7 +535,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 break;
 
             case Constants.TYPE_CONTACT:
-                if (sharedContactSenderName.trim().isEmpty() || sharedContactSenderNumber.trim().isEmpty()) {
+                if (TextUtils.isEmpty(sharedContactSenderName) || TextUtils.isEmpty(sharedContactSenderNumber)) {
                     Toast.makeText(this, "Please select contact", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -596,32 +628,117 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
-    public void takePhoto() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, TAKE_PICTURE);
+
+    /**
+     * @param typeCapture   PICK_CAMERA_IMAGE = 10;
+     *                      PICK_SINGLE_GALLERY_IMAGE = 20;
+     *                      PICK_MULTIPLE_GALLERY_IMAGE = 30;
+     * @param maxImageCount -for multiple image
+     * @param resultCode-   result code
+     */
+
+    public void takePhoto(final int typeCapture, final int maxImageCount, final int resultCode) {
+
+        initPermission(mActivity, new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+
+
+                if (typeCapture == Constants.PICK_CAMERA_IMAGE) {
+                    imageSelectUtils.selectImageCamera(new ImageSelectUtils.SelectedImage() {
+                        @Override
+                        public void imagePath(String path) {
+                            Log.e(TAG, "takePhoto=>" + path);
+
+
+                            //API CALL
+
+                            selectedImagePath = path;
+
+                            sendMsg(Constants.TYPE_IMAGE);
+
+                            if (resultCode == REQUEST_CAMERA_PICTURE) {
+
+                            } else if (resultCode == REQUEST_PICK_GALLERY) {
+
+                            }
+                        }
+
+                        @Override
+                        public void imageSelectionFailure() {
+                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
+                        }
+                    });
+                } else if (typeCapture == Constants.PICK_MULTIPLE_GALLERY_IMAGE) {
+
+                    imageSelectUtils.selectMultiImageGallery(maxImageCount, new ImageSelectUtils.SelectedMultipleImage() {
+                        @Override
+                        public void imagePath(ArrayList<ChatImagesModel> pathList) {
+                            Log.e(TAG, "takePhoto path list size=" + pathList.size());
+                            imagesPath = pathList;
+                            for (int i = 0; i < pathList.size(); i++) {
+                                Log.e(TAG, "takePhoto=>" + i + "=" + pathList.get(i).getImgPath());
+                            }
+
+                            mediaUpload();
+                            //API CALL
+
+                            //sendMsg(Constants.TYPE_IMAGE);
+                        }
+
+                        @Override
+                        public void imageSelectionFailure() {
+                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
+                        }
+                    });
+                } else if (typeCapture == Constants.PICK_SINGLE_GALLERY_IMAGE) {
+                    imageSelectUtils.selectSingleImageGallery(new ImageSelectUtils.SelectedImage() {
+                        @Override
+                        public void imagePath(String path) {
+                            Log.e(TAG, "takePhoto=>" + path);
+
+                            selectedImagePath = path;
+                            // sendMsg(Constants.TYPE_IMAGE);
+                        }
+
+                        @Override
+                        public void imageSelectionFailure() {
+                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
+                        }
+                    });
+                }
+
+            }
+
+            @Override
+            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                Toast.makeText(mActivity, mActivity.getResources().getString(R.string.must_allow_permission), Toast.LENGTH_SHORT).show();
+            }
+        }, true, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
     }
 
     public void choosePhotoFromGallary() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        startActivityForResult(galleryIntent, GALLERY);
+        startActivityForResult(galleryIntent, REQUEST_PICK_GALLERY);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        //super.onActivityResult(requestCode, resultCode, data); // no need for super
+        imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
 
             case REQUEST_PLACE_PICKER:
                 if (resultCode == RESULT_OK) {
                     Place place = PlacePicker.getPlace(data, mActivity);
 
-                    String mName=place.getName().toString();
-                  //  if (!TextUtils.isEmpty(mName) && SCUtils.isContainLatLng(mName))
-                    if (!TextUtils.isEmpty(mName) && mName.contains("°") && SCUtils.containsDigit(mName))
-                    {
-                        mName="";
+                    String mName = place.getName().toString();
+                    //  if (!TextUtils.isEmpty(mName) && SCUtils.isContainLatLng(mName))
+                    if (!TextUtils.isEmpty(mName) && mName.contains("°") && SCUtils.containsDigit(mName)) {
+                        mName = "";
                     }
                     userLocation = new UserLocation(SCUtils.validateStr(mName)
                             , SCUtils.validateStr(place.getAddress().toString())
@@ -629,13 +746,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             , SCUtils.validateStr(String.valueOf(place.getLatLng().longitude)));
 
 
-
                     String toastMsg = String.format("Place: %s", place.getName());
                     Log.e(TAG, toastMsg);
 
 
-
-                    SendMsg(Constants.TYPE_LOCATION);
+                    sendMsg(Constants.TYPE_LOCATION);
                 } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                     Status status = PlaceAutocomplete.getStatus(this, data);
                     // TODO: Handle the error.
@@ -645,56 +760,56 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     Log.e(TAG, "the user cancelled the operation");
                 }
 
-        break;
-        case TAKE_PICTURE:
-        if (resultCode == Activity.RESULT_OK) {
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-            saveImage(thumbnail);
-        }
-        break;
-        case GALLERY:
-        if (data != null) {
-            Uri contentURI = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                String path = saveImage(bitmap);
+                break;
+            /*case TAKE_PICTURE:
+                if (resultCode == Activity.RESULT_OK) {
+                    Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                    saveImage(thumbnail);
+                }
+                break;
+            case GALLERY:
+                if (data != null) {
+                    Uri contentURI = data.getData();
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
+                        String path = saveImage(bitmap);
 //                        img_profile.setImageBitmap(bitmap);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(SingleChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-            }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(SingleChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;*/
+            case REQUEST_SHARE_CONTACT:
+                if (data != null) {
+
+                    sharedContactSenderName = data.getStringExtra("name");
+                    sharedContactSenderNumber = data.getStringExtra("phone");
+                    sharedContactSenderImage = "";
+                    Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
+
+                    sendMsg(Constants.TYPE_CONTACT);
+
+                } else {
+
+                    sharedContactSenderName = "";
+                    sharedContactSenderNumber = "";
+                    sharedContactSenderImage = "";
+                }
+                break;
+
+            default:
+                sharedContactSenderName = "";
+                sharedContactSenderNumber = "";
+                sharedContactSenderImage = "";
+                break;
+
         }
-        break;
-        case SHARE_CONTACT:
-        if (data != null) {
-
-            sharedContactSenderName = data.getStringExtra("name");
-            sharedContactSenderNumber = data.getStringExtra("phone");
-            sharedContactSenderImage = "";
-            Log.e("ad", ">" + sharedContactSenderName + ":" + sharedContactSenderNumber);
-
-            SendMsg(Constants.TYPE_CONTACT);
-
-        } else {
-
-            sharedContactSenderName = "";
-            sharedContactSenderNumber = "";
-            sharedContactSenderImage = "";
-        }
-        break;
-
-        default:
-        sharedContactSenderName = "";
-        sharedContactSenderNumber = "";
-        sharedContactSenderImage = "";
-        break;
 
     }
 
-}
-
-    public String saveImage(Bitmap myBitmap) {
+    /*public String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
         File wallpaperDirectory = new File(
@@ -712,7 +827,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             selectedImagePath = yourUri.toString();
 
 
-            SendMsg(Constants.TYPE_IMAGE);
+            sendMsg(Constants.TYPE_IMAGE);
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
             MediaScannerConnection.scanFile(this,
@@ -727,7 +842,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         }
         return "";
     }
-
+*/
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -741,13 +856,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.menu_camera:
-                               /*Testing for the image
-                                selectedImagePath = "/data/user/0/com.commonlibrarysample/files/images/outputImage1543901674735.jpg";
-                                SendMsg(Constants.MY_IMAGE);*/
-                                takePhoto();
+                                takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
                                 return true;
                             case R.id.menu_gallery:
-                                choosePhotoFromGallary();
+                                takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
                                 return true;
                             case R.id.menu_document:
                                 return true;
@@ -777,7 +889,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                                     }
                                 },true,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION);*/
 
-                               try {
+                                try {
                                     PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
                                     Intent intent = intentBuilder.build(mActivity);
                                     // Start the intent by requesting a result,
@@ -793,7 +905,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                                 return true;
                             case R.id.menu_contact:
                                 Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
-                                startActivityForResult(intent, SHARE_CONTACT);
+                                startActivityForResult(intent, REQUEST_SHARE_CONTACT);
                                 return true;
                             case R.id.menu_cancel:
                                 popup.dismiss();
@@ -812,32 +924,25 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             case R.id.imgSend:
 
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
-                    SendMsg(Constants.TYPE_MESSAGE);
+                    sendMsg(Constants.TYPE_MESSAGE);
                 } else {
                     AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
 
                 }
                 break;
             case R.id.img_camera:
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+               /* if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
                 } else {
                     takePhoto();
-                }
+
+                }*/
+                takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
+
                 break;
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode == 0) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                takePhoto();
-            }
-        }
-    }
 
     @Override
     public void onPause() {

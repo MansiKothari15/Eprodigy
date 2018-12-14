@@ -33,6 +33,7 @@ import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -167,7 +168,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 ((ChatImageHolder) holder).tvTime.setText(formatted_date);
 
-                Picasso.with(context).load(chatPojo.getChatImage())
+                File f = new File(chatPojo.getChatImage());
+                Picasso.with(context).load(f)
                         .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .into(((ChatImageHolder) holder).img_outgoing);
@@ -208,7 +210,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 });
             }
 
-
         } else if (holder instanceof RecvContactHolder) {
 
             String name = chatPojo.getSharedContactSenderName();
@@ -234,8 +235,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 });
 
             }
-
-
         } else if (holder instanceof SendAudioHolder) {
 
             final String audioPath = chatPojo.getSendAudioPath();

@@ -11,4 +11,19 @@
         android:layout_margin="@dimen/padding_small"
         android:layout_alignParentRight="true"
         android:src="@mipmap/ic_launcher"/>
+    <TextView
+        android:layout_alignLeft="@id/img_outgoing"
+        android:layout_below="@id/img_outgoing"
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="5dp"
+        android:gravity="right"
+        android:alpha="0.9"
+
+        android:text="05:22 pm"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textColor="@color/black"
+        android:textSize="10sp" />
 </RelativeLayout>

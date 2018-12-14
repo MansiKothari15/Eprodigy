@@ -6,8 +6,14 @@ public class Constants {
     /*Message Types*/
 
 
+    public static final int PICK_CAMERA_IMAGE = 10;
+    public static final int PICK_SINGLE_GALLERY_IMAGE = 20;
+    public static final int PICK_MULTIPLE_GALLERY_IMAGE = 30;
+
     public static final int SUCCESS_STATUS = 101;
     public static final int SESSION_TIME_OUT_STATUS = 401;
+    public static final int ERRO_STATUS = 400;
+    public static final int RESPONSE_SUCCESS_STATUS = 200;
     public static final int OUR_USERS_STATUS = 1;
     public static final String CONTACT_SPLIT_KEY = ",";
 

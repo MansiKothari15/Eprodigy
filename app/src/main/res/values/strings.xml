@@ -53,6 +53,8 @@
     <string name="login_failed">Login Failed !</string>
     <string name="chat_text">Start chatting with your new friend now!\n<font color='#FF5F99EA'>Start Chat Now</font></string>
     <string name="view_contact_title">View Contact</string>
+    <string name="fail_capture_image">Fail to get image</string>
+    <string name="must_allow_permission">You have to allow permission.</string>
     <string-array name="statuslist">
         <item>Busy</item>
         <item>At school</item>

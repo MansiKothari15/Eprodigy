@@ -105,9 +105,29 @@ public interface ApiInterface {
             @FieldMap HashMap<String, String> data
     );
 
-    @FormUrlEncoded
+    @Multipart
     @POST("usermultiplemediaupload")
     Call<MediaUploadResponse> mediaUpload(
+            @Part("username") RequestBody id,
+            @Part("login_token") RequestBody fullName,
+            @Part("mediacount") RequestBody mediaCount,
+            @Part MultipartBody.Part[] media
+    );
+
+    @Multipart
+    @POST("usermultiplemediaupload")
+    Call<MediaUploadResponse> mediaUpload2(
+
+            @Part("username") RequestBody id,
+            @Part("login_token") RequestBody fullName,
+            @Part("mediacount") RequestBody mediaCount,
+            @Part MultipartBody.Part[] media
+    );
+
+    @Multipart
+    @POST("usermultiplemediaupload")
+    Call<MediaUploadResponse> mediaUpload3(
+
             @Part("username") RequestBody id,
             @Part("login_token") RequestBody fullName,
             @Part("mediacount") RequestBody mediaCount,
