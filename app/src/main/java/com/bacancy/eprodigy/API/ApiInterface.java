@@ -11,6 +11,7 @@ import com.bacancy.eprodigy.ResponseModel.ProfileUploadResponse;
 import com.bacancy.eprodigy.ResponseModel.RegisterResponse;
 import com.bacancy.eprodigy.ResponseModel.ResendCodeResponse;
 import com.bacancy.eprodigy.ResponseModel.StatusUpdateResponse;
+import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.ResponseModel.UserDetailResponse;
 import com.bacancy.eprodigy.ResponseModel.UserDisplayNameResponse;
 import com.bacancy.eprodigy.ResponseModel.VerifyUserResponse;
@@ -124,4 +125,16 @@ public interface ApiInterface {
     Call<LastSeenResponse> lastSeen(
             @FieldMap HashMap<String, String> data
     );
+
+
+    @Multipart
+    @POST("updategroupdetails")
+    Call<UpdateGroupDetailResponse> updateGroupDetail(
+            @Part("username") RequestBody id,
+            @Part("login_token") RequestBody fullName,
+            @Part("groupname") RequestBody groupname,
+            @Part("group_title") RequestBody group_title,
+            @Part MultipartBody.Part image
+    );
+
 }

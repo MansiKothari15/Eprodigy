@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
@@ -20,6 +19,7 @@ import com.bacancy.eprodigy.Adapters.viewholder.ChatImageRecvHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.HeaderHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.LocationFromHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.LocationToHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.RecvAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.RecvContactHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
@@ -27,8 +27,6 @@ import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.callback.ActorDiffCallback;
 import com.bacancy.eprodigy.custom.StickyHeaderAdapter;
-import com.bacancy.eprodigy.customMapView.MapScale;
-import com.bacancy.eprodigy.customMapView.MapType;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.squareup.picasso.Picasso;
@@ -65,6 +63,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     private String msg = "";
     private String mName = "";
     private int day = 0;
+
+    //set up MediaPlayer
+    MediaPlayer audio = new MediaPlayer();
 
     public ChatAdapter(Context context, ArrayList<ChatPojo> conversation_arrayList, String username) {
         this.context = context;
@@ -107,6 +108,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (i == MY_AUDIO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
             return new SendAudioHolder(layoutView);
+        } else if(i == OTHER_AUDIO){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_audio, viewGroup, false);
+            return new RecvAudioHolder(layoutView);
         } else if (i == MY_LOCATION) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_location, viewGroup, false);
             return new LocationFromHolder(layoutView);
@@ -123,7 +127,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
         final ChatPojo chatPojo = mLists.get(position);
 
@@ -241,7 +245,39 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             ((SendAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    audioPlayer(audioPath);
+                    ((SendAudioHolder) holder).img_pause.setVisibility(View.VISIBLE);
+                    ((SendAudioHolder) holder).img_play.setVisibility(View.GONE);
+                    audioPlayer(audioPath,holder);
+                }
+            });
+
+            ((SendAudioHolder) holder).img_pause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((SendAudioHolder) holder).img_pause.setVisibility(View.GONE);
+                    ((SendAudioHolder) holder).img_play.setVisibility(View.VISIBLE);
+                    audio.pause();
+                }
+            });
+
+        } else if (holder instanceof RecvAudioHolder) {
+
+            final String audioPath = chatPojo.getSendAudioPath();
+            ((RecvAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((RecvAudioHolder) holder).img_pause.setVisibility(View.VISIBLE);
+                    ((RecvAudioHolder) holder).img_play.setVisibility(View.GONE);
+                    audioPlayer(audioPath,holder);
+                }
+            });
+
+            ((RecvAudioHolder) holder).img_pause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((RecvAudioHolder) holder).img_pause.setVisibility(View.GONE);
+                    ((RecvAudioHolder) holder).img_play.setVisibility(View.VISIBLE);
+                    audio.pause();
                 }
             });
 
@@ -365,14 +401,23 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
     }
 
-    public void audioPlayer(String path) {
-        //set up MediaPlayer
-        MediaPlayer mp = new MediaPlayer();
+    public void audioPlayer(String path, final RecyclerView.ViewHolder holder) {
 
         try {
-            mp.setDataSource(path);
-            mp.prepare();
-            mp.start();
+            audio.setDataSource(path);
+            audio.prepare();
+            audio.start();
+
+            audio.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    ((SendAudioHolder) holder).img_pause.setVisibility(View.GONE);
+                    ((SendAudioHolder) holder).img_play.setVisibility(View.VISIBLE);
+                }
+
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }

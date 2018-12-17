@@ -6,17 +6,40 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.bacancy.eprodigy.API.ApiClient;
+import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.CreateGroupAdapter;
+import com.bacancy.eprodigy.Adapters.GroupContactAdapter;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.interfaces.MyContactListener;
+import com.bacancy.eprodigy.tasks.GetMyContactTask;
+import com.bacancy.eprodigy.utils.AlertUtils;
+import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.Pref;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CreateGroupActivity extends BaseActivity implements View.OnClickListener {
 
     TextView tv_label,tv_right,tv_left,tv_next,tv_back;
-    RecyclerView rv_group, rv_groupContacts;
+    public static RecyclerView rv_group;
+    RecyclerView rv_groupContacts;
     CreateGroupAdapter createGroupAdapter;
+    GroupContactAdapter groupContactAdapter;
+    List<ContactListResponse.ResponseDataBean> responseDataBeanList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +67,21 @@ public class CreateGroupActivity extends BaseActivity implements View.OnClickLis
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL, false);
         rv_group.setLayoutManager(mLayoutManager);
         rv_group.setItemAnimator(new DefaultItemAnimator());
-        createGroupAdapter = new CreateGroupAdapter();
-        rv_group.setAdapter(createGroupAdapter);
 
         rv_groupContacts = (RecyclerView)findViewById(R.id.rv_groupContacts);
         RecyclerView.LayoutManager mLayoutManager1 = new LinearLayoutManager(this);
         rv_groupContacts.setLayoutManager(mLayoutManager1);
         rv_groupContacts.setItemAnimator(new DefaultItemAnimator());
+
+        ((BaseActivity) CreateGroupActivity.this).showLoadingDialog(CreateGroupActivity.this);
+        new GetMyContactTask(CreateGroupActivity.this, new MyContactListener() {
+            @Override
+            public void onResponseGetContact(JSONArray jsonArray) {
+
+                Log.d("JSON---", jsonArray.toString());
+                getContactList(jsonArray.toString());
+            }
+        }).execute();
     }
 
     public void hideCustomToolbar(){
@@ -58,6 +89,61 @@ public class CreateGroupActivity extends BaseActivity implements View.OnClickLis
         tv_left.setVisibility(View.INVISIBLE);
         tv_next.setVisibility(View.VISIBLE);
         tv_back.setVisibility(View.VISIBLE);
+    }
+
+    private void getContactList(String contact_list) {
+        if (((BaseActivity) CreateGroupActivity.this).validateInternetConn(CreateGroupActivity.this)) {
+
+            String username = Pref.getValue(CreateGroupActivity.this, AppConfing.USERNAME, "");
+            String login_token = Pref.getValue(CreateGroupActivity.this, AppConfing.LOGIN_TOKEN, "");
+
+            HashMap<String, String> data = new HashMap<>();
+            data.put("username", username);
+            data.put("login_token", login_token);
+            data.put("contacts_list", contact_list);
+
+            Log.d("Params---", username + " " + login_token);
+
+            Call<ContactListResponse> phone_contact_list_call = ApiClient.getClient().contactList(data);
+            phone_contact_list_call.enqueue(new Callback<ContactListResponse>() {
+                @Override
+                public void onResponse(Call<ContactListResponse> call, Response<ContactListResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (((BaseActivity) CreateGroupActivity.this).validateUser(CreateGroupActivity.this,
+                                response.body().getStatus(),
+                                response.body().getMessage())) {
+                            return;
+                        }
+                        Log.d("ContactListResponse", response.toString());
+                        List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
+
+                        if (mList != null && mList.size() > 0) {
+                            for (ContactListResponse.ResponseDataBean bean : mList) {
+                                if (bean != null && bean.getStatus()==Constants.OUR_USERS_STATUS) {
+                                    responseDataBeanList.add(bean);
+                                }
+                            }
+                        }
+
+                        if (mList != null && mList.size() > 0) {
+                            groupContactAdapter = new GroupContactAdapter(CreateGroupActivity.this, responseDataBeanList);
+                            rv_groupContacts.setAdapter(groupContactAdapter);
+                        }
+
+                    } else {
+                        ((BaseActivity) CreateGroupActivity.this).dismissLoadingDialog();
+                        AlertUtils.showSimpleAlert(CreateGroupActivity.this, CreateGroupActivity.this.getString(R.string.server_error));
+                    }
+
+                    ((BaseActivity) CreateGroupActivity.this).dismissLoadingDialog();
+                }
+
+                @Override
+                public void onFailure(Call<ContactListResponse> call, Throwable t) {
+                    ((BaseActivity) CreateGroupActivity.this).dismissLoadingDialog();
+                }
+            });
+        }
     }
 
     @Override

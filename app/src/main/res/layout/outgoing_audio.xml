@@ -19,6 +19,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_media_play"/>
+        <ImageView
+            android:id="@+id/img_pause"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_pause"/>
+        <SeekBar
+            android:id="@+id/sb_audio"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
     <TextView
