@@ -101,6 +101,21 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
     public void uploadGroupDetail(File file){
 
+//        String grpName = edt_groupName.getText().toString();
+//        if (XMPPHandler.createRoom(grpName)) {
+//            mCheckset.add(mUser);
+//            for (String names : mCheckset) {
+//                XMPPHandler.inviteToGroup(names, grpName);
+//            }
+//            Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+//            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
+//            );
+//            finish();
+//        }
+
         showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
