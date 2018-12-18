@@ -184,7 +184,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
                 ((ChatImageRecvHolder) holder).tvTime.setText(formatted_date);
 
-                Picasso.with(context).load(chatPojo.getChatImage())
+                Picasso.with(context).load(chatPojo.getChatText())
                         .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                         .into(((ChatImageRecvHolder) holder).img_incoming);

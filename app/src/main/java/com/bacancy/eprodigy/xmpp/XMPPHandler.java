@@ -1009,7 +1009,8 @@ public class XMPPHandler {
     // will open up a TCP connection to another user (usually a roaster in jabber language),
     // will throw exception if there is an error
     public boolean sendMessage(final ChatPojo chatMessage) throws SmackException {
-        String body = chatMessage.getChatText();
+        String body = gson.toJson(chatMessage);
+       // String body = chatMessage.getChatText();
 
 
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
@@ -1060,7 +1061,7 @@ public class XMPPHandler {
 
             @Override
             public CharSequence toXML() {
-                return "<mediaType>"+chatMessage.getMsgType()+"</mediaType>";
+                return "<mediaType>"+"chat"+"</mediaType>";
             }
         });
 
@@ -1313,9 +1314,12 @@ public class XMPPHandler {
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                     String username = from.toString().replace("@", "").replace(AppConfing.SERVICE, "");
-                    updateDB(username, message.getBody(), username);
+                    //updateDB(username, message.getBody(), username);
 
+                    Gson gson = new Gson();
+                    ChatPojo chatMessage = gson.fromJson(message.getBody(), ChatPojo.class);
 
+                    updateDB(username, chatMessage, username);
                     //Now our message is in our representation, we can send it to our list to add newly received message
 
                 } else if (message.getType() == Message.Type.error) {
@@ -1333,8 +1337,34 @@ public class XMPPHandler {
 
 
     }
+    private void updateDB(String username, ChatPojo chatPojo, String s) {
 
-    private void updateDB(String username, String msg, String s) {
+        /*ChatPojo chatPojo = new ChatPojo();
+//        chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);//to
+        chatPojo.setChatId(s);//to
+        chatPojo.setChatSender(username);//from
+        chatPojo.setChatRecv(mUser);
+        chatPojo.setChatText(msg);
+        chatPojo.setShowing(false);
+        chatPojo.setChatTimestamp(SCUtils.getNow());*/
+
+
+//        DataManager.getInstance().AddChat(chatPojo);
+//
+//        DataManager.getInstance().updateTimestamp(username, SCUtils.getNow());
+
+
+        Log.e(TAG, "updateDB>" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
+
+        chatPojo.setChatId(s);//to
+        chatPojo.setChatRecv(mUser);//to
+        chatPojo.setChatSender(username);//from
+        chatPojo.setMine(false);
+
+        addMessage(chatPojo);
+
+    }
+  /*  private void updateDB(String username, String msg, String s) {
 
         ChatPojo chatPojo = new ChatPojo();
 //        chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);//to
@@ -1351,7 +1381,7 @@ public class XMPPHandler {
         addMessage(chatPojo);
 
 
-    }
+    }*/
 
     private void addMessage(final ChatPojo chatMessage) {
         service.onNewMessage(chatMessage);

@@ -363,8 +363,21 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                         return;
                     }
                     if (response.body().getStatus() == Constants.RESPONSE_SUCCESS_STATUS) {
+                        List<String> mediaUrlList = response.body().getMediaurl();
+                        if (mediaUrlList != null && mediaUrlList.size() > 0) {
 
-                        sendMsg(msgType);
+                            for (int i = 0; i < mediaUrlList.size(); i++) {
+                                selectedImagePath=mediaPath.get(i).getImgPath();
+                                final String url=mediaUrlList.get(i);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        sendMediaMsg(msgType,url);
+                                    }
+                                });
+                            }
+                        }
 
                     } else {
                         dismissLoadingDialog();
@@ -593,6 +606,54 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
+    private void sendMediaMsg(int msgType, String url) {
+
+        if (!InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
+            AlertUtils.showSimpleAlert(SingleChatActivity.this, getResources().getString(R.string.e_no_internet));
+            return;
+        }
+
+
+        ChatUserId = ChatUserId.replace(" ", "");
+        Log.d("ChatUserId", ChatUserId);
+
+        ChatPojo chatPojo = new ChatPojo();
+        chatPojo.setChatId(ChatUserId);//to
+        chatPojo.setChatSender(username);//from
+        chatPojo.setChatRecv(ChatUserId);
+        chatPojo.setShowing(true);
+        chatPojo.setChatTimestamp(SCUtils.getNow());
+        chatPojo.setMsgType(msgType);
+        chatPojo.setMine(true);
+
+        if (msgType == Constants.TYPE_IMAGE){
+            chatPojo.setChatImage(selectedImagePath);
+        }
+        if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
+            if (TextUtils.isEmpty(url)) {
+                Toast.makeText(this, "Media url empty", Toast.LENGTH_SHORT).show();
+            } else {
+                chatPojo.setChatText(url);
+            }
+        }
+
+
+        try {
+            if (MyApplication.getmService().xmpp.sendMessage(chatPojo)) {
+                DataManager.getInstance().AddChat(chatPojo);
+                edtMessage.setText("");
+
+                if (mMessageAdapter.getItemCount() > 2)
+                    rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
+            }
+
+        } catch (SmackException e) {
+            e.printStackTrace();
+            Toast.makeText(SingleChatActivity.this, "SmackException=" + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
 
     private void startXmppService() {
 
