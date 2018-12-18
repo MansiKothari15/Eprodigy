@@ -560,7 +560,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             case Constants.TYPE_AUDIO:
                 if (TextUtils.isEmpty(AudioSavePathInDevice)) {
 
-                    Toast.makeText(this, "Audio is not proper", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Long press to record your audio", Toast.LENGTH_SHORT).show();
 
                     return;
                 } else {

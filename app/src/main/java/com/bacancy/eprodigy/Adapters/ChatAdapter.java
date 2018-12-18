@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
+import com.bacancy.eprodigy.Activity.VideoActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatImageHolder;
@@ -21,8 +23,10 @@ import com.bacancy.eprodigy.Adapters.viewholder.LocationFromHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.LocationToHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.RecvAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.RecvContactHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.RecvVideoHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendAudioHolder;
 import com.bacancy.eprodigy.Adapters.viewholder.SendContactHolder;
+import com.bacancy.eprodigy.Adapters.viewholder.SendVideoHolder;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.callback.ActorDiffCallback;
@@ -44,7 +48,8 @@ import java.util.List;
  */
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyHeaderAdapter<HeaderHolder> {
-    int MY_MESSAGE = 0, OTHER_MESSAGE = 1, MY_IMAGE = 2, OTHER_IMAGE = 3, MY_CONTACT = 4, OTHER_CONTACT = 5, MY_LOCATION = 6, OTHER_LOCATION = 7, MY_AUDIO = 8, OTHER_AUDIO = 9;
+    int MY_MESSAGE = 0, OTHER_MESSAGE = 1, MY_IMAGE = 2, OTHER_IMAGE = 3, MY_CONTACT = 4, OTHER_CONTACT = 5, MY_LOCATION = 6, OTHER_LOCATION = 7,
+            MY_AUDIO = 8, OTHER_AUDIO = 9, MY_VIDEO = 10, OTHER_VIDEO = 11;
     private Context context;
     private List<ChatPojo> mLists;
     private SparseBooleanArray mSelectedItemsIds;
@@ -120,6 +125,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
+        } else if (i == MY_VIDEO){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_video, viewGroup, false);
+            return new SendVideoHolder(layoutView);
+        } else if (i == OTHER_VIDEO){
+            View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_video, viewGroup, false);
+            return new RecvVideoHolder(layoutView);
         } else {
             //default
             return new ChatHolderTo(LayoutInflater.from(context).inflate(R.layout.my_message, viewGroup, false));
@@ -241,6 +252,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             }
         } else if (holder instanceof SendAudioHolder) {
 
+            ((SendAudioHolder) holder).tv_time_outgoing.setText(formatted_date);
             final String audioPath = chatPojo.getSendAudioPath();
             ((SendAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -262,6 +274,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
 
         } else if (holder instanceof RecvAudioHolder) {
 
+            ((RecvAudioHolder) holder).tv_time_incoming.setText(formatted_date);
             final String audioPath = chatPojo.getSendAudioPath();
             ((RecvAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -278,6 +291,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                     ((RecvAudioHolder) holder).img_pause.setVisibility(View.GONE);
                     ((RecvAudioHolder) holder).img_play.setVisibility(View.VISIBLE);
                     audio.pause();
+                }
+            });
+
+        } else if (holder instanceof SendVideoHolder){
+
+            ((SendVideoHolder) holder).tv_time.setText(formatted_date);
+            ((SendVideoHolder) holder).img_outgoing_video.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(context,VideoActivity.class);
+                    context.startActivity(i);
+                }
+            });
+
+        } else if (holder instanceof RecvVideoHolder){
+
+            ((RecvVideoHolder) holder).tv_time.setText(formatted_date);
+            ((RecvVideoHolder) holder).img_incoming_video.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(context,VideoActivity.class);
+                    context.startActivity(i);
                 }
             });
 
