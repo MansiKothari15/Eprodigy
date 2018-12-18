@@ -34,9 +34,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     //Smack  dependencies
     implementation 'org.igniterealtime.smack:smack-android-extensions:4.2.3'
-    implementation 'org.igniterealtime.smack:smack-tcp:4.2.3'
-    implementation 'org.igniterealtime.smack:smack-experimental:4.2.0'
-    implementation 'org.igniterealtime.smack:smack-im:4.2.3'
+        implementation 'org.igniterealtime.smack:smack-tcp:4.2.3'
+        implementation 'org.igniterealtime.smack:smack-experimental:4.2.0'
+        implementation 'org.igniterealtime.smack:smack-im:4.2.3'
     // room database
     implementation 'android.arch.persistence.room:runtime:1.1.0-alpha3'
     annotationProcessor "android.arch.persistence.room:compiler:1.1.0-alpha3"

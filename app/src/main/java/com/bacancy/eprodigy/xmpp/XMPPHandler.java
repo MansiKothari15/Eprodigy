@@ -32,7 +32,11 @@ import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.filter.StanzaFilter;
+import org.jivesoftware.smack.packet.DefaultExtensionElement;
+import org.jivesoftware.smack.packet.Element;
+import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -59,6 +63,7 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 import org.jxmpp.util.XmppStringUtils;
+import org.xmlpull.v1.builder.XmlElement;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -856,8 +861,8 @@ public class XMPPHandler {
     // This method will try to create connection (if not established already),
     // will open up a TCP connection to another user (usually a roaster in jabber language),
     // will throw exception if there is an error
-    public boolean sendMessage(ChatPojo chatMessage) throws SmackException {
-        String body = gson.toJson(chatMessage);
+    public boolean sendMessage(final ChatPojo chatMessage) throws SmackException {
+        String body = chatMessage.getChatText();
 
 
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
@@ -892,7 +897,30 @@ public class XMPPHandler {
 
 
 
+
         message.setType(Message.Type.chat);
+
+        //mediaType
+        message.addExtension(new ExtensionElement() {
+            @Override
+            public String getNamespace() {
+                return "";
+            }
+
+            @Override
+            public String getElementName() {
+                return "mediaType";
+            }
+
+            @Override
+            public CharSequence toXML() {
+                return "<mediaType>"+chatMessage.getMsgType()+"</mediaType>";
+            }
+        });
+
+
+    //    message.addBody("type","attachment");
+      //  message.addBody("thumb","thumb url");
 
         try {
             if (connection.isAuthenticated() && connection.isConnected()) {
