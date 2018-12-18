@@ -57,6 +57,7 @@
         <activity android:name=".Activity.EditUsernameActivity" />
         <activity android:name=".Activity.ContactListActivity" />
         <activity android:name=".Activity.ChatContactDetailActivity" />
+        <activity android:name=".Activity.VideoActivity" />
 
         <service android:name=".xmpp.XMPPService" />
 

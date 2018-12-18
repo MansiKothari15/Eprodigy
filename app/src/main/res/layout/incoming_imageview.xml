@@ -9,7 +9,6 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_margin="@dimen/padding_small"
-
         android:src="@mipmap/ic_launcher"/>
     <TextView
         android:layout_alignRight="@id/img_incoming"
@@ -21,7 +20,6 @@
         android:layout_marginRight="5dp"
         android:gravity="right"
         android:alpha="0.9"
-
         android:text="05:22 pm"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@color/black"
