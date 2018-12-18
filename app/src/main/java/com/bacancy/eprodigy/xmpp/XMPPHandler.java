@@ -3,9 +3,7 @@ package com.bacancy.eprodigy.xmpp;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
@@ -16,7 +14,6 @@ import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
-import com.bacancy.eprodigy.utils.SCUtils;
 import com.google.gson.Gson;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -32,11 +29,8 @@ import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.filter.StanzaFilter;
-import org.jivesoftware.smack.packet.DefaultExtensionElement;
-import org.jivesoftware.smack.packet.Element;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -50,35 +44,44 @@ import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.ChatStateListener;
 import org.jivesoftware.smackx.chatstates.ChatStateManager;
 import org.jivesoftware.smackx.iqlast.LastActivityManager;
+import org.jivesoftware.smackx.muc.MucEnterConfiguration;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.MultiUserChatException;
+import org.jivesoftware.smackx.muc.MultiUserChatManager;
+import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
 import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
 import org.jivesoftware.smackx.vcardtemp.VCardManager;
 import org.jivesoftware.smackx.vcardtemp.packet.VCard;
-import org.json.JSONObject;
+import org.jivesoftware.smackx.xdata.Form;
+import org.jivesoftware.smackx.xdata.FormField;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.jid.parts.Resourcepart;
+import org.jxmpp.jid.util.JidUtil;
 import org.jxmpp.stringprep.XmppStringprepException;
 import org.jxmpp.util.XmppStringUtils;
-import org.xmlpull.v1.builder.XmlElement;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Extension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 
 public class XMPPHandler {
 
-    private final String TAG = getClass().getSimpleName();
+    private static String TAG = "XMPPHandler";
     public static boolean connected = false;
     private static LastActivityManager lastActivityManager;
     public boolean loggedin = false;
@@ -108,7 +111,10 @@ public class XMPPHandler {
     private MyStanzaListener mStanzaListener;
     private MyRosterListener mRoasterListener;
     private org.jivesoftware.smack.chat2.Chat chat;
-    private String mUser;
+    private static String mUser;
+
+    private static String grp_service;
+    private static String grp_name = Constants.grp_name;
 
 
     /*
@@ -227,6 +233,144 @@ public class XMPPHandler {
         this.userId = mUsername;
         this.userPassword = mPassword;
     }
+
+
+    public static boolean createRoom(String grp_name) {
+        try {
+            // Create the XMPP address (JID) of the MUC.
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
+            // Create the nickname.
+            Resourcepart nickname = Resourcepart.from(mUser);
+            // Get the MultiUserChatManager
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            // Get a MultiUserChat using MultiUserChatManager
+            MultiUserChat muc = manager.getMultiUserChat(mucJid);
+            // Prepare a list of owners of the new room
+            try {
+                Set<Jid> owners = JidUtil.jidSetFrom(new String[]{mUser + "@" + Constants.XMPP_HOST});
+                // Create the room
+                muc.create(nickname)
+                        .getConfigFormManager()
+                        .setRoomOwners(owners);
+                Form form = muc.getConfigurationForm();
+                Form submitForm = form.createAnswerForm();
+                for (FormField formField : submitForm.getFields()) {
+                    if (!FormField.Type.hidden.equals(formField.getType())
+                            && formField.getVariable() != null) {
+                        submitForm.setDefaultAnswer(formField.getVariable());
+                    }
+                }
+                submitForm.setAnswer("muc#roomconfig_publicroom", true);
+                submitForm.setAnswer("muc#roomconfig_persistentroom", true);
+                muc.sendConfigurationForm(submitForm);
+                Log.d(TAG, "submit form");
+                muc.join(nickname);
+                Log.d(TAG, "join");
+
+                return true;
+            } catch (MultiUserChatException.MissingMucCreationAcknowledgeException e) {
+//                showToast("Group Name is already Exist");
+                Log.d(TAG, "Group is already there " + Arrays.toString(e.getStackTrace()));
+                return false;
+            } catch (MultiUserChatException.MucAlreadyJoinedException e) {
+//                showToast("You are already part of this Group");
+                Log.d(TAG, "Group Error5 : " + e.getMessage());
+                return false;
+            } catch (MultiUserChatException.MucConfigurationNotSupportedException e) {
+                Log.d(TAG, "Group Error7 : " + e.getMessage());
+                return false;
+            }
+
+        } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | InterruptedException | XmppStringprepException | MultiUserChatException.NotAMucServiceException e) {
+            Log.d(TAG, "Group Error : " + e.getMessage());
+            return false;
+        } catch (SmackException.NotConnectedException e) {
+            Log.d(TAG, "Group Error2 : " + e.getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Add users to group
+     *
+     * @param inviteuser userID
+     * @param groupName  group Name
+     */
+    public static void inviteToGroup(String inviteuser, String groupName) {
+        try {
+
+            Message message = new Message(JidCreate.entityBareFrom(makeSmackId(inviteuser)));
+            message.setBody(groupName);
+            message.setType(Message.Type.headline);
+            message.setSubject("1");
+//            message.addExtension(new GroupChatInvitation(grp_name + "@" + grp_service));
+            connection.sendStanza(message);
+        } catch (XmppStringprepException | InterruptedException | SmackException.NotConnectedException e) {
+
+        }
+    }
+
+    public static String makeSmackId(String user) {
+        return user + "@" + Constants.XMPP_HOST + Constants.SMACk;
+    }
+
+    /**
+     * join the Groupchat when someone recieve head chat
+     *
+     * @param grpName Name of Group
+     */
+    public void JoinRoom(String grpName) {
+        try {
+
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grpName + "@" + grp_service);
+            Resourcepart nickname = Resourcepart.from(mUser);
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            MultiUserChat muc = manager.getMultiUserChat(mucJid);
+
+            MucEnterConfiguration.Builder mucEnterConfiguration
+                    = muc.getEnterConfigurationBuilder(nickname).requestNoHistory();
+
+
+            muc.join(mucEnterConfiguration.build());
+
+            RoomInfo info = manager.getRoomInfo(mucJid);
+            System.out.println("Number of occupants:" + info.getOccupantsCount());
+            System.out.println("Room Subject:" + info.getSubject());
+
+        } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | InterruptedException | XmppStringprepException | MultiUserChatException.NotAMucServiceException e) {
+            Log.d(TAG, "Group Error : " + e.getMessage());
+        } catch (SmackException.NotConnectedException e) {
+            Log.d(TAG, "Group Error4 : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Send Message in group
+     *
+     * @param msgText  message
+     * @param grp_name group Name
+     * @return message send successfully or not
+     */
+    public boolean sendGrpMessage(String msgText, String grp_name) {
+        try {
+            Message msg = new Message();
+            msg.setType(Message.Type.groupchat);
+            msg.setSubject("chat");
+            msg.setBody(msgText);
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            MultiUserChat muc = manager.getMultiUserChat(mucJid);
+
+            muc.sendMessage(msg);
+            return true;
+        } catch (XmppStringprepException | InterruptedException | SmackException.NotConnectedException e) {
+            Log.d(TAG, "sendGrpMessage() Error = [" + e.getMessage() + "]");
+            return false;
+        }
+
+    }
+
 
     //This method sets every chat instances to false (in situations where connection closes, or error happens)
     public static void chatInstanceIterator(Map<String, Boolean> mp) {

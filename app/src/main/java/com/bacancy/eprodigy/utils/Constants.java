@@ -17,6 +17,9 @@ public class Constants {
     public static final int OUR_USERS_STATUS = 1;
     public static final String CONTACT_SPLIT_KEY = ",";
 
+    public static String grp_name = "latestgrp4";
+    public static final String SMACk = "/Smack";
+
     public static final int TYPE_MESSAGE = 111;
     public static final int TYPE_CONTACT = 112;
     public static final int TYPE_IMAGE =113;
@@ -94,4 +97,6 @@ public class Constants {
     public static final String SIGNUP_ERR_CONFLICT = "User already exist";
     public static final String SIGNUP_ERR_SERVER_ERR = "Internal server error";
     public static final String SIGNUP_ERR_NOT_SUPPORTED = "Account creation is not supported by server";
+
+
 }
