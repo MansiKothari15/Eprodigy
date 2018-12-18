@@ -68,6 +68,7 @@ import org.xmlpull.v1.builder.XmlElement;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.cert.Extension;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -896,15 +897,14 @@ public class XMPPHandler {
         message.setBody(body);
 
 
-
-
         message.setType(Message.Type.chat);
 
         //mediaType
+
         message.addExtension(new ExtensionElement() {
             @Override
             public String getNamespace() {
-                return "";
+                return "urn:xmpp:mediatype";
             }
 
             @Override
@@ -1151,29 +1151,33 @@ public class XMPPHandler {
                 System.out.println("getType" + message.getType());
                 System.out.println("getBody" + message.getBody());
 
+                ExtensionElement mediaTypeExt=message.getExtension("urn:xmpp:mediatype");
+
                 if (message.getType() == Message.Type.chat && message.getBody() != null) {
+
+
+
 
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                     LogM.e("from: " + message.getFrom());
                     LogM.e("xml: " + message.getType().toString());
                     LogM.e("Got text [" + message.getBody() + "] from [" + message.getFrom() + "]");
                     LogM.e("newIncomingMessage: " + from);
+                    LogM.e("newIncomingMessage: " + from);
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                     String username = from.toString().replace("@", "").replace(AppConfing.SERVICE, "");
+                    updateDB(username, message.getBody(), username);
+
 
                     //Now our message is in our representation, we can send it to our list to add newly received message
-
-                    Gson gson = new Gson();
-                    ChatPojo chatMessage = gson.fromJson(message.getBody(), ChatPojo.class);
-
-                    updateDB(username, chatMessage, username);
 
                 } else if (message.getType() == Message.Type.error) {
                     Toast.makeText(service, "error type", Toast.LENGTH_SHORT).show();
 
                 } else if (message.getType() == Message.Type.groupchat) {
                     Toast.makeText(service, "groupchat type", Toast.LENGTH_SHORT).show();
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1184,31 +1188,22 @@ public class XMPPHandler {
 
     }
 
-    private void updateDB(String username, ChatPojo chatPojo, String s) {
+    private void updateDB(String username, String msg, String s) {
 
-        /*ChatPojo chatPojo = new ChatPojo();
+        ChatPojo chatPojo = new ChatPojo();
 //        chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);//to
         chatPojo.setChatId(s);//to
         chatPojo.setChatSender(username);//from
         chatPojo.setChatRecv(mUser);
         chatPojo.setChatText(msg);
         chatPojo.setShowing(false);
-        chatPojo.setChatTimestamp(SCUtils.getNow());*/
-
-
+        chatPojo.setChatTimestamp(SCUtils.getNow());
 //        DataManager.getInstance().AddChat(chatPojo);
 //
 //        DataManager.getInstance().updateTimestamp(username, SCUtils.getNow());
 
-
-        Log.e(TAG, "updateDB>" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
-
-        chatPojo.setChatId(s);//to
-        chatPojo.setChatRecv(mUser);//to
-        chatPojo.setChatSender(username);//from
-        chatPojo.setMine(false);
-
         addMessage(chatPojo);
+
 
     }
 

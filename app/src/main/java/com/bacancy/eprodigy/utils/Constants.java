@@ -24,6 +24,13 @@ public class Constants {
     public static final int TYPE_AUDIO =115;
     public static final int TYPE_VIDEO =116;
 
+/*    public static final String TYPE_MESSAGE = "chat";
+    public static final String TYPE_CONTACT = "contact";
+    public static final String TYPE_IMAGE ="attachement";
+    public static final String TYPE_LOCATION ="location";
+    public static final String TYPE_AUDIO ="audio";
+    public static final String TYPE_VIDEO ="video";*/
+
 
 
     //XMPP Connection specific constants
