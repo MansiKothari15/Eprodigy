@@ -14,6 +14,7 @@ import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.utils.SCUtils;
 import com.google.gson.Gson;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -237,8 +238,9 @@ public class XMPPHandler {
 
     public static boolean createRoom(String grp_name) {
         try {
+            mUser="eprodigy8xs3hgu1iw1543554629";
             // Create the XMPP address (JID) of the MUC.
-            EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + Constants.GRP_SERVICE);
             // Create the nickname.
             Resourcepart nickname = Resourcepart.from(mUser);
             // Get the MultiUserChatManager
@@ -249,9 +251,9 @@ public class XMPPHandler {
             try {
                 Set<Jid> owners = JidUtil.jidSetFrom(new String[]{mUser + "@" + Constants.XMPP_HOST});
                 // Create the room
-                muc.create(nickname)
-                        .getConfigFormManager()
-                        .setRoomOwners(owners);
+                muc.create(nickname);
+                      //  .getConfigFormManager()
+                     //   .setRoomOwners(owners);
                 Form form = muc.getConfigurationForm();
                 Form submitForm = form.createAnswerForm();
                 for (FormField formField : submitForm.getFields()) {
@@ -276,10 +278,10 @@ public class XMPPHandler {
 //                showToast("You are already part of this Group");
                 Log.d(TAG, "Group Error5 : " + e.getMessage());
                 return false;
-            } catch (MultiUserChatException.MucConfigurationNotSupportedException e) {
+            } /*catch (MultiUserChatException.MucConfigurationNotSupportedException e) {
                 Log.d(TAG, "Group Error7 : " + e.getMessage());
                 return false;
-            }
+            }*/
 
         } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | InterruptedException | XmppStringprepException | MultiUserChatException.NotAMucServiceException e) {
             Log.d(TAG, "Group Error : " + e.getMessage());
@@ -323,7 +325,7 @@ public class XMPPHandler {
     public void JoinRoom(String grpName) {
         try {
 
-            EntityBareJid mucJid = JidCreate.entityBareFrom(grpName + "@" + grp_service);
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grpName + "@" + Constants.GRP_SERVICE);
             Resourcepart nickname = Resourcepart.from(mUser);
             MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
             MultiUserChat muc = manager.getMultiUserChat(mucJid);

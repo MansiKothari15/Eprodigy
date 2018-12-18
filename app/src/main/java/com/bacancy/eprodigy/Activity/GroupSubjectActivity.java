@@ -31,6 +31,7 @@ import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.xmpp.XMPPHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -101,20 +102,20 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
     public void uploadGroupDetail(File file){
 
-//        String grpName = edt_groupName.getText().toString();
-//        if (XMPPHandler.createRoom(grpName)) {
-//            mCheckset.add(mUser);
-//            for (String names : mCheckset) {
-//                XMPPHandler.inviteToGroup(names, grpName);
-//            }
-//            Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+        String grpName = edt_groupName.getText().toString();
+        if (XMPPHandler.createRoom(grpName)) {
+           // mCheckset.add(mUser);
+           // for (String names : mCheckset) {
+                XMPPHandler.inviteToGroup("eprodigyiqsv6pvxc61543822451", grpName);
+            //}
+            Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
 //            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
 //            );
 //            finish();
-//        }
+        }
 
         showLoadingDialog(this);
 
@@ -163,7 +164,22 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 break;
             case R.id.tv_create:
                 if(edt_groupName.getText().length() != 0) {
-                    uploadGroupDetail(f);
+
+                    String grpName = edt_groupName.getText().toString();
+                    if (XMPPHandler.createRoom(grpName)) {
+                        // mCheckset.add(mUser);
+                        // for (String names : mCheckset) {
+                        XMPPHandler.inviteToGroup("eprodigyiqsv6pvxc61543822451", grpName);
+                        //}
+                        Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+//            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
+//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
+//            );
+//            finish();
+                    }
+                    //uploadGroupDetail(f);
                 } else {
                     Toast.makeText(this, "Group subject is required!", Toast.LENGTH_SHORT).show();
                 }

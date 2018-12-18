@@ -39,6 +39,7 @@ public class Constants {
     //XMPP Connection specific constants
     public static final String XMPP_DOMAIN = "localhost";
     public static final String XMPP_HOST = "158.69.205.234";
+    public static final String GRP_SERVICE = "conference.158.69.205.234";
     //    public static final String XMPP_HOST = "192.168.1.82";
     public static final int XMPP_PORT = 5222;
     public static final String XMPP_RESOURCE = "xmppdemo";
