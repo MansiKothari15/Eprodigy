@@ -1,26 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/img_outgoing_video"
+    <RelativeLayout
+        android:id="@+id/rl_video"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_margin="@dimen/padding_small"
         android:layout_alignParentRight="true"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_margin="@dimen/padding_small">
+
+        <ImageView
+            android:id="@+id/img_outgoing_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_launcher" />
+
+        <ImageView
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_play_circle_outline" />
+    </RelativeLayout>
+
     <TextView
-        android:layout_alignLeft="@id/img_outgoing_video"
-        android:layout_below="@id/img_outgoing_video"
         android:id="@+id/tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/rl_video"
+        android:layout_below="@id/rl_video"
         android:layout_gravity="right"
         android:layout_marginRight="5dp"
-        android:gravity="right"
         android:alpha="0.9"
+        android:gravity="right"
         android:text="05:22 pm"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@color/black"
