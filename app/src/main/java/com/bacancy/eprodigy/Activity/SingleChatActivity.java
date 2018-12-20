@@ -66,11 +66,6 @@ import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
 
-
-
-
-
-
 import org.jivesoftware.smack.SmackException;
 
 import java.io.File;
@@ -108,11 +103,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     //Get our custom event receiver so that we can bind our event listener to it
     XMPPEventReceiver xmppEventReceiver;
     private XMPPHandler xmppHandler;
-    private static final int REQUEST_CAMERA_PICTURE = 1, REQUEST_PICK_GALLERY = 2, REQUEST_SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4;
+    private static final int REQUEST_CAMERA_PICTURE = 1, REQUEST_PICK_GALLERY = 2, REQUEST_SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4, REQUEST_PICK_VIDEO = 5;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
     private String selectedImagePath = "";
-    private ArrayList<ChatMediaModel> mediaPath = new ArrayList<>();
+    List<LocalMedia> listLocalMedia = new ArrayList<>();
 
     private String sharedContactSenderNumber = "";
     private String sharedContactSenderName = "";
@@ -278,7 +273,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     public void sendAudio() {
-        sendMsg(Constants.TYPE_AUDIO);
+//        sendMsg(Constants.TYPE_AUDIO);
+        listLocalMedia=new ArrayList<>();
+        LocalMedia localMedia=new LocalMedia();
+        localMedia.setPath(AudioSavePathInDevice);
+        localMedia.setPictureType("audio/*");//audio/mpeg
+        listLocalMedia.add(localMedia);
+        mediaUpload(Constants.TYPE_AUDIO);
     }
 
     public void MediaRecorderReady() {
@@ -345,22 +346,33 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
-        int mCount = mediaPath != null ? mediaPath.size() : 0;
+        int mCount = listLocalMedia != null ? listLocalMedia.size() : 0;
 
         RequestBody userName = RequestBody.create(MediaType.parse(""), username);
         RequestBody loginToken = RequestBody.create(MediaType.parse(""), login_token);
         RequestBody mediaCount = RequestBody.create(MediaType.parse(""), String.valueOf(mCount));
 
 
-        MultipartBody.Part[] chatImagesParts = new MultipartBody.Part[mediaPath.size()];
+        MultipartBody.Part[] chatImagesParts = new MultipartBody.Part[listLocalMedia.size()];
         //MIME TYPE-http://blog.icodejava.com/tag/mime-type-multipartform-data/
-        for (int index = 0; index < mediaPath.size(); index++) {
-            Log.d(TAG, "requestUpload:" + index + "  " + mediaPath.get(index).getImgPath());
-            File file = new File(mediaPath.get(index).getImgPath());
-            String fileMimeType = SCUtils.getMimeTypeFomFile(file);
-            Log.e("ad", "mime type=" + fileMimeType);
+        for (int index = 0; index < listLocalMedia.size(); index++) {
 
-            RequestBody mBody = RequestBody.create(MediaType.parse(fileMimeType), file);
+            //validate path
+            String filePath = !TextUtils.isEmpty(listLocalMedia.get(index).getCompressPath())
+                    ? listLocalMedia.get(index).getCompressPath()
+                    : listLocalMedia.get(index).getPath();
+            if (TextUtils.isEmpty(filePath)) {
+                Log.d(TAG, "path is empty");
+                return;
+            }
+            //
+            Log.d(TAG, "requestUpload:" + index + "  " + filePath);
+
+            File file = new File(filePath);
+          //  String fileMimeType = SCUtils.getMimeTypeFomFile(file);
+            Log.e("ad", "mime type=" + listLocalMedia.get(index).getPictureType());
+
+            RequestBody mBody = RequestBody.create(MediaType.parse(listLocalMedia.get(index).getPictureType()), file);
 
             chatImagesParts[index] = MultipartBody.Part.createFormData("media" + (index + 1), file.getName(), mBody);
 
@@ -373,6 +385,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 dismissLoadingDialog();
 
                 Log.d("MediaUploadResponse", response.toString());
+
                 if (response.isSuccessful()) {
                     if (validateUser(mActivity,
                             response.body().getStatus(),
@@ -384,13 +397,22 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                         if (mediaUrlList != null && mediaUrlList.size() > 0) {
 
                             for (int i = 0; i < mediaUrlList.size(); i++) {
-                                selectedImagePath = mediaPath.get(i).getImgPath();
+                                String filePath = !TextUtils.isEmpty(listLocalMedia.get(i).getCompressPath())
+                                        ? listLocalMedia.get(i).getCompressPath()
+                                        : listLocalMedia.get(i).getPath();
+                                if (TextUtils.isEmpty(filePath) && TextUtils.isEmpty(listLocalMedia.get(i).getCutPath())) {
+                                    Log.d(TAG, "path is empty");
+                                    return;
+                                }
+
+                                selectedImagePath = filePath;
+
                                 final String url = mediaUrlList.get(i);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-
-                                        sendMediaMsg(msgType, url);
+                                        if (!TextUtils.isEmpty(url))
+                                            sendMediaMsg(msgType, url);
                                     }
                                 });
                             }
@@ -555,7 +577,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             case Constants.TYPE_IMAGE:
 
-                if (mediaPath != null && mediaPath.size() == 0 && TextUtils.isEmpty(selectedImagePath)) {
+                if (listLocalMedia != null && listLocalMedia.size() == 0 && TextUtils.isEmpty(selectedImagePath)) {
                     Toast.makeText(this, "Please select image", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -646,7 +668,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         if (msgType == Constants.TYPE_IMAGE) {
             chatPojo.setChatImage(selectedImagePath);
         }
-        if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
+        if (msgType == Constants.TYPE_AUDIO) {
+            chatPojo.setSendAudioPath(AudioSavePathInDevice);
+        }
+
+
+
+         if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
             if (TextUtils.isEmpty(url)) {
                 Toast.makeText(this, "Media url empty", Toast.LENGTH_SHORT).show();
             } else {
@@ -706,95 +734,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
 
-    /**
-     * @param typeCapture   PICK_CAMERA_IMAGE = 10;
-     *                      PICK_SINGLE_GALLERY_IMAGE = 20;
-     *                      PICK_MULTIPLE_GALLERY_IMAGE = 30;
-     * @param maxImageCount -for multiple image
-     * @param resultCode-   result code
-     */
-
-    public void takePhoto(final int typeCapture, final int maxImageCount, final int resultCode) {
-
-        initPermission(mActivity, new PermissionListener() {
-            @Override
-            public void onPermissionGranted() {
-
-
-                if (typeCapture == Constants.PICK_CAMERA_IMAGE) {
-                    imageSelectUtils.selectImageCamera(new ImageSelectUtils.SelectedImage() {
-                        @Override
-                        public void imagePath(String path) {
-                            Log.e(TAG, "takePhoto=>" + path);
-
-
-                            //API CALL
-
-                            selectedImagePath = path;
-
-                            sendMsg(Constants.TYPE_IMAGE);
-
-                            if (resultCode == REQUEST_CAMERA_PICTURE) {
-
-                            } else if (resultCode == REQUEST_PICK_GALLERY) {
-
-                            }
-                        }
-
-                        @Override
-                        public void imageSelectionFailure() {
-                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
-                        }
-                    });
-                } else if (typeCapture == Constants.PICK_MULTIPLE_GALLERY_IMAGE) {
-
-                    imageSelectUtils.selectMultiImageGallery(maxImageCount, new ImageSelectUtils.SelectedMultipleImage() {
-                        @Override
-                        public void imagePath(ArrayList<ChatMediaModel> pathList) {
-                            Log.e(TAG, "takePhoto path list size=" + pathList.size());
-                            mediaPath = pathList;
-
-                            //Api Call
-                            mediaUpload(Constants.TYPE_IMAGE);
-
-                            //testing-log
-                            /*for (int i = 0; i < pathList.size(); i++) {
-                                Log.e(TAG, "takePhoto=>" + i + "=" + pathList.get(i).getImgPath());
-                            }*/
-                        }
-
-                        @Override
-                        public void imageSelectionFailure() {
-                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
-                        }
-                    });
-                } else if (typeCapture == Constants.PICK_SINGLE_GALLERY_IMAGE) {
-                    imageSelectUtils.selectSingleImageGallery(new ImageSelectUtils.SelectedImage() {
-                        @Override
-                        public void imagePath(String path) {
-                            Log.e(TAG, "takePhoto=>" + path);
-
-                            selectedImagePath = path;
-                            // sendMsg(Constants.TYPE_IMAGE);
-                        }
-
-                        @Override
-                        public void imageSelectionFailure() {
-                            Log.e(TAG, mActivity.getResources().getString(R.string.fail_capture_image));
-                        }
-                    });
-                }
-
-            }
-
-            @Override
-            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                Toast.makeText(mActivity, mActivity.getResources().getString(R.string.must_allow_permission), Toast.LENGTH_SHORT).show();
-            }
-        }, true, Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-    }
-
     public void choosePhotoFromGallary() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -810,24 +749,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
 
-            /*case ImagePicker.IMAGE_PICKER_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
 
-                    List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
-                    Log.e("ad", "mPaths Gallery=" + mPaths.size());
-                }
-                break;
-            case VideoPicker.VIDEO_PICKER_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
+            case REQUEST_PICK_GALLERY:
 
-                    List<String> mPaths = data.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH);
-                    Log.e("ad", "mPaths Video=" + mPaths.size());
-                }
-                break;
-*/
-            case PictureConfig.CHOOSE_REQUEST:
-                // Image, video, audio selection result callback
-                List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
+                listLocalMedia = new ArrayList<>();
+                listLocalMedia = PictureSelector.obtainMultipleResult(data);
 
                 // For example, LocalMedia returns three paths
                 //EXTENSION OPTIONS
@@ -835,8 +761,25 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 // 2.media.getCutPath();To crop the path, you need to determine whether media.isCut(); is true. Note: except audio and video.
                 // 3.media.getCompressPath();o compress the path, you need to determine whether media.isCompressed(); is true. Note: except for audio and video
                 // If it is cropped and compressed, take the compression path as the first, then cut and compress
-                Log.e("ad", "mPaths =" + selectList.size());
+
+                Log.e("ad", "REQUEST_PICK_GALLERY =" + listLocalMedia.size());
+                mediaUpload(Constants.TYPE_IMAGE);
+
                 break;
+            case REQUEST_PICK_VIDEO:
+                listLocalMedia = new ArrayList<>();
+                listLocalMedia = PictureSelector.obtainMultipleResult(data);
+                Log.e("ad", "REQUEST_PICK_VIDEO =" + listLocalMedia.size());
+                mediaUpload(Constants.TYPE_VIDEO);
+                break;
+            case REQUEST_CAMERA_PICTURE:
+                listLocalMedia = new ArrayList<>();
+                listLocalMedia = PictureSelector.obtainMultipleResult(data);
+                Log.e("ad", "REQUEST_CAMERA_PICTURE =" + listLocalMedia.size());
+                mediaUpload(Constants.TYPE_IMAGE);
+
+                break;
+
             case REQUEST_PLACE_PICKER:
                 if (resultCode == RESULT_OK) {
                     Place place = PlacePicker.getPlace(data, mActivity);
@@ -867,26 +810,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
 
                 break;
-            /*case TAKE_PICTURE:
-                if (resultCode == Activity.RESULT_OK) {
-                    Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                    saveImage(thumbnail);
-                }
-                break;
-            case GALLERY:
-                if (data != null) {
-                    Uri contentURI = data.getData();
-                    try {
-                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                        String path = saveImage(bitmap);
-//                        img_profile.setImageBitmap(bitmap);
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(SingleChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;*/
             case REQUEST_SHARE_CONTACT:
                 if (data != null) {
 
@@ -969,18 +893,24 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 }
                 break;
             case R.id.img_camera:
-               /* if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-                } else {
-                    takePhoto();
+                PictureSelector.create(SingleChatActivity.this)
+                        .openCamera(PictureMimeType.ofAll())
+                        .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")
+                        .freeStyleCropEnabled(true)
+                        // .circleDimmedLayer(true)
+                        .showCropFrame(true)
+                        .showCropGrid(true)
+                        .rotateEnabled(true)
+                        .enableCrop(true)
+                        .compress(true)
+                        .minimumCompressSize(100)
+                        .forResult(REQUEST_CAMERA_PICTURE);
 
-                }*/
-                takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
 
                 break;
         }
     }
-    List<LocalMedia> listLocalMedia =new ArrayList<>();
+
     private void openPopup() {
 
 
@@ -995,59 +925,26 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_camera:
-                        takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
+//                        takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
+                        PictureSelector.create(SingleChatActivity.this)
+                                .openCamera(PictureMimeType.ofAll())
+                                .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")
+                                .freeStyleCropEnabled(true)
+                                // .circleDimmedLayer(true)
+                                .showCropFrame(true)
+                                .showCropGrid(true)
+                                .rotateEnabled(true)
+                                .enableCrop(true)
+                                .compress(true)
+                                .minimumCompressSize(100)
+                                .forResult(REQUEST_CAMERA_PICTURE);
                         return true;
                     case R.id.menu_gallery:
 
 
                         //takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
                         PictureSelector.create(SingleChatActivity.this)
-                                .openGallery(PictureMimeType.ofImage())
-                                 //.theme(R.style.MyPictureStyle)
-                                .maxSelectNum(10)
-                                .minSelectNum(1)
-                                .imageSpanCount(3)
-                                .selectionMode(PictureConfig.MULTIPLE)
-                                .previewImage(true)
-                                .previewVideo(true)
-                                .enablePreviewAudio(false)
-                                .isCamera(true)
-                               // .imageFormat(PictureMimeType.PNG)// Take a photo save image format suffix, default jpeg
-                                .isZoomAnim(true)
-                                .sizeMultiplier(0.5f)
-                                 .setOutputCameraPath("/"+getResources().getString(R.string.app_name)+"/media")// Custom photo save path, no need to fill
-                                .enableCrop(true)
-                                .compress(true)
-                                //.glideOverride()// Int glide loading width and height, the smaller the picture list, the smoother it will affect the clarity of the list image browsing
-                                //.withAspectRatio()// Int crop ratio such as 16:9 3:2 3:4 1:1 customizable
-                                .hideBottomControls(false)
-                                .isGif(true)
-                              //  .compressSavePath(getPath())
-                                .freeStyleCropEnabled(true)
-                               // .circleDimmedLayer(true)
-                                .showCropFrame(true)
-                                .showCropGrid(true)
-                                .openClickSound(false)
-                                .selectionMedia(listLocalMedia)
-                                .previewEggs(true)
-                              //  .cropCompressQuality()
-                                .minimumCompressSize(100)
-                                .synOrAsy(true)
-                               // .cropWH()
-                                .rotateEnabled(true)
-                             //   .scaleEnabled()
-                               // .videoQuality()
-                              //  .videoMaxSecond(15)
-                               // .videoMinSecond(10)
-                                //.recordVideoSecond()
-                                .isDragFrame(false)
-                                .forResult(PictureConfig.CHOOSE_REQUEST);
-
-                        return true;
-                    case R.id.menu_video:
-                        //takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
-                        PictureSelector.create(SingleChatActivity.this)
-                                .openGallery(PictureMimeType.ofVideo())
+                                .openGallery(PictureMimeType.ofAll())
                                 //.theme(R.style.MyPictureStyle)
                                 .maxSelectNum(10)
                                 .minSelectNum(1)
@@ -1060,7 +957,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                                 // .imageFormat(PictureMimeType.PNG)// Take a photo save image format suffix, default jpeg
                                 .isZoomAnim(true)
                                 .sizeMultiplier(0.5f)
-                                .setOutputCameraPath("/"+getResources().getString(R.string.app_name)+"/media")// Custom photo save path, no need to fill
+                                .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")// Custom photo save path, no need to fill
                                 .enableCrop(true)
                                 .compress(true)
                                 //.glideOverride()// Int glide loading width and height, the smaller the picture list, the smoother it will affect the clarity of the list image browsing
@@ -1086,7 +983,52 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                                 // .videoMinSecond(10)
                                 //.recordVideoSecond()
                                 .isDragFrame(false)
-                                .forResult(PictureConfig.CHOOSE_REQUEST);
+                                .forResult(REQUEST_PICK_GALLERY);
+
+                        return true;
+                    case R.id.menu_video:
+                        //takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
+                        PictureSelector.create(SingleChatActivity.this)
+                                .openGallery(PictureMimeType.ofVideo())
+                                //.theme(R.style.MyPictureStyle)
+                                .maxSelectNum(10)
+                                .minSelectNum(1)
+                                .imageSpanCount(3)
+                                .selectionMode(PictureConfig.MULTIPLE)
+                                .previewImage(true)
+                                .previewVideo(true)
+                                .enablePreviewAudio(false)
+                                .isCamera(true)
+                                // .imageFormat(PictureMimeType.PNG)// Take a photo save image format suffix, default jpeg
+                                .isZoomAnim(true)
+                                .sizeMultiplier(0.5f)
+                                .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")// Custom photo save path, no need to fill
+                                .enableCrop(true)
+                                .compress(true)
+                                //.glideOverride()// Int glide loading width and height, the smaller the picture list, the smoother it will affect the clarity of the list image browsing
+                                //.withAspectRatio()// Int crop ratio such as 16:9 3:2 3:4 1:1 customizable
+                                .hideBottomControls(false)
+                                .isGif(true)
+                                //  .compressSavePath(getPath())
+                                .freeStyleCropEnabled(true)
+                                // .circleDimmedLayer(true)
+                                .showCropFrame(true)
+                                .showCropGrid(true)
+                                .openClickSound(false)
+                                .selectionMedia(listLocalMedia)
+                                .previewEggs(true)
+                                //  .cropCompressQuality()
+                                .minimumCompressSize(100)
+                                .synOrAsy(true)
+                                // .cropWH()
+                                .rotateEnabled(true)
+                                //   .scaleEnabled()
+                                // .videoQuality()
+                                //  .videoMaxSecond(15)
+                                // .videoMinSecond(10)
+                                //.recordVideoSecond()
+                                .isDragFrame(false)
+                                .forResult(REQUEST_PICK_VIDEO);
                         return true;
                   /*  case R.id.menu_document:
                         return true;*/

@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.Activity.ChatContactDetailActivity;
+import com.bacancy.eprodigy.Activity.MainActivity;
 import com.bacancy.eprodigy.Activity.VideoActivity;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderFrom;
 import com.bacancy.eprodigy.Adapters.viewholder.ChatHolderTo;
@@ -33,6 +35,8 @@ import com.bacancy.eprodigy.callback.ActorDiffCallback;
 import com.bacancy.eprodigy.custom.StickyHeaderAdapter;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.SCUtils;
+import com.bumptech.glide.Glide;
+import com.luck.picture.lib.PictureSelector;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -113,7 +117,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (i == MY_AUDIO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_audio, viewGroup, false);
             return new SendAudioHolder(layoutView);
-        } else if(i == OTHER_AUDIO){
+        } else if (i == OTHER_AUDIO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_audio, viewGroup, false);
             return new RecvAudioHolder(layoutView);
         } else if (i == MY_LOCATION) {
@@ -125,10 +129,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (i == HEADER_MESSAGE) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.row_date_header, viewGroup, false);
             return new HeaderHolder(layoutView);
-        } else if (i == MY_VIDEO){
+        } else if (i == MY_VIDEO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.outgoing_video, viewGroup, false);
             return new SendVideoHolder(layoutView);
-        } else if (i == OTHER_VIDEO){
+        } else if (i == OTHER_VIDEO) {
             View layoutView = LayoutInflater.from(context).inflate(R.layout.incoming_video, viewGroup, false);
             return new RecvVideoHolder(layoutView);
         } else {
@@ -259,7 +263,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 public void onClick(View view) {
                     ((SendAudioHolder) holder).img_pause.setVisibility(View.VISIBLE);
                     ((SendAudioHolder) holder).img_play.setVisibility(View.GONE);
-                    audioPlayer(audioPath,holder);
+
+
+                    Log.e("ad", "SendAudioHolder audioPath=" + audioPath);
+                    audioPlayer(audioPath, holder);
                 }
             });
 
@@ -275,43 +282,61 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
         } else if (holder instanceof RecvAudioHolder) {
 
             ((RecvAudioHolder) holder).tv_time_incoming.setText(formatted_date);
-            final String audioPath = chatPojo.getSendAudioPath();
+            final String audioUrl = chatPojo.getChatText();
+
             ((RecvAudioHolder) holder).img_play.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     ((RecvAudioHolder) holder).img_pause.setVisibility(View.VISIBLE);
                     ((RecvAudioHolder) holder).img_play.setVisibility(View.GONE);
-                    audioPlayer(audioPath,holder);
+
+                    //audioPlayer(audioPath, holder);
                 }
             });
 
             ((RecvAudioHolder) holder).img_pause.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
                     ((RecvAudioHolder) holder).img_pause.setVisibility(View.GONE);
                     ((RecvAudioHolder) holder).img_play.setVisibility(View.VISIBLE);
                     audio.pause();
                 }
             });
 
-        } else if (holder instanceof SendVideoHolder){
+        } else if (holder instanceof SendVideoHolder) {
 
             ((SendVideoHolder) holder).tv_time.setText(formatted_date);
+
+            Glide.with(context)
+                    .load(chatPojo.getChatText())
+                    .into(((SendVideoHolder) holder).img_outgoing_video);
+
             ((SendVideoHolder) holder).img_outgoing_video.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //PictureSelector.create(MainActivity.this).externalPictureVideo(video_path);
+
                     Intent i = new Intent(context,VideoActivity.class);
+                    i.putExtra("videoPath",chatPojo.getChatText());
                     context.startActivity(i);
                 }
             });
 
-        } else if (holder instanceof RecvVideoHolder){
+
+        } else if (holder instanceof RecvVideoHolder) {
 
             ((RecvVideoHolder) holder).tv_time.setText(formatted_date);
+
+            Glide.with(context)
+                    .load(chatPojo.getChatText())
+                    .into(((RecvVideoHolder) holder).img_incoming_video);
+
             ((RecvVideoHolder) holder).img_incoming_video.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent i = new Intent(context,VideoActivity.class);
+                    i.putExtra("videoPath",chatPojo.getChatText());
                     context.startActivity(i);
                 }
             });
@@ -345,7 +370,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                 googleMapView.setMapHeight(350);
                 googleMapView.setLocation(location);
                 googleMapView.setZoomable(activity);*/
-
 
 
                 if (TextUtils.isEmpty(title)) {
@@ -387,8 +411,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
                             .placeholder(context.getResources().getDrawable(R.mipmap.profile_pic))
                             .error(context.getResources().getDrawable(R.mipmap.profile_pic))
                             .into(((LocationToHolder) holder).img_contact_outgoing);*/
-
-
 
 
                 if (TextUtils.isEmpty(title)) {
@@ -496,6 +518,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> i
             return MY_AUDIO;
         } else if (mType == Constants.TYPE_AUDIO && !isMy) {
             return OTHER_AUDIO;
+        } else if (mType == Constants.TYPE_VIDEO && isMy) {
+            return MY_VIDEO;
+        } else if (mType == Constants.TYPE_VIDEO && !isMy) {
+            return OTHER_VIDEO;
         } else {
             return 100;
         }

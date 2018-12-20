@@ -1,25 +1,37 @@
 package com.bacancy.eprodigy.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.VideoView;
 
 import com.bacancy.eprodigy.R;
 
-public class VideoActivity extends BaseActivity{
+public class VideoActivity extends BaseActivity {
+    String videoUrl = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
 
-        VideoView videoView = (VideoView)findViewById(R.id.VideoView);
+        Bundle intent = getIntent().getExtras();
+        if (intent != null) {
+            videoUrl = intent.getString("videoPath");
+        }
+
+        VideoView videoView = (VideoView) findViewById(R.id.VideoView);
         //MediaController mediaController = new MediaController(this);
         // mediaController.setAnchorView(videoView);
         //videoView.setMediaController(mediaController);
 
-        videoView.setVideoPath("");
+        if (!TextUtils.isEmpty(videoUrl)) {
+            Log.e("ad","videoPath="+videoUrl);
+            videoView.setVideoPath(videoUrl);
 
-        videoView.start();
+            videoView.start();
+        }
     }
 
 }

@@ -165,7 +165,7 @@ public class XMPPHandler {
                 .builder();
         config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
         try {
-            config.setXmppDomain(Constants.XMPP_HOST);
+            config.setXmppDomain(Constants.XMPP_DOMAIN);
             config.setPort(Constants.XMPP_PORT);
             config.setHost(Constants.XMPP_HOST);
         } catch (XmppStringprepException e) {
@@ -222,28 +222,7 @@ public class XMPPHandler {
         roster = Roster.getInstanceFor(connection);
 
 
-        roster.addRosterListener(new RosterListener() {
-            @Override
-            public void entriesAdded(Collection<Jid> addresses) {
-                LogM.e("entriesAdded-------------------");
-            }
-
-            @Override
-            public void entriesUpdated(Collection<Jid> addresses) {
-                LogM.e("entriesUpdated---------------");
-            }
-
-            @Override
-            public void entriesDeleted(Collection<Jid> addresses) {
-                LogM.e("entriesDeleted-------------");
-            }
-
-            @Override
-            public void presenceChanged(Presence presence) {
-                LogM.e("presenceChanged-----------");
-            }
-        });
-
+        roster.addRosterListener(mRoasterListener);
 
         //get Entry
 
@@ -1030,9 +1009,8 @@ public class XMPPHandler {
     // will open up a TCP connection to another user (usually a roaster in jabber language),
     // will throw exception if there is an error
     public boolean sendMessage(final ChatPojo chatMessage) throws SmackException {
-//        final String body = gson.toJson(chatMessage);
-        String body = chatMessage.getChatText();
-
+         final String body = gson.toJson(chatMessage);
+       // String body = chatMessage.getChatText();
 
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
             chat_created_for.put(chatMessage.getChatRecv(), false);
