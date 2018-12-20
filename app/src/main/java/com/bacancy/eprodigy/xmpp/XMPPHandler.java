@@ -32,6 +32,7 @@ import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Message.Type;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -164,7 +165,7 @@ public class XMPPHandler {
                 .builder();
         config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
         try {
-            config.setXmppDomain(Constants.XMPP_DOMAIN);
+            config.setXmppDomain(Constants.XMPP_HOST);
             config.setPort(Constants.XMPP_PORT);
             config.setHost(Constants.XMPP_HOST);
         } catch (XmppStringprepException e) {
@@ -221,7 +222,27 @@ public class XMPPHandler {
         roster = Roster.getInstanceFor(connection);
 
 
-        roster.addRosterListener(mRoasterListener);
+        roster.addRosterListener(new RosterListener() {
+            @Override
+            public void entriesAdded(Collection<Jid> addresses) {
+                LogM.e("entriesAdded-------------------");
+            }
+
+            @Override
+            public void entriesUpdated(Collection<Jid> addresses) {
+                LogM.e("entriesUpdated---------------");
+            }
+
+            @Override
+            public void entriesDeleted(Collection<Jid> addresses) {
+                LogM.e("entriesDeleted-------------");
+            }
+
+            @Override
+            public void presenceChanged(Presence presence) {
+                LogM.e("presenceChanged-----------");
+            }
+        });
 
 
         //get Entry
@@ -238,7 +259,7 @@ public class XMPPHandler {
 
     public static boolean createRoom(String grp_name) {
         try {
-            mUser="eprodigy8xs3hgu1iw1543554629";
+            mUser = "eprodigy8xs3hgu1iw1543554629";
             // Create the XMPP address (JID) of the MUC.
             EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + Constants.GRP_SERVICE);
             // Create the nickname.
@@ -252,8 +273,8 @@ public class XMPPHandler {
                 Set<Jid> owners = JidUtil.jidSetFrom(new String[]{mUser + "@" + Constants.XMPP_HOST});
                 // Create the room
                 muc.create(nickname);
-                      //  .getConfigFormManager()
-                     //   .setRoomOwners(owners);
+                //  .getConfigFormManager()
+                //   .setRoomOwners(owners);
                 Form form = muc.getConfigurationForm();
                 Form submitForm = form.createAnswerForm();
                 for (FormField formField : submitForm.getFields()) {
@@ -304,7 +325,7 @@ public class XMPPHandler {
 
             Message message = new Message(JidCreate.entityBareFrom(makeSmackId(inviteuser)));
             message.setBody(groupName);
-            message.setType(Message.Type.headline);
+            message.setType(Type.headline);
             message.setSubject("1");
 //            message.addExtension(new GroupChatInvitation(grp_name + "@" + grp_service));
             connection.sendStanza(message);
@@ -357,7 +378,7 @@ public class XMPPHandler {
     public boolean sendGrpMessage(String msgText, String grp_name) {
         try {
             Message msg = new Message();
-            msg.setType(Message.Type.groupchat);
+            msg.setType(Type.groupchat);
             msg.setSubject("chat");
             msg.setBody(msgText);
             EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
@@ -978,7 +999,7 @@ public class XMPPHandler {
 //                    LogM.e("offlineMessageManager else");
 //                }
 //            }
-//            setUserStatus(Presence.Mode.available);
+            setUserStatus(Presence.Mode.available);
 
 
             if (debug) Log.i(TAG, "Yey! We're logged in to the Xmpp server!");
@@ -1009,8 +1030,8 @@ public class XMPPHandler {
     // will open up a TCP connection to another user (usually a roaster in jabber language),
     // will throw exception if there is an error
     public boolean sendMessage(final ChatPojo chatMessage) throws SmackException {
-        String body = gson.toJson(chatMessage);
-       // String body = chatMessage.getChatText();
+//        final String body = gson.toJson(chatMessage);
+        String body = chatMessage.getChatText();
 
 
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
@@ -1040,34 +1061,76 @@ public class XMPPHandler {
         }
 
         final Message message = new Message();
-        Log.e(TAG, "Message");
+//        Log.e(TAG, "Message");
         message.setBody(body);
+        message.setType(Type.chat);
+
+//        //mediaType
+//        message.addExtension(new ExtensionElement() {
+//            @Override
+//            public String getNamespace() {
+//                return "urn:xmpp:mediatype";
+//            }
+//
+//            @Override
+//            public String getElementName() {
+//                return "mediaType";
+//            }
+//
+//            @Override
+//            public CharSequence toXML() {
+//                return "<mediaType>" + "chat" + "</mediaType>";
+//            }
+//
+//
+//        });
 
 
-        message.setType(Message.Type.chat);
-
-        //mediaType
-
-        message.addExtension(new ExtensionElement() {
+        /*Stanza msgStanza = new Stanza() {
             @Override
-            public String getNamespace() {
-                return "urn:xmpp:mediatype";
+            public String toString() {
+                return null;
             }
 
             @Override
-            public String getElementName() {
-                return "mediaType";
+            public String toXML() {
+//
+                String str = "<message to='" + chatMessage.getChatRecv() + "' type='chat' id='" + chatMessage.getChatId() + "'>" +
+                        "<messageId>" + chatMessage.getMsgId() + "</messageId>" +
+                        "<mediaType>chat</mediaType>" +
+                        "<messageAction>New</messageAction>" +
+                        "<body>" + chatMessage.getChatText() + "</body></message>";
+
+
+
+
+                String new1 = "<message to='eprodigy8xs3hgu1iw1543554629@localhost/36459054677700487981780830' id='2zZ6z-47' type='chat'>" +
+                        "<body>=========================</body>" +
+                        "<mediaType>chat</mediaType>" +
+                        "<request" +
+                        "xmlns='urn:xmpp:receipts'/>" +
+                        "<request" +
+                        "xmlns='urn:xmpp:receipts'/>" +
+                        "</message>" +
+                        "<r" +
+                        "xmlns='urn:xmpp:sm:3'/>"
+                       ;
+
+                String tst = "<message to=eprodigyiqsv6pvxc61543822451@localhost/27684856509976271501780664 id=NqP07-41>"+
+   "<mediaType>chat</mediaType>"+
+   "<request xmlns=urn:xmpp:receipts />"+
+   "<request xmlns=urn:xmpp:receipts /></message>";
+                Log.e("TAG", str);
+
+
+
+                return new1;
             }
+        };*/
 
-            @Override
-            public CharSequence toXML() {
-                return "<mediaType>"+"chat"+"</mediaType>";
-            }
-        });
+        //    message.addBody("type","attachment");
+        //  message.addBody("thumb","thumb url");
 
-
-    //    message.addBody("type","attachment");
-      //  message.addBody("thumb","thumb url");
 
         try {
             if (connection.isAuthenticated() && connection.isConnected()) {
@@ -1214,7 +1277,7 @@ public class XMPPHandler {
             chatInstanceIterator(chat_created_for);
             loggedin = true;
 
-//              setUserStatus(Presence.Mode.available);
+            setUserStatus(Presence.Mode.available);
 
 
             org.jivesoftware.smack.chat2.ChatManager.getInstanceFor(connection)
@@ -1298,11 +1361,9 @@ public class XMPPHandler {
                 System.out.println("getType" + message.getType());
                 System.out.println("getBody" + message.getBody());
 
-                ExtensionElement mediaTypeExt=message.getExtension("urn:xmpp:mediatype");
+                ExtensionElement mediaTypeExt = message.getExtension("urn:xmpp:mediatype");
 
-                if (message.getType() == Message.Type.chat && message.getBody() != null) {
-
-
+                if (message.getType() == Type.chat && message.getBody() != null) {
 
 
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -1310,7 +1371,7 @@ public class XMPPHandler {
                     LogM.e("xml: " + message.getType().toString());
                     LogM.e("Got text [" + message.getBody() + "] from [" + message.getFrom() + "]");
                     LogM.e("newIncomingMessage: " + from);
-                    LogM.e("newIncomingMessage: " + from);
+
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                     String username = from.toString().replace("@", "").replace(AppConfing.SERVICE, "");
@@ -1322,10 +1383,10 @@ public class XMPPHandler {
                     updateDB(username, chatMessage, username);
                     //Now our message is in our representation, we can send it to our list to add newly received message
 
-                } else if (message.getType() == Message.Type.error) {
+                } else if (message.getType() == Type.error) {
                     Toast.makeText(service, "error type", Toast.LENGTH_SHORT).show();
 
-                } else if (message.getType() == Message.Type.groupchat) {
+                } else if (message.getType() == Type.groupchat) {
                     Toast.makeText(service, "groupchat type", Toast.LENGTH_SHORT).show();
 
                 }
@@ -1337,6 +1398,7 @@ public class XMPPHandler {
 
 
     }
+
     private void updateDB(String username, ChatPojo chatPojo, String s) {
 
         /*ChatPojo chatPojo = new ChatPojo();
@@ -1351,9 +1413,7 @@ public class XMPPHandler {
 
 //        DataManager.getInstance().AddChat(chatPojo);
 //
-//        DataManager.getInstance().updateTimestamp(username, SCUtils.getNow());
-
-
+//        DataManager.getInstance().updateTimestamp(username, SCUtils.getNo
         Log.e(TAG, "updateDB>" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
 
         chatPojo.setChatId(s);//to
@@ -1479,8 +1539,9 @@ public class XMPPHandler {
         if (connection != null) {
             try {
                 Presence presence = new Presence(Presence.Type.available);
-                presence.setMode(status);
-
+                presence.setStatus("Online");
+                presence.setPriority(24);
+                presence.setMode(Presence.Mode.available);
                 connection.sendStanza(presence);
 
 
@@ -1507,7 +1568,7 @@ public class XMPPHandler {
                 // message successfully send or not check here
                 if (packet instanceof Message) {
                     Message message = (Message) packet;
-                    if (message.getType().equals(Message.Type.error)) {
+                    if (message.getType().equals(Type.error)) {
                         LogM.e("Error sending message");
                     }
                 }
@@ -1525,6 +1586,10 @@ public class XMPPHandler {
                      * user choice. We will show user asking him to "accept" or "reject".
                      */
                     //@see: http://xmpp.org/rfcs/rfc6121.html#sub-request
+                    if (((Presence) packet).getType() == Presence.Type.available) {
+                        Log.e(TAG, "----------------------------------------------");
+                    }
+
                     if (presence.getType() == Presence.Type.subscribe) {
 
                         if (debug) Log.e(TAG, "subscription request from - " + fromJID);

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -59,9 +60,16 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureConfig;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
 
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
+
+
+
+
+
 
 import org.jivesoftware.smack.SmackException;
 
@@ -128,7 +136,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         imageSelectUtils = new ImageSelectUtils(this);
         xmppEventReceiver = mChatApp.getEventReceiver();
 
-        KeyboardVisibilityEvent.setEventListener(
+        init();
+        /*KeyboardVisibilityEvent.setEventListener(
                 SingleChatActivity.this,
                 new KeyboardVisibilityEventListener() {
                     @Override
@@ -146,8 +155,9 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                             }
                         }
                     }
-                });
-        init();
+                });*/
+
+
     }
 
     private void init() {
@@ -168,7 +178,14 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         tv_back.setOnClickListener(this);
 
         rv_singleChat = (RecyclerView) findViewById(R.id.rv_singleChat);
-        rv_singleChat.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+//        mLayoutManager.setReverseLayout(true); //reverse RecyclerView because we need reversible data for category
+        mLayoutManager.setStackFromEnd(true);
+
+        rv_singleChat.setLayoutManager(mLayoutManager);
+        rv_singleChat.setHasFixedSize(true);
+
+
         edtMessage = (EditText) findViewById(R.id.edtMessage);
         img_profile = (ImageView) findViewById(R.id.img_profile);
         img_camera = (ImageView) findViewById(R.id.img_camera);
@@ -367,13 +384,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                         if (mediaUrlList != null && mediaUrlList.size() > 0) {
 
                             for (int i = 0; i < mediaUrlList.size(); i++) {
-                                selectedImagePath=mediaPath.get(i).getImgPath();
-                                final String url=mediaUrlList.get(i);
+                                selectedImagePath = mediaPath.get(i).getImgPath();
+                                final String url = mediaUrlList.get(i);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
 
-                                        sendMediaMsg(msgType,url);
+                                        sendMediaMsg(msgType, url);
                                     }
                                 });
                             }
@@ -626,7 +643,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         chatPojo.setMsgType(msgType);
         chatPojo.setMine(true);
 
-        if (msgType == Constants.TYPE_IMAGE){
+        if (msgType == Constants.TYPE_IMAGE) {
             chatPojo.setChatImage(selectedImagePath);
         }
         if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
@@ -785,12 +802,41 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         startActivityForResult(galleryIntent, REQUEST_PICK_GALLERY);
     }
 
+    List<Uri> mSelected = new ArrayList<>();
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data); // no need for super
         imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
 
+            /*case ImagePicker.IMAGE_PICKER_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+
+                    List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
+                    Log.e("ad", "mPaths Gallery=" + mPaths.size());
+                }
+                break;
+            case VideoPicker.VIDEO_PICKER_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+
+                    List<String> mPaths = data.getStringArrayListExtra(VideoPicker.EXTRA_VIDEO_PATH);
+                    Log.e("ad", "mPaths Video=" + mPaths.size());
+                }
+                break;
+*/
+            case PictureConfig.CHOOSE_REQUEST:
+                // Image, video, audio selection result callback
+                List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
+
+                // For example, LocalMedia returns three paths
+                //EXTENSION OPTIONS
+                // 1.media.getPath(); Path to the original
+                // 2.media.getCutPath();To crop the path, you need to determine whether media.isCut(); is true. Note: except audio and video.
+                // 3.media.getCompressPath();o compress the path, you need to determine whether media.isCompressed(); is true. Note: except for audio and video
+                // If it is cropped and compressed, take the compression path as the first, then cut and compress
+                Log.e("ad", "mPaths =" + selectList.size());
+                break;
             case REQUEST_PLACE_PICKER:
                 if (resultCode == RESULT_OK) {
                     Place place = PlacePicker.getPlace(data, mActivity);
@@ -907,76 +953,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_add:
-                final PopupMenu popup = new PopupMenu(SingleChatActivity.this, img_add);
-                //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+                openPopup();
 
-                //registering popup with OnMenuItemClickListener
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.menu_camera:
-                                takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
-                                return true;
-                            case R.id.menu_gallery:
-                                takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
-                                return true;
-                            case R.id.menu_document:
-                                return true;
-                            case R.id.menu_location:
-
-
-                               /* initPermission(mActivity, new PermissionListener() {
-                                    @Override
-                                    public void onPermissionGranted() {
-                                        try {
-                                            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-                                            Intent intent = intentBuilder.build(mActivity);
-                                            // Start the intent by requesting a result,
-                                            // identified by a request code.
-                                            startActivityForResult(intent, REQUEST_PLACE_PICKER);
-
-                                        } catch (GooglePlayServicesRepairableException e) {
-                                            Log.e(TAG, e.toString(), e);
-                                        } catch (GooglePlayServicesNotAvailableException e) {
-                                            Log.e(TAG, e.toString(), e);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                                        Toast.makeText(mActivity, "PLease provide location permission.", Toast.LENGTH_SHORT).show();
-                                    }
-                                },true,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION);*/
-
-                                try {
-                                    PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-                                    Intent intent = intentBuilder.build(mActivity);
-                                    // Start the intent by requesting a result,
-                                    // identified by a request code.
-                                    startActivityForResult(intent, REQUEST_PLACE_PICKER);
-
-                                } catch (GooglePlayServicesRepairableException e) {
-                                    Log.e(TAG, e.toString(), e);
-                                } catch (GooglePlayServicesNotAvailableException e) {
-                                    Log.e(TAG, e.toString(), e);
-                                }
-
-                                return true;
-                            case R.id.menu_contact:
-                                Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
-                                startActivityForResult(intent, REQUEST_SHARE_CONTACT);
-                                return true;
-                            case R.id.menu_cancel:
-                                popup.dismiss();
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                });
-
-                popup.show();//showing popup menu
                 break;
             case R.id.tv_back:
                 finish();
@@ -1001,6 +979,184 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                 break;
         }
+    }
+    List<LocalMedia> listLocalMedia =new ArrayList<>();
+    private void openPopup() {
+
+
+        final PopupMenu popup = new PopupMenu(SingleChatActivity.this, img_add);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+
+        //registering popup with OnMenuItemClickListener
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_camera:
+                        takePhoto(Constants.PICK_CAMERA_IMAGE, 1, REQUEST_CAMERA_PICTURE);
+                        return true;
+                    case R.id.menu_gallery:
+
+
+                        //takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
+                        PictureSelector.create(SingleChatActivity.this)
+                                .openGallery(PictureMimeType.ofImage())
+                                 //.theme(R.style.MyPictureStyle)
+                                .maxSelectNum(10)
+                                .minSelectNum(1)
+                                .imageSpanCount(3)
+                                .selectionMode(PictureConfig.MULTIPLE)
+                                .previewImage(true)
+                                .previewVideo(true)
+                                .enablePreviewAudio(false)
+                                .isCamera(true)
+                               // .imageFormat(PictureMimeType.PNG)// Take a photo save image format suffix, default jpeg
+                                .isZoomAnim(true)
+                                .sizeMultiplier(0.5f)
+                                 .setOutputCameraPath("/"+getResources().getString(R.string.app_name)+"/media")// Custom photo save path, no need to fill
+                                .enableCrop(true)
+                                .compress(true)
+                                //.glideOverride()// Int glide loading width and height, the smaller the picture list, the smoother it will affect the clarity of the list image browsing
+                                //.withAspectRatio()// Int crop ratio such as 16:9 3:2 3:4 1:1 customizable
+                                .hideBottomControls(false)
+                                .isGif(true)
+                              //  .compressSavePath(getPath())
+                                .freeStyleCropEnabled(true)
+                               // .circleDimmedLayer(true)
+                                .showCropFrame(true)
+                                .showCropGrid(true)
+                                .openClickSound(false)
+                                .selectionMedia(listLocalMedia)
+                                .previewEggs(true)
+                              //  .cropCompressQuality()
+                                .minimumCompressSize(100)
+                                .synOrAsy(true)
+                               // .cropWH()
+                                .rotateEnabled(true)
+                             //   .scaleEnabled()
+                               // .videoQuality()
+                              //  .videoMaxSecond(15)
+                               // .videoMinSecond(10)
+                                //.recordVideoSecond()
+                                .isDragFrame(false)
+                                .forResult(PictureConfig.CHOOSE_REQUEST);
+
+                        return true;
+                    case R.id.menu_video:
+                        //takePhoto(Constants.PICK_MULTIPLE_GALLERY_IMAGE, 10, REQUEST_PICK_GALLERY);
+                        PictureSelector.create(SingleChatActivity.this)
+                                .openGallery(PictureMimeType.ofVideo())
+                                //.theme(R.style.MyPictureStyle)
+                                .maxSelectNum(10)
+                                .minSelectNum(1)
+                                .imageSpanCount(3)
+                                .selectionMode(PictureConfig.MULTIPLE)
+                                .previewImage(true)
+                                .previewVideo(true)
+                                .enablePreviewAudio(false)
+                                .isCamera(true)
+                                // .imageFormat(PictureMimeType.PNG)// Take a photo save image format suffix, default jpeg
+                                .isZoomAnim(true)
+                                .sizeMultiplier(0.5f)
+                                .setOutputCameraPath("/"+getResources().getString(R.string.app_name)+"/media")// Custom photo save path, no need to fill
+                                .enableCrop(true)
+                                .compress(true)
+                                //.glideOverride()// Int glide loading width and height, the smaller the picture list, the smoother it will affect the clarity of the list image browsing
+                                //.withAspectRatio()// Int crop ratio such as 16:9 3:2 3:4 1:1 customizable
+                                .hideBottomControls(false)
+                                .isGif(true)
+                                //  .compressSavePath(getPath())
+                                .freeStyleCropEnabled(true)
+                                // .circleDimmedLayer(true)
+                                .showCropFrame(true)
+                                .showCropGrid(true)
+                                .openClickSound(false)
+                                .selectionMedia(listLocalMedia)
+                                .previewEggs(true)
+                                //  .cropCompressQuality()
+                                .minimumCompressSize(100)
+                                .synOrAsy(true)
+                                // .cropWH()
+                                .rotateEnabled(true)
+                                //   .scaleEnabled()
+                                // .videoQuality()
+                                //  .videoMaxSecond(15)
+                                // .videoMinSecond(10)
+                                //.recordVideoSecond()
+                                .isDragFrame(false)
+                                .forResult(PictureConfig.CHOOSE_REQUEST);
+                        return true;
+                  /*  case R.id.menu_document:
+                        return true;*/
+                    case R.id.menu_location:
+
+
+                       /* initPermission(mActivity, new PermissionListener() {
+                            @Override
+                            public void onPermissionGranted() {
+                                try {
+                                    PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+                                    Intent intent = intentBuilder.build(mActivity);
+                                    // Start the intent by requesting a result,
+                                    // identified by a request code.
+                                    startActivityForResult(intent, REQUEST_PLACE_PICKER);
+
+                                } catch (GooglePlayServicesRepairableException e) {
+                                    Log.e(TAG, e.toString(), e);
+                                } catch (GooglePlayServicesNotAvailableException e) {
+                                    Log.e(TAG, e.toString(), e);
+                                }
+                            }
+
+                            @Override
+                            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                                Toast.makeText(mActivity, "PLease provide location permission.", Toast.LENGTH_SHORT).show();
+                            }
+                        },true,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION);*/
+
+                        try {
+                            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+                            Intent intent = intentBuilder.build(mActivity);
+                            // Start the intent by requesting a result,
+                            // identified by a request code.
+                            startActivityForResult(intent, REQUEST_PLACE_PICKER);
+
+                        } catch (GooglePlayServicesRepairableException e) {
+                            Log.e(TAG, e.toString(), e);
+                        } catch (GooglePlayServicesNotAvailableException e) {
+                            Log.e(TAG, e.toString(), e);
+                        }
+
+                        return true;
+                    case R.id.menu_contact:
+                        Intent intent = new Intent(SingleChatActivity.this, ContactListActivity.class);
+                        startActivityForResult(intent, REQUEST_SHARE_CONTACT);
+                        return true;
+                    case R.id.menu_cancel:
+                        popup.dismiss();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (popup != null) {
+                    popup.dismiss();
+                }
+                popup.show();
+
+            }
+        }, 100);
+
+
     }
 
 

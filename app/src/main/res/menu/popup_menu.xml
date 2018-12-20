@@ -5,13 +5,16 @@
         android:title="Camera" />
     <item
         android:id="@+id/menu_gallery"
-        android:title="Photo n Video library"/>
+        android:title="Photo Library"/>
     <item
+        android:id="@+id/menu_video"
+        android:title="Video Library"/>
+   <!-- <item
         android:id="@+id/menu_document"
-        android:title="Document"/>
+        android:title="Document"/>-->
     <item
         android:id="@+id/menu_location"
-        android:title="Location"/>
+        android:title="Share Location"/>
     <item
         android:id="@+id/menu_contact"
         android:title="Contact"/>

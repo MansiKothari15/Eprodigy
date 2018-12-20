@@ -48,4 +48,59 @@
         <item name="setMapHeight">640</item>
     </style>
 
+
+     <style name="MyPictureStyle" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <!--Title bar background color -->
+        <item name="colorPrimary">@color/bar_grey</item>
+        <!--Status bar background color -->
+        <item name="colorPrimaryDark">@color/bar_grey</item>
+        <!--Whether to change the picture list interface status bar font color is black -->
+       <!-- <item name="picture.statusFontColor">false</item>-->
+        <!--Back button icon -->
+       <!-- <item name="picture.leftBack.icon">@drawable/picture_back</item>-->
+        <!--Title drop-down arrow -->
+      <!--  <item name="picture.arrow_down.icon">@drawable/arrow_down</item>-->
+        <!--Title up arrow-->
+        <!--<item name="picture.arrow_up.icon">@drawable/arrow_up</item>-->
+        <!--Title text color -->
+        <item name="picture.title.textColor">@color/white</item>
+        <!--The text on the right side of the title bar -->
+        <item name="picture.right.textColor">@color/white</item>
+        <!--Image list check style -->
+       <!-- <item name="picture.checked.style">@drawable/checkbox_selector</item>-->
+        <!--Open image list, check the number mode -->
+       <!-- <item name="picture.style.checkNumMode">false</item>-->
+        <!--Select picture style 0/9-->
+        <!--<item name="picture.style.numComplete">false</item>-->
+        <!--Background color at the bottom of the image list -->
+        <item name="picture.bottom.bg">@color/color_fa</item>
+        <!--Image list preview text color -->
+        <item name="picture.preview.textColor">@color/blue</item>
+        <!--The picture list has completed the text color -->
+        <item name="picture.complete.textColor">@color/blue</item>
+        <!--Image selected number of dots background color -->
+        <item name="picture.num.style">@drawable/num_oval</item>
+        <!--Preview interface title text color -->
+        <item name="picture.ac_preview.title.textColor">@color/white</item>
+        <!--Preview interface has completed text color -->
+        <item name="picture.ac_preview.complete.textColor">@color/blue</item>
+        <!--Preview interface title bar background color -->>
+        <item name="picture.ac_preview.title.bg">@color/green_shade_3</item>
+        <!--Preview background color at the bottom of the interface -->
+        <item name="picture.ac_preview.bottom.bg">@color/green_shade_3</item>
+        <!--Preview interface return arrow -->
+        <item name="picture.preview.leftBack.icon">@drawable/picture_back</item>
+        <!--Whether to change the preview interface status bar font color is black -->
+     <!--   <item name="picture.preview.statusFontColor">false</item>-->
+        <!--Crop page title background color -->
+        <item name="picture.crop.toolbar.bg">@color/green_shade_1</item>
+        <!--Crop page status bar color -->
+        <item name="picture.crop.status.color">@color/green_shade_1</item>
+        <!--Crop page title text color -->
+        <item name="picture.crop.title.color">@color/white</item>
+        <!--Album folder list check icon -->
+        <item name="picture.folder_checked_dot">@drawable/orange_oval</item>
+    </style>
+
 </resources>

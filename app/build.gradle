@@ -50,5 +50,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.google.android.gms:play-services-places:16.0.0'
 
+    implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.3'
+
+
+
 
 }
