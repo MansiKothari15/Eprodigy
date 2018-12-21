@@ -33,6 +33,7 @@ import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 
 import java.util.ArrayList;
@@ -99,7 +100,8 @@ public class ChatsFragment extends Fragment {
 
             ((BaseActivity)getActivity()).xmppHandler = MyApplication.getmService().xmpp;
             ((BaseActivity)getActivity()).xmppHandler.setUserPassword(((BaseActivity)getActivity()).username, ((BaseActivity)getActivity()).password);
-            ((BaseActivity)getActivity()).xmppHandler.login();
+            //((BaseActivity)getActivity()).xmppHandler.login();
+            new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
         }
 
         public void onLoginFailed() {

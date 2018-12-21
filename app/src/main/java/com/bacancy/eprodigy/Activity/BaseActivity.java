@@ -1,7 +1,9 @@
 package com.bacancy.eprodigy.Activity;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -42,9 +44,7 @@ import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
 
 
-/**
- * Created by sumeet on 5/10/17.
- */
+
 
 public class BaseActivity extends AppCompatActivity {
     public String TAG = "BaseActivity";
@@ -168,7 +168,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void showLoadingDialog(Activity mActivity) {
+    public void showLoadingDialog(Context mActivity) {
 
         if (mActivity!=null &&customProgressDialog != null) {
 
@@ -289,7 +289,7 @@ public class BaseActivity extends AppCompatActivity {
 
 
         //Start XMPP Service (if not running already)
-        if (!XMPPService.isServiceRunning) {
+        if (!isMyServiceRunning(XMPPService.class)) {
             Log.d("startXmppService--", "running already");
             final Intent intent = new Intent(this, XMPPService.class);
 //            mChatApp.UnbindService();
@@ -304,8 +304,8 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             xmppHandler = MyApplication.getmService().xmpp;
             if (!xmppHandler.isConnected()) {
-                xmppHandler.connect();
-              //  new XMPPHandler.ConnectXMPP(mActivity).execute();
+              //  xmppHandler.connect();
+                new XMPPHandler.ConnectXMPP(mActivity).execute();
             } else {
 
                 username = Pref.getValue(mActivity, "username", "");
@@ -314,10 +314,20 @@ public class BaseActivity extends AppCompatActivity {
 
                 xmppHandler.setUserPassword(username, password);
                 if (!xmppHandler.loggedin)
-                    xmppHandler.login();
+                new XMPPHandler.LoginTask(mActivity,username,password);
+                // xmppHandler.login();
             }
         }
 
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

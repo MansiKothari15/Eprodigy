@@ -172,7 +172,10 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             Log.d("Login startXmppService-", username + " " + password);
             xmppHandler = MyApplication.getmService().xmpp;
             xmppHandler.setUserPassword(username, password);
-            xmppHandler.login();
+
+            if (!xmppHandler.loggedin)
+                new XMPPHandler.LoginTask(mActivity,username,password);
+           // xmppHandler.login();
         }
 
         public void onLoginFailed() {
@@ -187,6 +190,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
         mActivity = this;
+
         startXmppService(mActivity);
         xmppEventReceiver = mChatApp.getEventReceiver();
 

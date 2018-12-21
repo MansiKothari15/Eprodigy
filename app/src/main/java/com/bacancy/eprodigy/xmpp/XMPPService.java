@@ -36,7 +36,9 @@ public class XMPPService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         if(intent != null){
-            xmpp.connect();
+           // xmpp.connect();
+            new XMPPHandler.ConnectXMPP().execute();
+
             XMPPService.isServiceRunning = true;
         }
 

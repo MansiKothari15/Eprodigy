@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.xmpp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
+import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
@@ -396,24 +398,41 @@ public class XMPPHandler {
 
 
     public static class ConnectXMPP extends AsyncTask<Void, Void, Boolean> {
-        Activity mActivity;
+        /* Activity mActivity;
 
-        public ConnectXMPP(final Activity mActivity) {
+         public ConnectXMPP(final Activity mActivity) {
+             this.mActivity = mActivity;
+         }*/
+        Activity mActivity;
+        private CustomProgressDialog customProgressDialog;
+
+        public ConnectXMPP() {
+
+            customProgressDialog = new CustomProgressDialog();
+            Toast.makeText(service, "connecting....", Toast.LENGTH_LONG).show();
+        }
+
+        public ConnectXMPP(Activity mActivity) {
             this.mActivity = mActivity;
+            customProgressDialog = new CustomProgressDialog();
+
+
+                customProgressDialog.showCustomDialog(mActivity);
         }
 
         @Override
         protected void onPreExecute() {
 
-            if (mActivity != null)
-                ((BaseActivity) mActivity).showLoadingDialog(mActivity);
 
-            super.onPreExecute();
+            Log.e("ad", "------------------onPreExecute");
+            // Toast.makeText(service, "connecting....", Toast.LENGTH_LONG).show();
+
+
         }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-
+            Log.e("ad", "------------------doInBackground");
             if (connection.isConnected())
                 return false;
 
@@ -528,15 +547,16 @@ public class XMPPHandler {
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-            if (mActivity != null)
-                ((BaseActivity) mActivity).dismissLoadingDialog();
-            super.onPostExecute(aBoolean);
+            customProgressDialog.dismissCustomDialog();
+            Toast.makeText(service, "Connected", Toast.LENGTH_SHORT).show();
+            Log.e("ad", "------------------Connected");
+
 
         }
     }
 
 
-    public void connect() {
+    public static void connect() {
 
 
         AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
@@ -938,13 +958,15 @@ public class XMPPHandler {
 //    }
 
     //Login to server
-    public void login() {
+    public void login2() {
         try {
 
 //            new Thread(new Runnable() {
 //                @Override
 //                public void run() {
-            if (!connected && !isconnecting) connect();
+            if (!connected && !isconnecting) {
+                new XMPPHandler.ConnectXMPP().execute();
+            }
 //                }
 //            }).start();
 
@@ -1141,6 +1163,92 @@ public class XMPPHandler {
         } catch (InterruptedException e) {
             e.printStackTrace();
             LogM.e("12" + e.getMessage());
+
+        }
+    }
+
+    public void login() {
+        try {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!connected && !isconnecting) connect();
+                }
+            }).start();
+
+            if (debug) Log.i(TAG, "User " + userId + userPassword);
+
+            try {
+                connection.login(userId, userPassword);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (debug) Log.i(TAG, "Yey! We're logged in to the Xmpp server!");
+
+            service.onLoggedIn();
+        } catch (XMPPException | IOException e) {
+
+            service.onLoginFailed();
+            if (debug) e.printStackTrace();
+        } catch (SmackException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class LoginTask extends AsyncTask<Void, Void, Boolean> {
+        private String username;
+        private String password;
+        private CustomProgressDialog customProgressDialog;
+
+        public LoginTask(Activity mActivity, String username, String password) {
+
+            this.username = username;
+            this.password = password;
+
+            //customProgressDialog = new CustomProgressDialog();
+           // customProgressDialog.showCustomDialog(mActivity);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!connected && !isconnecting) connect();
+                    }
+                }).start();
+
+                if (debug) Log.i(TAG, "User " + username + password);
+
+                try {
+                    connection.login(username, password);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (debug) Log.i(TAG, "Yey! We're logged in to the Xmpp server!");
+
+                service.onLoggedIn();
+            } catch (XMPPException | IOException e) {
+
+                service.onLoginFailed();
+                if (debug) e.printStackTrace();
+            } catch (SmackException e) {
+                e.printStackTrace();
+            }
+
+
+            return isconnecting = false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+
+            //customProgressDialog.dismissCustomDialog();
 
         }
     }
