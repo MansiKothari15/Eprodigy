@@ -1,5 +1,7 @@
 package com.bacancy.eprodigy.xmpp;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -7,10 +9,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
+import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
+import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -97,11 +101,11 @@ public class XMPPHandler {
     Roster roster;
 
     Gson gson;
-    public XMPPService service;
+    public static XMPPService service;
     public static XMPPHandler instance = null;
     public static boolean instanceCreated = false;
 
-    private final boolean debug = Constants.XMPP_DEBUG;
+    private static final boolean debug = Constants.XMPP_DEBUG;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -389,7 +393,151 @@ public class XMPPHandler {
 
 
     //Explicitly start a connection
+
+
+    public static class ConnectXMPP extends AsyncTask<Void, Void, Boolean> {
+        Activity mActivity;
+
+        public ConnectXMPP(final Activity mActivity) {
+            this.mActivity = mActivity;
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+            if (mActivity != null)
+                ((BaseActivity) mActivity).showLoadingDialog(mActivity);
+
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            if (connection.isConnected())
+                return false;
+
+
+            isconnecting = true;
+
+           /* if (isToasted)
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(service, "connecting....", Toast.LENGTH_LONG).show();
+                    }
+                });*/
+
+            if (debug) Log.d(TAG, "connecting....");
+
+            try {
+
+                connection.connect();
+
+
+                ReconnectionManager.getInstanceFor(connection).enableAutomaticReconnection();
+
+                connection.setReplyTimeout(100000);
+
+//                    PingManager pm =  PingManager.getInstanceFor(connection) ;
+//                    pm.setPingInterval(5) ;  // 5 sec
+//                    pm.pingMyServer() ;
+//                    pm.registerPingFailedListener(new PingFailedListener() {
+//
+//                        @Override
+//                        public void pingFailed() {
+//                            Log.e(TAG , "pingFailed") ;
+//                        }
+//
+//                    });
+
+
+                try {
+
+
+                    DeliveryReceiptManager
+                            dm = DeliveryReceiptManager.getInstanceFor(connection);
+                    dm.setAutoReceiptMode(DeliveryReceiptManager.AutoReceiptMode.always);
+                    dm.autoAddDeliveryReceiptRequests();
+                    ProviderManager.addExtensionProvider(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE, new DeliveryReceipt.Provider());
+                    ProviderManager.addExtensionProvider(DeliveryReceiptRequest.ELEMENT, DeliveryReceipt.NAMESPACE, new DeliveryReceiptRequest.Provider());
+                    dm.addReceiptReceivedListener(new ReceiptReceivedListener() {
+                        @Override
+                        public void onReceiptReceived(Jid fromJid, Jid toJid, String receiptId, Stanza receipt) {
+
+                            LogM.e("fromJid" + fromJid.toString());
+                            LogM.e("toJid" + toJid.toString());
+                            LogM.e("receiptId" + receiptId.toString());
+                            LogM.e("" + receipt.toString());
+                        }
+                    });
+
+                } catch (Exception e) {
+                    LogM.e("16" + e.getMessage());
+
+                }
+                connected = true;
+
+            } catch (IOException e) {
+                LogM.e("17" + e.getMessage());
+
+                service.onConnectionClosed();
+                if (isToasted)
+                    new Handler(Looper.getMainLooper())
+                            .post(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    Toast.makeText(service, "IOException: ", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                if (debug) Log.e(TAG, "IOException: " + e.getMessage());
+            } catch (SmackException e) {
+                service.onConnectionClosed();
+                LogM.e("16" + e.getMessage());
+
+                if (isToasted)
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(service, "SMACKException: ", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                if (debug) Log.e(TAG, "SMACKException: " + e.getMessage());
+            } catch (XMPPException e) {
+                service.onConnectionClosed();
+                LogM.e("15" + e.getMessage());
+
+                if (isToasted)
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(service, "XMPPException: ", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                if (debug) Log.e(TAG, "XMPPException: " + e.getMessage());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                LogM.e("14" + e.getMessage());
+
+            }
+
+            //Our "connection" phase is now complete. We can tell others to make requests from now on.
+            return isconnecting = false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            if (mActivity != null)
+                ((BaseActivity) mActivity).dismissLoadingDialog();
+            super.onPostExecute(aBoolean);
+
+        }
+    }
+
+
     public void connect() {
+
 
         AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -1009,8 +1157,8 @@ public class XMPPHandler {
     // will open up a TCP connection to another user (usually a roaster in jabber language),
     // will throw exception if there is an error
     public boolean sendMessage(final ChatPojo chatMessage) throws SmackException {
-         final String body = gson.toJson(chatMessage);
-       // String body = chatMessage.getChatText();
+        final String body = gson.toJson(chatMessage);
+        // String body = chatMessage.getChatText();
 
         if (chat_created_for.get(chatMessage.getChatRecv()) == null)
             chat_created_for.put(chatMessage.getChatRecv(), false);

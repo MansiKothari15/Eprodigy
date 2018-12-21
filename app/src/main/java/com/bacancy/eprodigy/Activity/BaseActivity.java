@@ -13,15 +13,18 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.UserPojo;
+import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.db.DataManager;
@@ -34,6 +37,9 @@ import com.bacancy.eprodigy.utils.ImageSelectUtils;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
+import com.bacancy.eprodigy.xmpp.XMPPHandler;
+import com.bacancy.eprodigy.xmpp.XMPPService;
 
 
 /**
@@ -49,15 +55,30 @@ public class BaseActivity extends AppCompatActivity {
     public Activity activity;
     CustomProgressDialog customProgressDialog;
 
+    public XMPPEventReceiver xmppEventReceiver;
+    public MyApplication mChatApp = MyApplication.getInstance();
+    public XMPPHandler xmppHandler;
+    public String username, password;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.activity = this;
+
+        xmppEventReceiver = mChatApp.getEventReceiver();
+
+
         imageSelectUtils = new ImageSelectUtils(BaseActivity.this);
         permissionActivity = new PermissionActivity(BaseActivity.this);
 
 
         customProgressDialog = new CustomProgressDialog();
-        this.activity = this;
+
+        username = Pref.getValue( activity, "username", "");
+        password = Pref.getValue(activity, "password", "");
+
+
     }
 
     /**
@@ -148,7 +169,8 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void showLoadingDialog(Activity mActivity) {
-        if (customProgressDialog != null) {
+
+        if (mActivity!=null &&customProgressDialog != null) {
 
             customProgressDialog.showCustomDialog(mActivity);
         }
@@ -259,6 +281,43 @@ public class BaseActivity extends AppCompatActivity {
 
 
         notificationManager.notify(num /* ID of list_menu */, notificationBuilder.build());
+    }
+
+
+
+    public void startXmppService(Activity mActivity) {
+
+
+        //Start XMPP Service (if not running already)
+        if (!XMPPService.isServiceRunning) {
+            Log.d("startXmppService--", "running already");
+            final Intent intent = new Intent(this, XMPPService.class);
+//            mChatApp.UnbindService();
+            Handler handler1 = new Handler();
+            handler1.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mChatApp.BindService(intent);
+                }
+            }, 200);
+
+        } else {
+            xmppHandler = MyApplication.getmService().xmpp;
+            if (!xmppHandler.isConnected()) {
+                xmppHandler.connect();
+              //  new XMPPHandler.ConnectXMPP(mActivity).execute();
+            } else {
+
+                username = Pref.getValue(mActivity, "username", "");
+                password = Pref.getValue(mActivity, "password", "");
+                Log.d("Login startXmppService-", username + " " + password);
+
+                xmppHandler.setUserPassword(username, password);
+                if (!xmppHandler.loggedin)
+                    xmppHandler.login();
+            }
+        }
+
     }
 
 }

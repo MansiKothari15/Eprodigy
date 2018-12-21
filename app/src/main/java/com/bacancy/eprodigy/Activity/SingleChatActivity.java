@@ -94,7 +94,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String username, password, ChatUserId, mName;
+    String ChatUserId, mName="";
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -102,8 +102,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     MyApplication mChatApp = MyApplication.getInstance();
 
     //Get our custom event receiver so that we can bind our event listener to it
-    XMPPEventReceiver xmppEventReceiver;
-    private XMPPHandler xmppHandler;
+
+
     private static final int REQUEST_CAMERA_PICTURE = 1, REQUEST_PICK_GALLERY = 2, REQUEST_SHARE_CONTACT = 3, REQUEST_PLACE_PICKER = 4, REQUEST_PICK_VIDEO = 5;
     private Uri imageUri;
     private List<ChatPojo> conversation_ArrayList = new ArrayList<>();
@@ -123,16 +123,82 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private boolean ifshow = false;
 
 
+
+    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
+
+        //Event Listeners
+        public void onNewMessageReceived(ChatPojo chatPojo) {
+
+            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
+
+            chatPojo.setShowing(true);
+            chatPojo.setMine(false);
+            DataManager.getInstance().AddChat(chatPojo);
+
+            LogM.e("onNewMessageReceived ChatActivity");
+
+            if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
+
+        }
+
+        @Override
+        public void onPresenceChanged(PresenceModel presenceModel) {
+//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    txtUserStatus.setText(presence);
+//                    LogM.e("onPresenceChanged" + presence);
+//                }
+//            });
+        }
+
+
+        //On Chat Status Changed
+        public void onChatStateChanged(ChatStateModel chatStateModel) {
+
+//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
+            LogM.e("chatStatus --- onChatStateChanged");
+            if (MyApplication.getmService().xmpp.checkSender(username, chatStateModel.getUser())) {
+                //  chatStatusTv.setText(chatStatus);
+                LogM.e("onChatStateChanged");
+            }
+        }
+
+        @Override
+        public void onConnected() {
+            username = Pref.getValue(SingleChatActivity.this, "username", "");
+            password = Pref.getValue(SingleChatActivity.this, "password", "");
+            Log.d("Login startXmppService-", username + " " + password);
+            xmppHandler = MyApplication.getmService().xmpp;
+            xmppHandler.setUserPassword(username, password);
+            xmppHandler.login();
+        }
+
+        public void onLoginFailed() {
+            xmppHandler.disconnect();
+            Toast.makeText(getApplicationContext(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
         mActivity = this;
-        startXmppService();
-        imageSelectUtils = new ImageSelectUtils(this);
+        startXmppService(mActivity);
         xmppEventReceiver = mChatApp.getEventReceiver();
 
+        imageSelectUtils = new ImageSelectUtils(this);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            mName = extras.getString("name");
+            ChatUserId = extras.getString("receiverJid");
+
+        }
         init();
+
         /*KeyboardVisibilityEvent.setEventListener(
                 SingleChatActivity.this,
                 new KeyboardVisibilityEventListener() {
@@ -158,39 +224,45 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void init() {
 
-        username = Pref.getValue(SingleChatActivity.this, "username", "");
-        password = Pref.getValue(SingleChatActivity.this, "password", "");
+
+
         Log.d("Login init-", username + " " + password);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         random = new Random();
+
         tv_label = (TextView) findViewById(R.id.tv_label);
         tv_newMessage = (TextView) findViewById(R.id.tv_right);
         tv_createGroup = (TextView) findViewById(R.id.tv_left);
-        tv_back = (TextView) findViewById(R.id.tv_back);
         tv_lastseen = (TextView) findViewById(R.id.tv_lastseen);
-        tv_back.setOnClickListener(this);
-
-        rv_singleChat = (RecyclerView) findViewById(R.id.rv_singleChat);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
-//        mLayoutManager.setReverseLayout(true); //reverse RecyclerView because we need reversible data for category
-        mLayoutManager.setStackFromEnd(true);
-
-        rv_singleChat.setLayoutManager(mLayoutManager);
-        rv_singleChat.setHasFixedSize(true);
-
-
+        tv_back = (TextView) findViewById(R.id.tv_back);
         edtMessage = (EditText) findViewById(R.id.edtMessage);
         img_profile = (ImageView) findViewById(R.id.img_profile);
         img_camera = (ImageView) findViewById(R.id.img_camera);
         img_add = (ImageView) findViewById(R.id.img_add);
         imgSend = (ImageView) findViewById(R.id.imgSend);
+
+
+        rv_singleChat = (RecyclerView) findViewById(R.id.rv_singleChat);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+//        mLayoutManager.setReverseLayout(true); //reverse RecyclerView because we need reversible data for category
+        mLayoutManager.setStackFromEnd(true);
+        rv_singleChat.setLayoutManager(mLayoutManager);
+        rv_singleChat.setHasFixedSize(true);
+
+
+        tv_back.setOnClickListener(this);
         img_add.setOnClickListener(this);
         imgSend.setOnClickListener(this);
         img_camera.setOnClickListener(this);
         img_audio = (ImageView) findViewById(R.id.img_audio);
+
+
+        tv_label.setText(mName);
+
         img_audio.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -240,20 +312,15 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             }
         });
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            mName = extras.getString("name");
-            ChatUserId = extras.getString("receiverJid");
-            tv_label.setText(mName);
-        }
+
         hideCustomToolbar();
 
-        String username = "TestUser";
         mMessageAdapter = new ChatAdapter(this, new ArrayList<ChatPojo>(), username);
         rv_singleChat.setAdapter(mMessageAdapter);
 
         if (mMessageAdapter.getItemCount() > 2)
             rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
+
 
         edtMessage.setOnTouchListener(new View.OnTouchListener() {
 
@@ -318,6 +385,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     private void LoadData() {
+
         ChatUserId = ChatUserId.replace(" ", "");
 
         DataManager.getInstance().showingmsgUser(ChatUserId);
@@ -487,63 +555,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         });
     }
 
-    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
 
-        //Event Listeners
-        public void onNewMessageReceived(ChatPojo chatPojo) {
-
-            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
-
-            chatPojo.setShowing(true);
-            chatPojo.setMine(false);
-            DataManager.getInstance().AddChat(chatPojo);
-
-            LogM.e("onNewMessageReceived ChatActivity");
-
-            if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
-
-        }
-
-        @Override
-        public void onPresenceChanged(PresenceModel presenceModel) {
-//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    txtUserStatus.setText(presence);
-//                    LogM.e("onPresenceChanged" + presence);
-//                }
-//            });
-        }
-
-
-        //On Chat Status Changed
-        public void onChatStateChanged(ChatStateModel chatStateModel) {
-
-//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
-            LogM.e("chatStatus --- onChatStateChanged");
-            if (MyApplication.getmService().xmpp.checkSender(username, chatStateModel.getUser())) {
-                //  chatStatusTv.setText(chatStatus);
-                LogM.e("onChatStateChanged");
-            }
-        }
-
-        @Override
-        public void onConnected() {
-            username = Pref.getValue(SingleChatActivity.this, "username", "");
-            password = Pref.getValue(SingleChatActivity.this, "password", "");
-            Log.d("Login startXmppService-", username + " " + password);
-            xmppHandler = MyApplication.getmService().xmpp;
-            xmppHandler.setUserPassword(username, password);
-            xmppHandler.login();
-        }
-
-        public void onLoginFailed() {
-            xmppHandler.disconnect();
-            Toast.makeText(getApplicationContext(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
-        }
-
-    };
 
     private void sendMsg(int msgType) {
 
@@ -701,56 +713,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
-    private void startXmppService() {
-
-
-        //Start XMPP Service (if not running already)
-        if (!XMPPService.isServiceRunning) {
-            Log.d("startXmppService--", "running already");
-            final Intent intent = new Intent(this, XMPPService.class);
-//            mChatApp.UnbindService();
-            Handler handler1 = new Handler();
-            handler1.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mChatApp.BindService(intent);
-                }
-            }, 200);
-
-        } else {
-            xmppHandler = MyApplication.getmService().xmpp;
-            if (!xmppHandler.isConnected()) {
-                xmppHandler.connect();
-            } else {
-                username = Pref.getValue(SingleChatActivity.this, "username", "");
-                password = Pref.getValue(SingleChatActivity.this, "password", "");
-                Log.d("Login startXmppService-", username + " " + password);
-
-                xmppHandler.setUserPassword(username, password);
-                if (!xmppHandler.loggedin)
-                    xmppHandler.login();
-            }
-        }
-
-    }
-
-
-    public void choosePhotoFromGallary() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-        startActivityForResult(galleryIntent, REQUEST_PICK_GALLERY);
-    }
-
-    List<Uri> mSelected = new ArrayList<>();
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data); // no need for super
         imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-
-
             case REQUEST_PICK_GALLERY:
 
                 listLocalMedia = new ArrayList<>();
@@ -840,40 +808,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
-    /*public String saveImage(Bitmap myBitmap) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-        File wallpaperDirectory = new File(
-                Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
-        // have the object build the directory structure, if needed.
-        if (!wallpaperDirectory.exists()) {
-            wallpaperDirectory.mkdirs();
-        }
 
-        try {
-            File f = new File(wallpaperDirectory, Calendar.getInstance()
-                    .getTimeInMillis() + ".jpg");
-            f.createNewFile();
-            Uri yourUri = Uri.fromFile(f);
-            selectedImagePath = yourUri.toString();
-
-
-            sendMsg(Constants.TYPE_IMAGE);
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(bytes.toByteArray());
-            MediaScannerConnection.scanFile(this,
-                    new String[]{f.getPath()},
-                    new String[]{"image/jpeg"}, null);
-            fo.close();
-            Log.d("TAG", "File Saved::--->" + f.getAbsolutePath());
-//            mediaUpload(f);
-            return f.getAbsolutePath();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        return "";
-    }
-*/
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
