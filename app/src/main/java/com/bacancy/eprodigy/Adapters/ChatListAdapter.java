@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,18 +19,22 @@ import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.callback.ActorDiffCallbackChat;
+import com.bacancy.eprodigy.db.DataManager;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyViewHolder> implements Filterable{
 
-    private List<String> mList = new ArrayList<>();
-    List<String> mListFiltered=new ArrayList<>();
+    private List<ChatPojo> mList = new ArrayList<>();
+    List<ChatPojo> mListFiltered=new ArrayList<>();
     Context mContext;
 
 
-    public ChatListAdapter(List<String> chatUserList, Context mContext) {
+    public ChatListAdapter(ArrayList<ChatPojo> chatUserList, Context mContext) {
         this.mList = chatUserList;
         this.mListFiltered = chatUserList;
         this.mContext = mContext;
@@ -43,21 +49,40 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChatListAdapter.MyViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ChatListAdapter.MyViewHolder holder, final int position) {
 
-        holder.tv_id.setText(mListFiltered.get(position));
+        final ChatPojo bean = mList.get(position);
+        final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
+
+        if (singleUser != null) {
+            holder.tv_id.setText(singleUser.getName());
+            holder.tv_text.setText(singleUser.getPhone());
+            Glide.with(mContext).load(singleUser.getProfilepicture())
+                    .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+        }
+
         holder.rv_main.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(mContext,SingleChatActivity.class);
                 Bundle b = new Bundle();
-                b.putString("name",mListFiltered.get(position));
+                b.putString("name",holder.tv_id.getText().toString());
+                b.putString("receiverJid",singleUser.getUsername());
                 i.putExtras(b);
                 mContext.startActivity(i);
             }
         });
+
     }
 
+    public void swapItems(List<ChatPojo> actors) {
+        final ActorDiffCallbackChat diffCallback = new ActorDiffCallbackChat(this.mList, actors);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        this.mList.clear();
+        this.mList.addAll(actors);
+        diffResult.dispatchUpdatesTo(this);
+    }
 
     @Override
     public int getItemCount() {
@@ -73,10 +98,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 if (charString.isEmpty()) {
                     mListFiltered = mList;
                 } else {
-                    List<String> filteredList = new ArrayList<>();
-                    for (String str : mList) {
+                    List<ChatPojo> filteredList = new ArrayList<>();
+                    for (ChatPojo str : mList) {
 
-                        if (str.toLowerCase().contains(charString.toLowerCase().trim())) {
+                        if (str.getChatText().toLowerCase().contains(charString.toLowerCase().trim())) {
                             filteredList.add(str);
                         }
                     }
@@ -91,7 +116,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                mListFiltered = (List<String>) filterResults.values;
+//                mListFiltered = (List<String>) filterResults.values;
                 notifyDataSetChanged();
             }
         };
@@ -101,6 +126,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
         TextView tv_id,tv_text,tv_time;
         RelativeLayout rv_main;
+        ImageView img_pic;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -108,6 +134,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             tv_text = (TextView)itemView.findViewById(R.id.tv_text);
             tv_time = (TextView)itemView.findViewById(R.id.tv_time);
             rv_main = (RelativeLayout)itemView.findViewById(R.id.rv_main);
+            img_pic = (ImageView)itemView.findViewById(R.id.img_pic);
         }
     }
 }

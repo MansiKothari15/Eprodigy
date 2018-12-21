@@ -1,16 +1,8 @@
 package com.bacancy.eprodigy.Fragment;
 
 import android.Manifest;
-import android.content.ContentResolver;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
+import android.arch.lifecycle.Observer;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -25,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
@@ -33,19 +24,17 @@ import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.interfaces.MyContactListener;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.tasks.GetMyContactTask;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +95,7 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
             public void afterTextChanged(Editable editable) {
                 //after the change calling the method and passing the search input
 
-                if (usersAdapter!=null) {
+                if (usersAdapter != null) {
                     usersAdapter.getFilter().filter(editable);
                 }
             }
@@ -121,7 +110,6 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
 
         ((BaseActivity) getActivity()).initPermission(getActivity(), permissionListenerIntr, true, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS);
     }
-
 
 
     private void getContactList(String contact_list) {
@@ -152,11 +140,28 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
 
                         if (mList != null && mList.size() > 0) {
                             for (ContactListResponse.ResponseDataBean bean : mList) {
-                                if (bean != null && bean.getStatus()==Constants.OUR_USERS_STATUS) {
+                                if (bean != null && bean.getStatus() == Constants.OUR_USERS_STATUS) {
                                     responseDataBeanList.add(bean);
+
+                                    DataManager.getInstance().AddUser(bean);
+                                    DataManager.getInstance().getAllUser();
+
+                                    DataManager.getInstance()
+                                            .getAllUser()
+                                            .observe(getActivity(), new Observer<List<ContactListResponse.ResponseDataBean>>() {
+                                                @Override
+                                                public void onChanged(@Nullable List<ContactListResponse.ResponseDataBean> userList) {
+
+                                                    if (userList != null)
+                                                        LogM.e("" + userList.size());
+
+
+                                                }
+                                            });
                                 }
                             }
                         }
+
 
                         if (mList != null && mList.size() > 0) {
                             usersAdapter = new UsersAdapter(getActivity(), responseDataBeanList);

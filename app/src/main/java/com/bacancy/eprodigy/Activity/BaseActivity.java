@@ -3,7 +3,6 @@ package com.bacancy.eprodigy.Activity;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -25,9 +24,9 @@ import android.util.Log;
 
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Models.ChatPojo;
-import com.bacancy.eprodigy.Models.UserPojo;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.permission.MyPermission;
@@ -42,8 +41,6 @@ import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
-
-
 
 
 public class BaseActivity extends AppCompatActivity {
@@ -84,7 +81,7 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * @param mActivity
      * @param permissionlistener
-     * @param isDenied           : for denied message ,if true then user must allow permission
+     * @param isDenied : for denied message ,if true then user must allow permission
      * @param permissions
      */
     public void initPermission(Activity mActivity, PermissionListener permissionlistener, boolean isDenied, String... permissions) {
@@ -150,11 +147,11 @@ public class BaseActivity extends AppCompatActivity {
 
                     }
                 })
-                /*  .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                      public void onClick(DialogInterface dialog, int which) {
-                          // do nothing
-                      }
-                  })*/
+                /* .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                // do nothing
+                }
+                })*/
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
 
@@ -185,7 +182,7 @@ public class BaseActivity extends AppCompatActivity {
     public boolean validateUser(final Activity mActivity, int responseStatus, String message) {
         if (responseStatus == Constants.SESSION_TIME_OUT_STATUS) {
             dismissLoadingDialog();
-            //   AlertUtils.showSimpleAlert(mContext, TextUtils.isEmpty(message)?mContext.getString(R.string.session_time_out):message);
+            // AlertUtils.showSimpleAlert(mContext, TextUtils.isEmpty(message)?mContext.getString(R.string.session_time_out):message);
 
             AlertDialog dialog = new AlertDialog.Builder(mActivity)
                     .setIcon(0).setMessage(TextUtils.isEmpty(message) ? mActivity.getString(R.string.session_time_out) : message)
@@ -224,7 +221,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public static void SendNotification(Context mContext, ChatPojo chatPojo) {
 
-        UserPojo singleUser = DataManager.getInstance().getUser(chatPojo.getChatSender());
+        ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(chatPojo.getChatSender());
         if (singleUser != null) {
             displayName = singleUser.getDisplayname();
         }
@@ -268,16 +265,16 @@ public class BaseActivity extends AppCompatActivity {
         notificationBuilder.setAutoCancel(true);
         notificationBuilder.setSound(defaultSoundUri);
         notificationBuilder.setContentIntent(pendingIntent);
-//        notificationBuilder.setNumber(4);
+// notificationBuilder.setNumber(4);
 
-//        Notification notification = new NotificationCompat.InboxStyle(notificationBuilder)
-//                .addLine(chatPojo.getChatText())
-////                .addLine("Second Message")
-////                .addLine("Third Message")
-////                .addLine("Fourth Message")
-//                .setBigContentTitle(displayName)
-//                .setSummaryText("+3 more")
-//                .build();
+// Notification notification = new NotificationCompat.InboxStyle(notificationBuilder)
+// .addLine(chatPojo.getChatText())
+//// .addLine("Second Message")
+//// .addLine("Third Message")
+//// .addLine("Fourth Message")
+// .setBigContentTitle(displayName)
+// .setSummaryText("+3 more")
+// .build();
 
 
         notificationManager.notify(num /* ID of list_menu */, notificationBuilder.build());
@@ -292,7 +289,7 @@ public class BaseActivity extends AppCompatActivity {
         if (!isMyServiceRunning(XMPPService.class)) {
             Log.d("startXmppService--", "running already");
             final Intent intent = new Intent(this, XMPPService.class);
-//            mChatApp.UnbindService();
+// mChatApp.UnbindService();
             Handler handler1 = new Handler();
             handler1.postDelayed(new Runnable() {
                 @Override
@@ -304,7 +301,7 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             xmppHandler = MyApplication.getmService().xmpp;
             if (!xmppHandler.isConnected()) {
-              //  xmppHandler.connect();
+                // xmppHandler.connect();
                 new XMPPHandler.ConnectXMPP(mActivity).execute();
             } else {
 
@@ -314,7 +311,7 @@ public class BaseActivity extends AppCompatActivity {
 
                 xmppHandler.setUserPassword(username, password);
                 if (!xmppHandler.loggedin)
-                new XMPPHandler.LoginTask(mActivity,username,password);
+                    new XMPPHandler.LoginTask(mActivity,username,password);
                 // xmppHandler.login();
             }
         }

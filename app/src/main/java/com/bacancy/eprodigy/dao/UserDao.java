@@ -8,7 +8,7 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
-import com.bacancy.eprodigy.Models.UserPojo;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.List;
 
@@ -19,26 +19,26 @@ import java.util.List;
 public interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long Add(UserPojo userPojo);
+    long Add(ContactListResponse.ResponseDataBean userPojo);
 
-    @Query("select * from UserPojo ORDER BY role_id DESC ")
-    LiveData<List<UserPojo>> getAll();
+    @Query("select * from UserPojo")
+    LiveData<List<ContactListResponse.ResponseDataBean>> getAll();
 
     @Delete
-    int singledelete(UserPojo userPojo);
+    int singledelete(ContactListResponse.ResponseDataBean userPojo);
 
     @Query("select * from UserPojo WHERE  username = :username ")
-    UserPojo getSingle(String username);
+    ContactListResponse.ResponseDataBean getSingle(String username);
 
     @Query("select displayname from UserPojo WHERE  username = :username ")
     String getSingleById(String username);
 
 
     @Update
-    void update(UserPojo userPojo);
+    void update(ContactListResponse.ResponseDataBean userPojo);
 
-    @Query("select * from UserPojo WHERE  username IN (:ids) ORDER BY updated_at DESC")
-    LiveData<List<UserPojo>> getAllbyIds(List<String> ids);
+    @Query("select * from UserPojo WHERE  username IN (:ids)")
+    LiveData<List<ContactListResponse.ResponseDataBean>> getAllbyIds(List<String> ids);
 
     @Query("DELETE FROM UserPojo")
     void deleteTbl();
@@ -46,9 +46,9 @@ public interface UserDao {
     @Query("select profilepicture from UserPojo WHERE  username = :username ")
     String getUserPic(String username);
 
-    @Query("UPDATE UserPojo SET updated_at = :now where username = :username ")
-    void updateTime(String username, String now);
+//    @Query("UPDATE UserPojo SET updated_at = :now where username = :username ")
+//    void updateTime(String username, String now);
 
-    @Query("select * from UserPojo where displayname LIKE :displayname ORDER BY role_id DESC")
-    List<UserPojo> search(String displayname);
+//    @Query("select * from UserPojo where displayname LIKE :displayname ORDER BY role_id DESC")
+//    List<ContactListResponse.ResponseDataBean> search(String displayname);
 }

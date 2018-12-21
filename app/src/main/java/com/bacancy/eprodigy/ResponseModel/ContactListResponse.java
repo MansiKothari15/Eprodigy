@@ -1,5 +1,9 @@
 package com.bacancy.eprodigy.ResponseModel;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
 public class ContactListResponse {
@@ -47,6 +51,8 @@ public class ContactListResponse {
         this.response_data = response_data;
     }
 
+
+    @Entity(tableName = "UserPojo")
     public static class ResponseDataBean {
         /**
          * username :
@@ -66,7 +72,8 @@ public class ContactListResponse {
          * privacystatus : 0
          * readreceiptstatus : 0
          */
-
+@NonNull
+        @PrimaryKey
         private String username;
         private String name;
         private String userstatus;

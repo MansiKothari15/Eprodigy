@@ -5,7 +5,7 @@ import android.arch.lifecycle.LiveData;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.RecentChatUserPojo;
 import com.bacancy.eprodigy.Models.StarredMssagePojo;
-import com.bacancy.eprodigy.Models.UserPojo;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.List;
 
@@ -26,17 +26,17 @@ public interface IDataManager {
 
 
     // userList
-    void AddUser(UserPojo userPojo);
-    LiveData<List<UserPojo>> getAllUser();
+    void AddUser(ContactListResponse.ResponseDataBean userPojo);
+    LiveData<List<ContactListResponse.ResponseDataBean>> getAllUser();
 
-    UserPojo getUser(String username);
+    ContactListResponse.ResponseDataBean getUser(String username);
 
-    void UpdateUser(UserPojo userPojo);
+    void UpdateUser(ContactListResponse.ResponseDataBean userPojo);
 
     List<String> getChatUserList();
     List<String> getChatUserListNew();
 
-    LiveData<List<UserPojo>> getChatUserListById(List<String> chatList);
+    LiveData<List<ContactListResponse.ResponseDataBean>> getChatUserListById(List<String> chatList);
 
     ChatPojo getLastOne(String username);
 
@@ -64,7 +64,7 @@ public interface IDataManager {
 
     LiveData<ChatPojo> getSingleLast(String s);
 
-    List<UserPojo> getusersearch(String trim);
+    List<ContactListResponse.ResponseDataBean> getusersearch(String trim);
 
 
     void deletChatPojo();

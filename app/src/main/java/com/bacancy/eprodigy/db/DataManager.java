@@ -5,7 +5,7 @@ import android.arch.lifecycle.LiveData;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.RecentChatUserPojo;
 import com.bacancy.eprodigy.Models.StarredMssagePojo;
-import com.bacancy.eprodigy.Models.UserPojo;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class DataManager implements IDataManager {
     }
 
     @Override
-    public void AddUser(final UserPojo userPojo) {
+    public void AddUser(final ContactListResponse.ResponseDataBean userPojo) {
 
         mDataBaseHelper.runInTransaction(new Runnable() {
             @Override
@@ -73,17 +73,17 @@ public class DataManager implements IDataManager {
     }
 
     @Override
-    public LiveData<List<UserPojo>> getAllUser() {
+    public LiveData<List<ContactListResponse.ResponseDataBean>> getAllUser() {
         return mDataBaseHelper.getUserPojo().getAll();
     }
 
     @Override
-    public UserPojo getUser(String username) {
+    public ContactListResponse.ResponseDataBean getUser(String username) {
         return mDataBaseHelper.getUserPojo().getSingle(username);
     }
 
     @Override
-    public void UpdateUser(UserPojo userPojo) {
+    public void UpdateUser(ContactListResponse.ResponseDataBean userPojo) {
         mDataBaseHelper.getUserPojo().update(userPojo);
     }
 
@@ -98,7 +98,7 @@ public class DataManager implements IDataManager {
     }
 
     @Override
-    public LiveData<List<UserPojo>> getChatUserListById(List<String> chatList) {
+    public LiveData<List<ContactListResponse.ResponseDataBean>> getChatUserListById(List<String> chatList) {
         return mDataBaseHelper.getUserPojo().getAllbyIds(chatList);
     }
 
@@ -169,7 +169,7 @@ public class DataManager implements IDataManager {
 
     @Override
     public void updateTimestamp(String user, String now) {
-        mDataBaseHelper.getUserPojo().updateTime(user, now);
+      //  mDataBaseHelper.getUserPojo().updateTime(user, now);
     }
 
     @Override
@@ -188,9 +188,10 @@ public class DataManager implements IDataManager {
     }
 
     @Override
-    public List<UserPojo> getusersearch(String trim) {
+    public List<ContactListResponse.ResponseDataBean> getusersearch(String trim) {
 
-        return mDataBaseHelper.getUserPojo().search("%" + trim + "%");
+//        return mDataBaseHelper.getUserPojo().search("%" + trim + "%");
+        return null;
     }
 
     @Override

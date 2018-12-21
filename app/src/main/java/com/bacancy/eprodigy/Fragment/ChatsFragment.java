@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -22,17 +23,14 @@ import android.widget.Toast;
 
 import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Activity.NewMessageActivity;
-import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.Adapters.ChatListAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
-import com.bacancy.eprodigy.Models.UserPojo;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.LogM;
-import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 
@@ -146,6 +144,15 @@ public class ChatsFragment extends Fragment {
         rv_chat.setLayoutManager(mLayoutManager);
         rv_chat.setItemAnimator(new DefaultItemAnimator());
 
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv_chat.getContext(),
+                new LinearLayoutManager(getActivity()).getOrientation());
+        rv_chat.addItemDecoration(dividerItemDecoration);
+
+//        userChatAdapter = new UserChatAdapter(getActivity(), new ArrayList<ContactListResponse.ResponseDataBean>());
+        chatListAdapter = new ChatListAdapter(new ArrayList<ChatPojo>(),getActivity());
+        rv_chat.setAdapter(chatListAdapter);
+        chatListAdapter.notifyDataSetChanged();
+
         tv_noChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -185,29 +192,25 @@ public class ChatsFragment extends Fragment {
     }
 
     private void LoadData() {
-        String username = Pref.getValue(getActivity(), "username", "");
-        List<String> mlistId=new ArrayList<>();
-        mlistId.add(username);
-         DataManager.getInstance().getRecentChatUserListById(mlistId);
-        Log.d("chatUserList--",chatUserList.toString());
-        if(chatUserList.size() != 0){
+
+        List<String> chatList = DataManager.getInstance().getChatUserList();
+        Log.d("chatList",chatList.toString());
+
+        if (chatList != null && chatList.size() > 0)
             tv_noChat.setVisibility(View.INVISIBLE);
-        }
-        else
-        {
-            tv_noChat.setVisibility(View.VISIBLE);
-        }
+            DataManager.getInstance()
+                    .getRecentChatUserListById(chatList)
+                    .observe(getActivity(), new Observer<List<ChatPojo>>() {
+                        @Override
+                        public void onChanged(@Nullable List<ChatPojo> userList) {
 
-        DataManager.getInstance().getAll(username).observe(getActivity(), new Observer<List<ChatPojo>>() {
-            @Override
-            public void onChanged(@Nullable List<ChatPojo> chatPojos) {
-                conversation_ArrayList = chatPojos;
-            }
-        });
+                            if (chatListAdapter != null) {
+                                chatListAdapter.swapItems(userList);
+                                chatListAdapter.notifyDataSetChanged();
+                            }
 
-        chatListAdapter = new ChatListAdapter(chatUserList,getActivity());
-        rv_chat.setAdapter(chatListAdapter);
-
+                        }
+                    });
     }
 
 
