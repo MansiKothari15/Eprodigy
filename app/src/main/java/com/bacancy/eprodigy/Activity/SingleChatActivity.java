@@ -87,6 +87,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
     Activity mActivity;
+      PopupMenu popup;
     private ImageSelectUtils imageSelectUtils;
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
@@ -914,7 +915,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private void openPopup() {
 
 
-        final PopupMenu popup = new PopupMenu(SingleChatActivity.this, img_add);
+         popup = new PopupMenu(SingleChatActivity.this, img_add);
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
@@ -1101,11 +1102,29 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     }
 
+    @Override
+    protected void onStop() {
+        if (popup != null) {
+            popup.dismiss();
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (popup != null) {
+            popup.dismiss();
+        }
+        super.onDestroy();
+    }
 
     @Override
     public void onPause() {
         super.onPause();
 
+        if (popup != null) {
+            popup.dismiss();
+        }
         ifshow = true;
     }
 }
