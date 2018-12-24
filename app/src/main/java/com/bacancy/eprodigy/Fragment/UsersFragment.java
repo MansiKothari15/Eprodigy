@@ -279,16 +279,11 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
 
                                     DataManager.getInstance().AddUser(bean);
 
-
                                 }
                             }
                         }
 
 
-                        if (mList != null && mList.size() > 0) {
-                            usersAdapter = new UsersAdapter(getActivity(), responseDataBeanList);
-                            rv_users.setAdapter(usersAdapter);
-                        }
 
                     } else {
                         ((BaseActivity) getActivity()).dismissLoadingDialog();
