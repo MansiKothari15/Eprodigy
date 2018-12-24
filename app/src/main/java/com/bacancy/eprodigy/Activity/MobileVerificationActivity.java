@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ApiClient;
+import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ResendCodeResponse;
 import com.bacancy.eprodigy.ResponseModel.VerifyUserResponse;
@@ -165,8 +166,10 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
                         Pref.setValue(MobileVerificationActivity.this,"username",response.body().getUserdata().getUsername());
                         Pref.setValue(MobileVerificationActivity.this,"verified",response.body().getUserdata().getVerified());
                         Pref.setValue(MobileVerificationActivity.this,"password",response.body().getUserdata().getPassword());
+                        Pref.setValueBoolean(MobileVerificationActivity.this, AppConfing.IS_LOGGED_IN_FIRST_TIME,true);
 
                         Intent i = new Intent(MobileVerificationActivity.this,UserDetailsActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(i);
                         finish();
                     }else {

@@ -167,9 +167,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
         @Override
         public void onConnected() {
+
             username = Pref.getValue(SingleChatActivity.this, "username", "");
             password = Pref.getValue(SingleChatActivity.this, "password", "");
-            Log.d("Login startXmppService-", username + " " + password);
+
+            Log.d("startXmppService","login-onConnected="+username + " " + password);
+
             xmppHandler = MyApplication.getmService().xmpp;
             xmppHandler.setUserPassword(username, password);
 
@@ -397,14 +400,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         DataManager.getInstance().getAll(ChatUserId).observe(SingleChatActivity.this, new Observer<List<ChatPojo>>() {
             @Override
             public void onChanged(@Nullable List<ChatPojo> chatPojos) {
+
                 if (mMessageAdapter != null && chatPojos != null) {
                     mMessageAdapter.swapItems(chatPojos);
                     if (mMessageAdapter.getItemCount() > 2)
                         rv_singleChat.smoothScrollToPosition(mMessageAdapter.getItemCount() - 1);
 
-
                     conversation_ArrayList = chatPojos;
-
 
                 }
 

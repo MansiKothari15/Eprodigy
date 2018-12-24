@@ -32,7 +32,7 @@ public class Pref {
 		Pref.sharedPreferences = null;
 	}
 
-	public static boolean getValueboolean(Context context, String key,
+	public static boolean getValueBoolean(Context context, String key,
                                           boolean defaultValue) {
 		Pref.openPref(context);
 		boolean result = Pref.sharedPreferences.getBoolean(key, defaultValue);
@@ -40,7 +40,7 @@ public class Pref {
 		return result;
 	}
 
-	public static void setValueboolean(Context context, String key, boolean value) {
+	public static void setValueBoolean(Context context, String key, boolean value) {
 		Pref.openPref(context);
 		Editor prefsPrivateEditor = Pref.sharedPreferences.edit();
 		prefsPrivateEditor.putBoolean(key, value);

@@ -9,6 +9,7 @@ public class AppConfing {
     public static final String CODE = "code";
     public static final String AUTH_ID = "authId";
     public static final String USERNAME = "username";
+    public static final String IS_LOGGED_IN_FIRST_TIME = "isLoggedInFirstTime";
     public static final String DISPLAY_NAME = "displayname";
     public static final String ISLOGIN = "isLogin";
     public static final String USER_PROFILE_PIC = "userProfilePic";

@@ -390,7 +390,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                     }
 
                     Pref.setValue(getActivity(), "verified", "0");
+                    Pref.setValueBoolean(getActivity(), AppConfing.IS_LOGGED_IN_FIRST_TIME, false);
+
                     Intent i = new Intent(getActivity(), MobileRegistrationActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
                     getActivity().finish();
                 }
