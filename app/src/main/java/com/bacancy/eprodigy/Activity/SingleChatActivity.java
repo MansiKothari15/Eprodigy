@@ -726,33 +726,38 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_PICK_GALLERY:
+                if (resultCode == RESULT_OK) {
+                    listLocalMedia = new ArrayList<>();
+                    listLocalMedia = PictureSelector.obtainMultipleResult(data);
 
-                listLocalMedia = new ArrayList<>();
-                listLocalMedia = PictureSelector.obtainMultipleResult(data);
+                    // For example, LocalMedia returns three paths
+                    //EXTENSION OPTIONS
+                    // 1.media.getPath(); Path to the original
+                    // 2.media.getCutPath();To crop the path, you need to determine whether media.isCut(); is true. Note: except audio and video.
+                    // 3.media.getCompressPath();o compress the path, you need to determine whether media.isCompressed(); is true. Note: except for audio and video
+                    // If it is cropped and compressed, take the compression path as the first, then cut and compress
 
-                // For example, LocalMedia returns three paths
-                //EXTENSION OPTIONS
-                // 1.media.getPath(); Path to the original
-                // 2.media.getCutPath();To crop the path, you need to determine whether media.isCut(); is true. Note: except audio and video.
-                // 3.media.getCompressPath();o compress the path, you need to determine whether media.isCompressed(); is true. Note: except for audio and video
-                // If it is cropped and compressed, take the compression path as the first, then cut and compress
+                    Log.e("ad", "REQUEST_PICK_GALLERY =" + listLocalMedia.size());
 
-                Log.e("ad", "REQUEST_PICK_GALLERY =" + listLocalMedia.size());
-                mediaUpload(Constants.TYPE_IMAGE);
+                    mediaUpload(Constants.TYPE_IMAGE);
+
+                }
 
                 break;
             case REQUEST_PICK_VIDEO:
+                if (resultCode == RESULT_OK) {
                 listLocalMedia = new ArrayList<>();
                 listLocalMedia = PictureSelector.obtainMultipleResult(data);
                 Log.e("ad", "REQUEST_PICK_VIDEO =" + listLocalMedia.size());
-                mediaUpload(Constants.TYPE_VIDEO);
+                mediaUpload(Constants.TYPE_VIDEO);}
                 break;
             case REQUEST_CAMERA_PICTURE:
-                listLocalMedia = new ArrayList<>();
-                listLocalMedia = PictureSelector.obtainMultipleResult(data);
-                Log.e("ad", "REQUEST_CAMERA_PICTURE =" + listLocalMedia.size());
-                mediaUpload(Constants.TYPE_IMAGE);
-
+                if (resultCode == RESULT_OK) {
+                    listLocalMedia = new ArrayList<>();
+                    listLocalMedia = PictureSelector.obtainMultipleResult(data);
+                    Log.e("ad", "REQUEST_CAMERA_PICTURE =" + listLocalMedia.size());
+                    mediaUpload(Constants.TYPE_IMAGE);
+                }
                 break;
 
             case REQUEST_PLACE_PICKER:

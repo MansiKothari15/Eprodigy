@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,7 +32,12 @@ import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.utils.SCUtils;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureConfig;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,6 +45,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -49,20 +57,31 @@ import retrofit2.Response;
 
 public class GroupSubjectActivity extends BaseActivity implements View.OnClickListener {
 
-    TextView tv_label,tv_right,tv_left,tv_back,tv_create;
+    TextView tv_label, tv_right, tv_left, tv_back, tv_create;
     RecyclerView rv_createdGroup;
     CreateGroupAdapter createGroupAdapter;
     EditText edt_groupName;
     ImageView img_groupPic;
-    private int GALLERY = 1, CAMERA = 2;
+    private int REQUEST_PICK_GALLERY = 111, REQUEST_CAMERA_PICTURE = 222;
     private static final String IMAGE_DIRECTORY = "/eProdigy";
     File f;
     ArrayList<String> NameArrayList = new ArrayList<>();
+    ArrayList<String> mCheckset = new ArrayList<>();
+    List<LocalMedia> selectedImageList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_groupsubject);
+
+        Bundle bundle = new Bundle(getIntent().getExtras());
+        if (bundle != null) {
+            mCheckset = (ArrayList<String>) getIntent().getSerializableExtra("checked_array_list");
+            NameArrayList = (ArrayList<String>) getIntent().getSerializableExtra("name_array_list");
+            LogM.e("GroupSubjectActivity  uname>>" + mCheckset.size());
+            LogM.e("GroupSubjectActivity  name>>" + NameArrayList.size());
+        }
+
         init();
     }
 
@@ -70,58 +89,43 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        tv_label = (TextView)findViewById(R.id.tv_label);
-        tv_right = (TextView)findViewById(R.id.tv_right);
-        tv_left = (TextView)findViewById(R.id.tv_left);
-        tv_back = (TextView)findViewById(R.id.tv_back);
-        img_groupPic = (ImageView)findViewById(R.id.img_groupPic);
+        tv_label = (TextView) findViewById(R.id.tv_label);
+        tv_right = (TextView) findViewById(R.id.tv_right);
+        tv_left = (TextView) findViewById(R.id.tv_left);
+        tv_back = (TextView) findViewById(R.id.tv_back);
+        img_groupPic = (ImageView) findViewById(R.id.img_groupPic);
         tv_back.setOnClickListener(this);
-        tv_create = (TextView)findViewById(R.id.tv_create);
+        tv_create = (TextView) findViewById(R.id.tv_create);
         tv_create.setOnClickListener(this);
         img_groupPic.setOnClickListener(this);
 
         tv_label.setText("Add Users");
         hideCustomToolbar();
 
-        edt_groupName = (EditText)findViewById(R.id.edt_groupName);
-        rv_createdGroup = (RecyclerView)findViewById(R.id.rv_createdGroup);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL, false);
+        edt_groupName = (EditText) findViewById(R.id.edt_groupName);
+        rv_createdGroup = (RecyclerView) findViewById(R.id.rv_createdGroup);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         rv_createdGroup.setLayoutManager(mLayoutManager);
         rv_createdGroup.setItemAnimator(new DefaultItemAnimator());
-        createGroupAdapter = new CreateGroupAdapter(GroupSubjectActivity.this,NameArrayList);
+        createGroupAdapter = new CreateGroupAdapter(GroupSubjectActivity.this, NameArrayList);
         rv_createdGroup.setAdapter(createGroupAdapter);
 
     }
 
-    public void hideCustomToolbar(){
+    public void hideCustomToolbar() {
         tv_right.setVisibility(View.INVISIBLE);
         tv_left.setVisibility(View.INVISIBLE);
         tv_back.setVisibility(View.VISIBLE);
         tv_create.setVisibility(View.VISIBLE);
     }
 
-    public void uploadGroupDetail(File file){
-
-        String grpName = edt_groupName.getText().toString();
-        if (XMPPHandler.createRoom(grpName)) {
-           // mCheckset.add(mUser);
-           // for (String names : mCheckset) {
-                XMPPHandler.inviteToGroup("eprodigyiqsv6pvxc61543822451", grpName);
-            //}
-            Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
-//            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
-//            );
-//            finish();
-        }
+    public void uploadGroupDetail() {
 
         showLoadingDialog(this);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
-        String groupname = edt_groupName.getText().toString();
+        String groupname = edt_groupName.getText().toString() + "_" + SCUtils.getCurrentTimeStamp2();
         String group_title = edt_groupName.getText().toString();
 
         RequestBody userName = RequestBody.create(MediaType.parse(""), username);
@@ -129,19 +133,20 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
         RequestBody groupName = RequestBody.create(MediaType.parse(""), groupname);
         RequestBody groupTitle = RequestBody.create(MediaType.parse(""), group_title);
 
+        File file = new File(selectedImageList.get(0).getPath());
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
-        Log.d("Params->",userName.toString()+" "+loginToken.toString());
+        Log.d("Params->", userName.toString() + " " + loginToken.toString());
 
-        Call<UpdateGroupDetailResponse> call = ApiClient.getClient().updateGroupDetail(userName,loginToken,groupName,groupTitle,body);
+        Call<UpdateGroupDetailResponse> call = ApiClient.getClient().updateGroupDetail(userName, loginToken, groupName, groupTitle, body);
         call.enqueue(new Callback<UpdateGroupDetailResponse>() {
             @Override
             public void onResponse(Call<UpdateGroupDetailResponse> call, Response<UpdateGroupDetailResponse> response) {
 
                 dismissLoadingDialog();
                 Log.d("UpdateGroupDetailRes", response.toString());
-                Intent i = new Intent(GroupSubjectActivity.this,MessagingActivity.class);
+                Intent i = new Intent(GroupSubjectActivity.this, MessagingActivity.class);
                 startActivity(i);
                 finish();
 
@@ -158,44 +163,49 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.tv_back:
                 finish();
                 break;
             case R.id.tv_create:
-                if(edt_groupName.getText().length() != 0) {
+                if (edt_groupName.getText().length() != 0) {
 
                     String grpName = edt_groupName.getText().toString();
                     if (XMPPHandler.createRoom(grpName)) {
-                        // mCheckset.add(mUser);
-                        // for (String names : mCheckset) {
-                        XMPPHandler.inviteToGroup("eprodigyiqsv6pvxc61543822451", grpName);
-                        //}
+                        mCheckset.add(username);
+                        for (String names : mCheckset) {
+                            XMPPHandler.inviteToGroup(names, grpName);
+                        }
                         Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+                        uploadGroupDetail();
 //            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
 //                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
 //            );
 //            finish();
+
                     }
-                    //uploadGroupDetail(f);
+
+
                 } else {
                     Toast.makeText(this, "Group subject is required!", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.img_groupPic:
+
                 showPictureDialog();
+
                 break;
         }
     }
 
-    private void showPictureDialog(){
+    private void showPictureDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Action");
         String[] pictureDialogItems = {
                 "Select photo from gallery",
-                "Capture photo from camera" };
+                "Capture photo from camera"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -203,15 +213,15 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                         switch (which) {
                             case 0:
                                 if (ContextCompat.checkSelfPermission(GroupSubjectActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(GroupSubjectActivity.this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
-                                }else {
+                                    ActivityCompat.requestPermissions(GroupSubjectActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                                } else {
                                     choosePhotoFromGallary();
                                 }
                                 break;
                             case 1:
                                 if (ContextCompat.checkSelfPermission(GroupSubjectActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(GroupSubjectActivity.this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 1);
-                                }else {
+                                    ActivityCompat.requestPermissions(GroupSubjectActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                                } else {
                                     takePhotoFromCamera();
                                 }
 
@@ -223,15 +233,40 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
     }
 
     public void choosePhotoFromGallary() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        startActivityForResult(galleryIntent, GALLERY);
+        PictureSelector.create(GroupSubjectActivity.this)
+                .openGallery(PictureMimeType.ofAll())
+                .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")
+                .freeStyleCropEnabled(true)
+                // .circleDimmedLayer(true)
+                .selectionMode(PictureConfig.SINGLE)
+                .showCropFrame(true)
+                .showCropGrid(true)
+                .rotateEnabled(true)
+                .enableCrop(true)
+                .compress(true)
+                .minimumCompressSize(100)
+                .forResult(REQUEST_PICK_GALLERY);
+
+
     }
 
     private void takePhotoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, CAMERA);
+
+        PictureSelector.create(GroupSubjectActivity.this)
+                .openCamera(PictureMimeType.ofAll())
+                .setOutputCameraPath("/" + getResources().getString(R.string.app_name) + "/media")
+                .freeStyleCropEnabled(true)
+                // .circleDimmedLayer(true)
+                .showCropFrame(true)
+                .showCropGrid(true)
+                .rotateEnabled(true)
+                .enableCrop(true)
+                .compress(true)
+                .minimumCompressSize(100)
+                .forResult(REQUEST_CAMERA_PICTURE);
+
+
     }
 
     @Override
@@ -241,24 +276,24 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
         if (resultCode == this.RESULT_CANCELED) {
             return;
         }
-        if (requestCode == GALLERY) {
+        if ((requestCode == REQUEST_PICK_GALLERY && resultCode == RESULT_OK) ||
+                (requestCode == REQUEST_CAMERA_PICTURE && resultCode == RESULT_OK)) {
             if (data != null) {
-                Uri contentURI = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path = saveImage(bitmap);
-                    img_groupPic.setImageBitmap(bitmap);
+                selectedImageList = PictureSelector.obtainMultipleResult(data);
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(GroupSubjectActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+                if (selectedImageList != null && selectedImageList.size() > 0) {
+                    File imgFile = new File(selectedImageList.get(0).getPath());
+
+                    if (imgFile.exists()) {
+
+                        Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+                        img_groupPic.setImageBitmap(myBitmap);
+
+                    }
                 }
             }
 
-        } else if (requestCode == CAMERA) {
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-            img_groupPic.setImageBitmap(thumbnail);
-            saveImage(thumbnail);
         }
     }
 

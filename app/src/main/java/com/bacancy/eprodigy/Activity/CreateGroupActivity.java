@@ -20,6 +20,7 @@ import com.bacancy.eprodigy.interfaces.MyContactListener;
 import com.bacancy.eprodigy.tasks.GetMyContactTask;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 
 import org.json.JSONArray;
@@ -150,7 +151,12 @@ public class CreateGroupActivity extends BaseActivity implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.tv_next:
+                LogM.e("  uname>>"+groupContactAdapter.getCheckSetList().size());
+                LogM.e("  name>>"+groupContactAdapter.getNameList().size());
+
                 Intent i = new Intent(CreateGroupActivity.this,GroupSubjectActivity.class);
+                i.putExtra("checked_array_list", groupContactAdapter.getCheckSetList());
+                i.putExtra("name_array_list", groupContactAdapter.getNameList());
                 startActivity(i);
                 break;
             case R.id.tv_back:

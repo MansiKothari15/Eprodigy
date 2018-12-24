@@ -283,8 +283,6 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                             }
                         }
 
-
-
                     } else {
                         ((BaseActivity) getActivity()).dismissLoadingDialog();
                         AlertUtils.showSimpleAlert(getActivity(), getActivity().getString(R.string.server_error));

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@mipmap/bg">
@@ -9,166 +10,112 @@
         android:id="@+id/img_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_back"
+        android:layout_alignParentLeft="true"
         android:layout_margin="@dimen/margin_large"
         android:padding="@dimen/padding_small"
-        android:layout_alignParentLeft="true"/>
+        android:src="@mipmap/ic_back" />
 
     <LinearLayout
+        android:id="@+id/ll_main_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="@dimen/margin_large">
+
+        android:layout_margin="@dimen/margin_large"
+        android:orientation="vertical">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/verification_img"
+            android:layout_gravity="center"
             android:layout_marginTop="@dimen/margin_gap"
-            android:layout_gravity="center"/>
+            android:src="@mipmap/verification_img" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
+            android:layout_marginTop="@dimen/normal_margin"
             android:text="@string/verification_label1"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:textSize="@dimen/text_big"/>
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_big" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="@dimen/normal_margin"
             android:gravity="center"
-            android:textColor="@android:color/white"
             android:text="@string/verification_label2"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:textSize="@dimen/text_small"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:layout_gravity="center">
-            <EditText
-                android:id="@+id/edt_1"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:inputType="number"
-                android:imeOptions="actionNext"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_2"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:inputType="number"
-                android:gravity="center"
-                android:textColor="@color/white"
-                android:maxLength="1"
-                android:imeOptions="actionNext"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_3"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:inputType="number"
-                android:imeOptions="actionNext"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_4"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:inputType="number"
-                android:gravity="center"
-                android:imeOptions="actionGo"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_5"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:inputType="number"
-                android:gravity="center"
-                android:imeOptions="actionGo"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_6"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:inputType="number"
-                android:gravity="center"
-                android:imeOptions="actionGo"
-                android:background="@mipmap/code_bg"/>
-            <EditText
-                android:id="@+id/edt_7"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_marginLeft="@dimen/normal_margin"
-                android:maxLength="1"
-                android:textColor="@color/white"
-                android:inputType="number"
-                android:gravity="center"
-                android:imeOptions="actionGo"
-                android:background="@mipmap/code_bg"/>
-        </LinearLayout>
-
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_small" />
 
     </LinearLayout>
+    <com.chaos.view.PinView
+
+        android:layout_marginLeft="@dimen/_5sdp"
+        android:layout_marginRight="@dimen/_5sdp"
+        android:layout_centerHorizontal="true"
+
+        android:layout_below="@id/ll_main_data"
+        android:id="@+id/et_code_verification"
+        style="@style/PinWidget.PinView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:cursorVisible="true"
+        android:inputType="number"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_12sdp"
+        android:textStyle="bold"
+        app:cursorWidth="@dimen/_2sdp"
+        app:itemCount="7"
+        app:itemSpacing="@dimen/_3sdp"
+        app:lineColor="@color/white"
+        app:lineWidth="@dimen/_1sdp"
+        app:viewType="none"
+        android:itemBackground="@mipmap/code_bg" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textSize="@dimen/text_normal"
+                android:text="Not got code yet?"
                 android:textColor="@android:color/white"
-                android:text="Not got code yet?"/>
+                android:textSize="@dimen/text_normal" />
+
             <TextView
                 android:id="@+id/tv_resend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textSize="@dimen/text_normal"
-                android:textColor="@android:color/white"
                 android:layout_marginLeft="@dimen/padding_xsmall"
-                android:text="@string/resend_code"/>
+                android:text="@string/resend_code"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/text_normal" />
         </LinearLayout>
+
         <Button
             android:id="@+id/btn_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_normal"
             android:layout_marginTop="@dimen/normal_margin"
             android:background="@mipmap/continue_btn"
+            android:text="confirm number"
             android:textColor="@android:color/white"
-            android:text="confirm number"/>
+            android:textSize="@dimen/text_normal" />
     </LinearLayout>
 
 </RelativeLayout>

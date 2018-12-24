@@ -25,8 +25,17 @@ public class GroupContactAdapter extends RecyclerView.Adapter<GroupContactAdapte
     private static int lastCheckedPos = 0;
     CreateGroupAdapter createGroupAdapter;
     ArrayList<String> NameArrayList = new ArrayList<>();
+      ArrayList<String> mCheckset = new ArrayList<>();
 
 
+
+    public ArrayList<String> getCheckSetList()
+    {
+        return mCheckset;
+    }public ArrayList<String> getNameList()
+    {
+        return NameArrayList;
+    }
     public GroupContactAdapter(Context mcContext,List<ContactListResponse.ResponseDataBean> responseDataBeanList) {
         this.mContext = mcContext;
         this.responseDataBeanList = responseDataBeanList;
@@ -41,7 +50,7 @@ public class GroupContactAdapter extends RecyclerView.Adapter<GroupContactAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final GroupContactAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final GroupContactAdapter.MyViewHolder holder, final int position) {
 
         holder.tv_name.setText(responseDataBeanList.get(position).getName());
         holder.tv_country.setText(responseDataBeanList.get(position).getPhone());
@@ -54,7 +63,10 @@ public class GroupContactAdapter extends RecyclerView.Adapter<GroupContactAdapte
             public void onClick(View v)
             {
                 NameArrayList.add(holder.tv_name.getText().toString());
+                mCheckset.add(responseDataBeanList.get(position).getUsername());
                 createGroupAdapter = new CreateGroupAdapter(mContext,NameArrayList);
+
+                if (CreateGroupActivity.rv_group!=null)
                 CreateGroupActivity.rv_group.setAdapter(createGroupAdapter);
 //                CheckBox cb = (CheckBox)v;
 //                int clickedPos = (Integer) cb.getTag();

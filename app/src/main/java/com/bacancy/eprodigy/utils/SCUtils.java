@@ -104,6 +104,11 @@ public class SCUtils {
         return s.format(new Date());
     }
 
+    public static String getCurrentTimeStamp2() {
+
+        return String.valueOf(System.currentTimeMillis() / 1000L);
+    }
+
 
     //use either formatted_date or time_ago (below)
     public static String formatted_date_only(String timestamp) {
