@@ -203,7 +203,7 @@ public class ChatsFragment extends Fragment {
                     .observe(getActivity(), new Observer<List<ChatPojo>>() {
                         @Override
                         public void onChanged(@Nullable List<ChatPojo> userList) {
-
+                            Log.d("userList",userList.toString());
                             if (chatListAdapter != null) {
                                 chatListAdapter.swapItems(userList);
                                 chatListAdapter.notifyDataSetChanged();

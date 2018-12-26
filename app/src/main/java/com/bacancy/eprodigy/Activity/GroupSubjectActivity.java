@@ -39,6 +39,8 @@ import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
+import org.jivesoftware.smackx.muc.MultiUserChat;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -171,11 +173,12 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 if (edt_groupName.getText().length() != 0) {
 
                     String grpName = edt_groupName.getText().toString();
-                    if (XMPPHandler.createRoom(grpName)) {
-                        mCheckset.add(username);
-                        for (String names : mCheckset) {
-                            XMPPHandler.inviteToGroup(names, grpName);
-                        }
+                    mCheckset.add(username);
+                    if (XMPPHandler.createRoom(grpName,mCheckset)) {
+//                        for (String names : mCheckset) {
+//                            XMPPHandler.inviteToGroup(names, grpName);
+//
+//                        }
                         Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
                         uploadGroupDetail();
 //            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)

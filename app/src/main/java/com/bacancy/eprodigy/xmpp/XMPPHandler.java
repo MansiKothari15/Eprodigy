@@ -248,11 +248,11 @@ public class XMPPHandler {
                 if (message.getBody() != null) {
                     String addedBy = XmppStringUtils.parseLocalpart(message.getFrom().toString());
                     LogM.e("HeadLines      ++++++++++++++++++++++++++++++++++++++++++");
-                    LogM.e( "from: " + message.getFrom());
-                    LogM.e( "xml: " + message.getType().toString());
+                    LogM.e("from: " + message.getFrom());
+                    LogM.e("xml: " + message.getType().toString());
                     LogM.e("Got text [" + message.getBody() + "] from [" + addedBy + "]");
-                    LogM.e( "Type [" + message.getSubject() + "] ");
-                    LogM.e( "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                    LogM.e("Type [" + message.getSubject() + "] ");
+                    LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                     if (message.getSubject().equals("1")) {
                         updateDB(message.getBody(), "You have been added in Group "
                                 + message.getBody() + " by " + addedBy, 1, 0, message.getBody(), true);
@@ -270,9 +270,42 @@ public class XMPPHandler {
         MultiUserChatManager.getInstanceFor(connection).addInvitationListener(new InvitationListener() {
             @Override
             public void invitationReceived(XMPPConnection conn, MultiUserChat room, EntityJid inviter, String reason, String password, Message message, MUCUser.Invite invitation) {
-              //  Utils.Log(TAG, "invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
+                //  Utils.Log(TAG, "invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
                 LogM.e("invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
+                try {
+                    Resourcepart nickname = null;
+                    try {
+                        nickname = Resourcepart.from(userId);
+                    } catch (XmppStringprepException e) {
+                        e.printStackTrace();
+                    }
 
+                    try {
+
+                        room.join(nickname);
+
+                    } catch (SmackException.NoResponseException e) {
+                        e.printStackTrace();
+                    } catch (SmackException.NotConnectedException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (MultiUserChatException.NotAMucServiceException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.e(TAG, "join room successfully");
+                    try {
+                        room.sendMessage("I joined this room!! Bravo!!");
+                    } catch (SmackException.NotConnectedException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    Log.e("abc", "join room failed!");
+                }
 
             }
         });
@@ -287,15 +320,14 @@ public class XMPPHandler {
     }
 
 
-    public static boolean createRoom(String grp_name) {
+    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset) {
         try {
 
-            if (TextUtils.isEmpty(grp_name))
-            {
+            if (TextUtils.isEmpty(grp_name)) {
                 return false;
             }
 
-            String gName=grp_name+"_"+System.currentTimeMillis() / 1000L;
+            String gName = grp_name + "_" + System.currentTimeMillis() / 1000L;
             // Create the XMPP address (JID) of the MUC.
             EntityBareJid mucJid = JidCreate.entityBareFrom(gName + "@" + Constants.GRP_SERVICE);
             // Create the nickname.
@@ -306,7 +338,7 @@ public class XMPPHandler {
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
             // Prepare a list of owners of the new room
             try {
-                Log.e(TAG,"userId="+userId);
+                Log.e(TAG, "userId=" + userId);
                 Set<Jid> owners = JidUtil.jidSetFrom(new String[]{userId + "@" + Constants.XMPP_HOST});
                 // Create the room
                 muc.create(nickname);
@@ -327,10 +359,17 @@ public class XMPPHandler {
                 submitForm.setAnswer("muc#roomconfig_roomname", grp_name);
 
 
-
                 muc.sendConfigurationForm(submitForm);
                 Log.d(TAG, "submit form");
                 muc.join(nickname);
+
+                for (String names : mCheckset) {
+                    EntityBareJid eJId = JidCreate.entityBareFrom(names + "@" + Constants.XMPP_DOMAIN);
+                    muc.invite(eJId, "Greetings");
+
+
+                }
+
                 Log.d(TAG, "join");
 
                 return true;
@@ -363,8 +402,11 @@ public class XMPPHandler {
      * @param inviteuser userID
      * @param groupName  group Name
      */
+
+
     public static void inviteToGroup(String inviteuser, String groupName) {
         try {
+
 
             Message message = new Message(JidCreate.entityBareFrom(makeSmackId(inviteuser)));
             message.setBody(groupName);
@@ -372,8 +414,9 @@ public class XMPPHandler {
             message.setSubject("1");
 //            message.addExtension(new GroupChatInvitation(grp_name + "@" + grp_service));
             connection.sendStanza(message);
+            Log.e(TAG, "inviteToGroup() called with: inviteuser = [" + inviteuser + "], groupName = [" + groupName + "]");
         } catch (XmppStringprepException | InterruptedException | SmackException.NotConnectedException e) {
-
+            Log.e(TAG, "sendMessage() Error = [" + e.getMessage() + "]");
         }
     }
 
@@ -475,7 +518,7 @@ public class XMPPHandler {
             customProgressDialog = new CustomProgressDialog();
 
 
-                customProgressDialog.showCustomDialog(mActivity);
+            customProgressDialog.showCustomDialog(mActivity);
         }
 
         @Override
@@ -1267,7 +1310,7 @@ public class XMPPHandler {
             this.password = password;
 
             //customProgressDialog = new CustomProgressDialog();
-           // customProgressDialog.showCustomDialog(mActivity);
+            // customProgressDialog.showCustomDialog(mActivity);
         }
 
         @Override
@@ -1642,32 +1685,33 @@ public class XMPPHandler {
 
 
     }
-/*    private class GroupChatListener implements  InvitationListener{
-        String nickname;
-        public GroupChatListener(String nick)
-        {
-            nickname = nick;
-        }
 
-        @Override
-        public void invitationReceived(XMPPConnection conn, MultiUserChat room, EntityJid inviter, String reason, String password, Message message, MUCUser.Invite invitation) {
-            System.out.println(" Entered invitation handler... ");
-            try
+    /*    private class GroupChatListener implements  InvitationListener{
+            String nickname;
+            public GroupChatListener(String nick)
             {
-                MultiUserChat chatRoom = new MultiUserChat(connection, room);
-                chatRoom.join(nickname);
+                nickname = nick;
             }
 
-            catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | SmackException.NotConnectedException e)
-            {
-                e.printStackTrace();
-            } catch (SmackException e)
-            {
-                e.printStackTrace();
+            @Override
+            public void invitationReceived(XMPPConnection conn, MultiUserChat room, EntityJid inviter, String reason, String password, Message message, MUCUser.Invite invitation) {
+                System.out.println(" Entered invitation handler... ");
+                try
+                {
+                    MultiUserChat chatRoom = new MultiUserChat(connection, room);
+                    chatRoom.join(nickname);
+                }
+
+                catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | SmackException.NotConnectedException e)
+                {
+                    e.printStackTrace();
+                } catch (SmackException e)
+                {
+                    e.printStackTrace();
+                }
+                System.out.println(" Invitation Accepted... ");
             }
-            System.out.println(" Invitation Accepted... ");
-        }
-    }*/
+        }*/
     //Your own Chat Manager. We attach the message events here
     private class MyChatManagerListener implements IncomingChatMessageListener {
 
@@ -1718,13 +1762,12 @@ public class XMPPHandler {
 
     }
 
-    public  void updateDB(String username, String message, int chatType, int header, String chatheader, boolean isGroup) {
+    public void updateDB(String username, String message, int chatType, int header, String chatheader, boolean isGroup) {
         ChatPojo chatPojo = new ChatPojo();
 
 
         if (isGroup) chatPojo.setChatId(AppConfing.grpID + chatheader);
         else chatPojo.setChatId(AppConfing.chatID + mUser + "_" + chatheader);
-
 
 
         chatPojo.setChatSender(username);//from
@@ -1734,8 +1777,8 @@ public class XMPPHandler {
         //chatPojo.setChatType(header);
         chatPojo.setChatTimestamp(SCUtils.getNow());
         addMessage(chatPojo);
-
     }
+
     private void updateDB(String username, ChatPojo chatPojo, String s) {
 
         /*ChatPojo chatPojo = new ChatPojo();
@@ -1753,12 +1796,12 @@ public class XMPPHandler {
 //        DataManager.getInstance().updateTimestamp(username, SCUtils.getNo
         Log.e(TAG, "updateDB >" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
 
-
-        chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);
+        chatPojo.setChatId(s);
+        //chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);
         chatPojo.setChatRecv(mUser);//to
         chatPojo.setChatSender(username);//from
         chatPojo.setMine(false);
-        chatPojo.setChatTimestamp(SCUtils.getNow());
+        chatPojo.setChatTimestamp(SCUtils.getCurrentTimeStamp2());
         addMessage(chatPojo);
 
     }
@@ -1935,6 +1978,10 @@ public class XMPPHandler {
 
                     }
                 }
+
+//                else if (packet instanceof Message){
+//
+//                }
             } catch (Exception e) {
                 e.printStackTrace();
                 LogM.e("123" + e.getMessage());

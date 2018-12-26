@@ -269,6 +269,7 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                                 response.body().getMessage())) {
                             return;
                         }
+
                         Log.d("ContactListResponse", response.toString());
                         List<ContactListResponse.ResponseDataBean> mList = response.body().getResponse_data();
 
@@ -282,6 +283,8 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
                                 }
                             }
                         }
+
+                        LoadData();
 
                     } else {
                         ((BaseActivity) getActivity()).dismissLoadingDialog();
