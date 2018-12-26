@@ -296,7 +296,7 @@ public class XMPPHandler {
 
                     Log.e(TAG, "join room successfully");
                     try {
-                        room.sendMessage("I joined this room!! Bravo!!");
+                        room.sendMessage("Greetings");
                     } catch (SmackException.NotConnectedException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -304,7 +304,7 @@ public class XMPPHandler {
                     }
                 } catch (XMPPException e) {
                     e.printStackTrace();
-                    Log.e("abc", "join room failed!");
+                    Log.e(TAG, "join room failed!");
                 }
 
             }

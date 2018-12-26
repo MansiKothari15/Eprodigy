@@ -45,7 +45,7 @@ import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
-import com.bacancy.eprodigy.utils.ImageSelectUtils;
+
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -88,7 +88,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
     Activity mActivity;
       PopupMenu popup;
-    private ImageSelectUtils imageSelectUtils;
+
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
@@ -197,7 +197,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         startXmppService(mActivity);
         xmppEventReceiver = mChatApp.getEventReceiver();
 
-        imageSelectUtils = new ImageSelectUtils(this);
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             mName = extras.getString("name");
@@ -723,7 +723,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data); // no need for super
-        imageSelectUtils.onActivityResult(requestCode, resultCode, data);
+//        imageSelectUtils.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_PICK_GALLERY:
                 if (resultCode == RESULT_OK) {

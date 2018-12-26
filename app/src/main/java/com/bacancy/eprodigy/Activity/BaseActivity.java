@@ -34,7 +34,7 @@ import com.bacancy.eprodigy.permission.PermissionActivity;
 import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
-import com.bacancy.eprodigy.utils.ImageSelectUtils;
+
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -46,7 +46,7 @@ import com.bacancy.eprodigy.xmpp.XMPPService;
 public class BaseActivity extends AppCompatActivity {
     public String TAG = "BaseActivity";
 
-    public ImageSelectUtils imageSelectUtils;
+
     PermissionActivity permissionActivity;
 
     public Activity activity;
@@ -66,7 +66,7 @@ public class BaseActivity extends AppCompatActivity {
         xmppEventReceiver = mChatApp.getEventReceiver();
 
 
-        imageSelectUtils = new ImageSelectUtils(BaseActivity.this);
+
         permissionActivity = new PermissionActivity(BaseActivity.this);
 
 
