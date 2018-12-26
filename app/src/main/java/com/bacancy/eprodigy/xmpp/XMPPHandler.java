@@ -296,7 +296,7 @@ public class XMPPHandler {
 
                     Log.e(TAG, "join room successfully");
                     try {
-                        room.sendMessage("Greetings");
+                        room.sendMessage("I joined this room!! Bravo!!");
                     } catch (SmackException.NotConnectedException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
