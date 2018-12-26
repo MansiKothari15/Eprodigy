@@ -7,10 +7,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -28,6 +26,7 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.CreateGroupAdapter;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.utils.LogM;
@@ -39,8 +38,6 @@ import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
-import org.jivesoftware.smackx.muc.MultiUserChat;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,7 +45,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -148,6 +144,15 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
                 dismissLoadingDialog();
                 Log.d("UpdateGroupDetailRes", response.toString());
+
+                GroupPojo groupPojo = new GroupPojo();
+                groupPojo.setGid(response.body().getUserdata().getId());
+                groupPojo.setGroup_title(response.body().getUserdata().getGroup_title());
+                groupPojo.setGroupname(response.body().getUserdata().getGroupname());
+                groupPojo.setGroupimage(response.body().getUserdata().getGroupimage());
+                groupPojo.setCreated_at(response.body().getUserdata().getCreated_at());
+                groupPojo.setModify_at(response.body().getUserdata().getModify_at());
+
                 Intent i = new Intent(GroupSubjectActivity.this, MessagingActivity.class);
                 startActivity(i);
                 finish();
