@@ -53,8 +53,6 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
         tv_resend.setOnClickListener(this);
         img_back.setOnClickListener(this);
 
-
-
     }
 
     @Override

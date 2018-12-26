@@ -1,74 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@mipmap/bg">
 
     <LinearLayout
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="@dimen/margin_large">
+       android:layout_marginLeft="@dimen/_5sdp"
+        android:layout_marginRight="@dimen/_5sdp"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
-            android:text="Register Mobile"
             android:layout_marginTop="@dimen/normal_margin"
-            android:textSize="@dimen/text_big"/>
+            android:text="Register Mobile"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_big" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/verification_img"
+            android:layout_gravity="center"
             android:layout_marginTop="@dimen/normal_margin"
-            android:layout_gravity="center"/>
+            android:src="@mipmap/verification_img" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
+            android:layout_marginTop="@dimen/normal_margin"
             android:text="@string/registration_label1"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:textSize="@dimen/text_big"/>
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_big" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="@dimen/normal_margin"
             android:gravity="center"
-            android:textColor="@android:color/white"
             android:text="@string/registration_label2"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:textSize="@dimen/text_small"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="@dimen/normal_margin"
-        android:weightSum="2">
-        <Spinner
-            android:id="@+id/sp_countrycode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:layout_gravity="bottom"/>
-        <EditText
-            android:id="@+id/edt_phoneNo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/normal_margin"
-            android:textStyle="bold"
-            android:textSize="@dimen/text_normal"
-            android:inputType="phone"
             android:textColor="@android:color/white"
-            android:layout_weight="1.4"/>
-    </LinearLayout>
+            android:textSize="@dimen/text_small" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/normal_margin"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="0.8">
+
+                <ProgressBar
+                    android:id="@+id/pgb_country"
+                    style="@android:style/Widget.ProgressBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="@dimen/_8sdp" />
+
+                <Spinner
+                    android:id="@+id/sp_countrycode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:spinnerMode="dialog" />
+            </RelativeLayout>
+
+            <EditText
+                android:id="@+id/edt_phoneNo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/normal_margin"
+                android:layout_weight="1.2"
+                android:inputType="phone"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/text_normal"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -77,8 +97,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:textSize="@dimen/text_normal"
-        android:textColor="@android:color/white"
         android:background="@mipmap/continue_btn"
-        android:text="continue"/>
+        android:text="continue"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/text_normal" />
 </RelativeLayout>
