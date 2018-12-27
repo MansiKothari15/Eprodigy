@@ -36,8 +36,16 @@ import org.json.JSONObject;
  "locationAddressLatitude": "aaaa",
  "locationAddressLongitude": "aaaa"
 } */
+
 @Entity(tableName = "ChatPojo")
 public class ChatPojo implements Parcelable {
+
+    @ColumnInfo(name = "groupId")
+    private String groupId;
+
+    /*0= single ,1 = group chat*/
+    @ColumnInfo(name = "msgMode")
+    private String msgMode;
 
     @PrimaryKey(autoGenerate = true)
     private int msgId;
@@ -118,6 +126,8 @@ public class ChatPojo implements Parcelable {
         msgId = in.readInt();
         msgType = in.readInt();
         chatId = in.readString();
+        groupId = in.readString();
+        msgMode = in.readString();
         chatText = in.readString();
         chatTimestamp = in.readString();
         chatSender = in.readString();
@@ -148,6 +158,23 @@ public class ChatPojo implements Parcelable {
             return new ChatPojo[size];
         }
     };
+
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getMsgMode() {
+        return msgMode;
+    }
+
+    public void setMsgMode(String msgMode) {
+        this.msgMode = msgMode;
+    }
 
     public int getMsgId() {
         return msgId;
@@ -320,6 +347,8 @@ public class ChatPojo implements Parcelable {
         parcel.writeInt(msgId);
         parcel.writeInt(msgType);
         parcel.writeString(chatId);
+        parcel.writeString(groupId);
+        parcel.writeString(msgMode);
         parcel.writeString(chatText);
         parcel.writeString(chatTimestamp);
         parcel.writeString(chatSender);

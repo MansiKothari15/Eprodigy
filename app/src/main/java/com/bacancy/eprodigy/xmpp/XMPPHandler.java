@@ -254,12 +254,10 @@ public class XMPPHandler {
                     LogM.e("Type [" + message.getSubject() + "] ");
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                     if (message.getSubject().equals("1")) {
-                        updateDB(message.getBody(), "You have been added in Group "
-                                + message.getBody() + " by " + addedBy, 1, 0, message.getBody(), true);
+                        updateDB(message.getBody(), message.getBody(), message.getFrom().toString(), message.getBody());
                         JoinRoom(message.getBody());
                     } else {
-                        updateDB(message.getBody(), "You have been Removed from Group "
-                                + message.getBody() + " by " + addedBy, 1, 0, message.getBody(), true);
+                        updateDB(message.getBody(), message.getBody(), message.getFrom().toString(), message.getBody());
 
                     }
 
@@ -283,7 +281,7 @@ public class XMPPHandler {
                     try {
 
                         room.join(nickname);
-
+                        room.getRoom().getLocalpart();
                     } catch (SmackException.NoResponseException e) {
                         e.printStackTrace();
                     } catch (SmackException.NotConnectedException e) {
@@ -295,8 +293,16 @@ public class XMPPHandler {
                     }
 
                     Log.e(TAG, "join room successfully");
+
+                    String addedBy = XmppStringUtils.parseLocalpart(message.getFrom().toString());
+//room.getRoom().getLocalpart().part;
+
+                    updateDB(message.getFrom().toString(),
+                            message.getBody(), message.getFrom().toString(), reason);
+
                     try {
                         room.sendMessage("I joined this room!! Bravo!!");
+
                     } catch (SmackException.NotConnectedException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -364,8 +370,11 @@ public class XMPPHandler {
                 muc.join(nickname);
 
                 for (String names : mCheckset) {
+
+                    Message message = new Message();
+                    message.setBody("Greetings");
                     EntityBareJid eJId = JidCreate.entityBareFrom(names + "@" + Constants.XMPP_DOMAIN);
-                    muc.invite(eJId, "Greetings");
+                    muc.invite(message, eJId, grp_name);
 
 
                 }
@@ -1762,21 +1771,25 @@ public class XMPPHandler {
 
     }
 
-    public void updateDB(String username, String message, int chatType, int header, String chatheader, boolean isGroup) {
+    public void updateDB(String username, String message, String chatSender, String groupName) {
+
         ChatPojo chatPojo = new ChatPojo();
 
 
-        if (isGroup) chatPojo.setChatId(AppConfing.grpID + chatheader);
-        else chatPojo.setChatId(AppConfing.chatID + mUser + "_" + chatheader);
+        chatPojo.setGroupId(groupName + "_" + SCUtils.getCurrentTimeStamp2());
+
+        Log.e("ad", "updateDB=" + chatPojo.getGroupId());
 
 
-        chatPojo.setChatSender(username);//from
+        chatPojo.setChatSender(chatSender);//from
+        chatPojo.setChatId(username);//to
         chatPojo.setChatRecv(mUser);
         chatPojo.setChatText(message);
         chatPojo.setShowing(false);
         //chatPojo.setChatType(header);
         chatPojo.setChatTimestamp(SCUtils.getNow());
         addMessage(chatPojo);
+
     }
 
     private void updateDB(String username, ChatPojo chatPojo, String s) {

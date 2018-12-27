@@ -8,6 +8,7 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
 import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 
 import java.util.List;
 
@@ -34,7 +35,8 @@ public interface ChatDao {
 
 //    @Query("select * from ChatPojo ")
 //    LiveData<List<ChatPojo>> getAll();
-
+    /*@Query("select * from ChatPojo WHERE  groupId = :groupId ")
+ContactListResponse.ResponseDataBean getSingle(String groupId);*/
 
     @Delete
     int singledelete(ChatPojo chatPojo);

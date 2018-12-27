@@ -3,6 +3,7 @@ package com.bacancy.eprodigy.db;
 import android.arch.lifecycle.LiveData;
 
 import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.RecentChatUserPojo;
 import com.bacancy.eprodigy.Models.StarredMssagePojo;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
@@ -18,7 +19,11 @@ public interface IDataManager {
     // chatpojo
     void AddChat(ChatPojo ChatPojo);
 
+    void AddGroup(GroupPojo groupPojo);
+
     LiveData<List<ChatPojo>> getAll(String form);
+
+    LiveData<List<GroupPojo>> getAllGroup();
 
     void SingleDelete(ChatPojo ChatPojo);
 

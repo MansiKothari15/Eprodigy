@@ -22,10 +22,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.Activity.BaseActivity;
+import com.bacancy.eprodigy.Activity.GroupSubjectActivity;
 import com.bacancy.eprodigy.Activity.NewMessageActivity;
 import com.bacancy.eprodigy.Adapters.ChatListAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
@@ -198,12 +200,21 @@ public class ChatsFragment extends Fragment {
 
         if (chatList != null && chatList.size() > 0)
             tv_noChat.setVisibility(View.INVISIBLE);
+
             DataManager.getInstance()
                     .getRecentChatUserListById(chatList)
                     .observe(getActivity(), new Observer<List<ChatPojo>>() {
                         @Override
                         public void onChanged(@Nullable List<ChatPojo> userList) {
                             Log.d("userList",userList.toString());
+
+                            for (ChatPojo chatPojo:userList) {
+
+                                Log.e("Sender=",">"+chatPojo.getChatSender());
+                                Log.e("Recv=",">"+chatPojo.getChatRecv());
+                                Log.e("grp id=",">"+chatPojo.getGroupId());
+                            }
+
                             if (chatListAdapter != null) {
                                 chatListAdapter.swapItems(userList);
                                 chatListAdapter.notifyDataSetChanged();
@@ -211,6 +222,22 @@ public class ChatsFragment extends Fragment {
 
                         }
                     });
+
+        DataManager.getInstance()
+                .getAllGroup()
+                .observe(getActivity(), new Observer<List<GroupPojo>>() {
+                    @Override
+                    public void onChanged(@Nullable List<GroupPojo> groupPojoList) {
+                        if (groupPojoList != null)
+                            Log.d("groupPojoList", "" + groupPojoList.size());
+                             /*   if (chatListAdapter != null) {
+                                    chatListAdapter.swapItems(userList);
+                                    chatListAdapter.notifyDataSetChanged();
+                                }*/
+
+                    }
+                });
+
     }
 
 

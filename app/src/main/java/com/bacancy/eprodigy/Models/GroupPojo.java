@@ -1,59 +1,78 @@
 package com.bacancy.eprodigy.Models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+
+@Entity(tableName = "GroupPojo")
 public class GroupPojo {
 
-    private String gid;
-    private String group_title;
-    private String groupname;
-    private String groupimage;
-    private String created_at;
-    private String modify_at;
+    @NonNull
+    @PrimaryKey
+    private String groupId;
 
-    public String getGid() {
-        return gid;
+    @ColumnInfo(name = "groupName")
+    private String groupName;
+
+    @ColumnInfo(name = "groupTitle")
+    private String groupTitle;
+
+    @ColumnInfo(name = "groupImage")
+    private String groupImage;
+
+    @ColumnInfo(name = "createdAt")
+    private String createdAt;
+
+    @ColumnInfo(name = "modifyAt")
+    private String modifyAt;
+
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setGid(String gid) {
-        this.gid = gid;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
-    public String getGroup_title() {
-        return group_title;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setGroup_title(String group_title) {
-        this.group_title = group_title;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
-    public String getGroupname() {
-        return groupname;
+    public String getGroupTitle() {
+        return groupTitle;
     }
 
-    public void setGroupname(String groupname) {
-        this.groupname = groupname;
+    public void setGroupTitle(String groupTitle) {
+        this.groupTitle = groupTitle;
     }
 
-    public String getGroupimage() {
-        return groupimage;
+    public String getGroupImage() {
+        return groupImage;
     }
 
-    public void setGroupimage(String groupimage) {
-        this.groupimage = groupimage;
+    public void setGroupImage(String groupImage) {
+        this.groupImage = groupImage;
     }
 
-    public String getCreated_at() {
-        return created_at;
+    public String getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(String created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public String getModify_at() {
-        return modify_at;
+    public String getModifyAt() {
+        return modifyAt;
     }
 
-    public void setModify_at(String modify_at) {
-        this.modify_at = modify_at;
+    public void setModifyAt(String modifyAt) {
+        this.modifyAt = modifyAt;
     }
 }

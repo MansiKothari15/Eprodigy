@@ -311,6 +311,7 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
             public void onResponseGetContact(JSONArray jsonArray) {
 
                 Log.d("JSON---", jsonArray.toString());
+
                 getContactList(jsonArray.toString());
             }
         }).execute();

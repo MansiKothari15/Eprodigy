@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.Activity;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -26,9 +28,11 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.CreateGroupAdapter;
+import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
+import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
@@ -146,12 +150,37 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 Log.d("UpdateGroupDetailRes", response.toString());
 
                 GroupPojo groupPojo = new GroupPojo();
-                groupPojo.setGid(response.body().getUserdata().getId());
-                groupPojo.setGroup_title(response.body().getUserdata().getGroup_title());
-                groupPojo.setGroupname(response.body().getUserdata().getGroupname());
-                groupPojo.setGroupimage(response.body().getUserdata().getGroupimage());
-                groupPojo.setCreated_at(response.body().getUserdata().getCreated_at());
-                groupPojo.setModify_at(response.body().getUserdata().getModify_at());
+                groupPojo.setGroupId(response.body().getUserdata().getId());
+                groupPojo.setGroupTitle(response.body().getUserdata().getGroup_title());
+                groupPojo.setGroupName(response.body().getUserdata().getGroupname());
+                groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+
+                DataManager.getInstance().AddGroup(groupPojo);
+
+
+                //userid-JID -chatpojo - group id
+                //DataManager.getInstance().AddChat(chatPojo);
+//                ChatPojo chatPojo = new ChatPojo();
+//                chatPojo.setGroupId(response.body().getUserdata().getId());
+//                DataManager.getInstance().AddChat(chatPojo);
+
+
+                DataManager.getInstance()
+                        .getAllGroup()
+                        .observe(GroupSubjectActivity.this, new Observer<List<GroupPojo>>() {
+                            @Override
+                            public void onChanged(@Nullable List<GroupPojo> groupPojoList) {
+                                if (groupPojoList != null)
+                                    Log.d("groupPojoList", "" + groupPojoList.size());
+                             /*   if (chatListAdapter != null) {
+                                    chatListAdapter.swapItems(userList);
+                                    chatListAdapter.notifyDataSetChanged();
+                                }*/
+
+                            }
+                        });
 
                 Intent i = new Intent(GroupSubjectActivity.this, MessagingActivity.class);
                 startActivity(i);
@@ -179,7 +208,7 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
 
                     String grpName = edt_groupName.getText().toString();
                     mCheckset.add(username);
-                    if (XMPPHandler.createRoom(grpName,mCheckset)) {
+                    if (XMPPHandler.createRoom(grpName, mCheckset)) {
 //                        for (String names : mCheckset) {
 //                            XMPPHandler.inviteToGroup(names, grpName);
 //

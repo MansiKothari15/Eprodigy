@@ -107,11 +107,12 @@ public class GetMyContactTask extends AsyncTask<Void, Void, JSONArray> {
 
                             Log.i(TAG, "Phone Number: " + phoneNo);
 
-                            String ph=phoneNo.replace("(","");
-                            String ph2=ph.replace(")","");
+                            String ph=phoneNo.trim().replaceAll("[^0-9]", "");
+                            /*String ph2=ph.replace(")","");
                             String ph3=ph2.replace("-","");
                             String ph4=ph3.replace(" ","");
-                            phoneNumberList.add(ph4);
+                            String ph5=ph4.trim().replaceAll("[^0-9]", "");*/
+                            phoneNumberList.add(ph);
 
                         CountryList.add(country);
                         UserNameList.add(name);

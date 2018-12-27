@@ -72,7 +72,7 @@ public class ContactListResponse {
          * privacystatus : 0
          * readreceiptstatus : 0
          */
-@NonNull
+        @NonNull
         @PrimaryKey
         private String username;
         private String name;
@@ -219,7 +219,6 @@ public class ContactListResponse {
             this.readreceiptstatus = readreceiptstatus;
         }
     }
-
 
 
 //new response don't delete
