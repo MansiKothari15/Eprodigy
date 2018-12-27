@@ -301,8 +301,8 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             xmppHandler = MyApplication.getmService().xmpp;
             if (!xmppHandler.isConnected()) {
-                // xmppHandler.connect();
-                new XMPPHandler.ConnectXMPP(mActivity).execute();
+                  xmppHandler.connect();
+               // new XMPPHandler.ConnectXMPP(mActivity).execute();
             } else {
 
                 username = Pref.getValue(mActivity, "username", "");
@@ -311,8 +311,8 @@ public class BaseActivity extends AppCompatActivity {
 
                 xmppHandler.setUserPassword(username, password);
                 if (!xmppHandler.loggedin)
-                    new XMPPHandler.LoginTask(mActivity,username,password);
-                // xmppHandler.login();
+                  //  new XMPPHandler.LoginTask(mActivity,username,password);
+                 xmppHandler.login();
             }
         }
 

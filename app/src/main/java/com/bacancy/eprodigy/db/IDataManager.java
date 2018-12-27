@@ -39,6 +39,7 @@ public interface IDataManager {
     void UpdateUser(ContactListResponse.ResponseDataBean userPojo);
 
     List<String> getChatUserList();
+    List<String> getGroupIdList();
     List<String> getChatUserListNew();
 
     LiveData<List<ContactListResponse.ResponseDataBean>> getChatUserListById(List<String> chatList);
@@ -79,6 +80,8 @@ public interface IDataManager {
     RecentChatUserPojo getRecentChatUserById(String chatUserId);
 
     LiveData<List<ChatPojo>> getRecentChatUserListById(List<String> chatList);
+
+    LiveData<List<ChatPojo>> getRecentGroupUserListById(List<String> groupIds);
 
     List<ChatPojo> getSearchUserList(String trim);
 }

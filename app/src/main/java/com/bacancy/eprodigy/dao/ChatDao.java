@@ -24,11 +24,18 @@ public interface ChatDao {
     @Query("select * from ChatPojo where chatId = :chatId")
     LiveData<List<ChatPojo>> getAll(String chatId);
 
+    @Query("select * from ChatPojo WHERE  groupId IN (:groupIds)  GROUP BY groupId ORDER BY chatTimestamp DESC")
+    LiveData<List<ChatPojo>> getRecentGroupChatAll(List<String> groupIds);
+
+
     @Query("select * from ChatPojo WHERE  chatId IN (:ids)  GROUP BY chatId ORDER BY chatTimestamp DESC")
     LiveData<List<ChatPojo>> getRecentChatAll(List<String> ids);
 
     @Query("select DISTINCT chatId  from ChatPojo")
     List<String> getRecentChatUserList();
+
+    @Query("select DISTINCT groupId  from GroupPojo")
+    List<String> getGroupIdList();
 
     @Query("select * from ChatPojo where chatId = :chatId and isShowing = 0 ORDER BY chatTimestamp DESC limit 1")
     LiveData<ChatPojo> getSingleLast(String chatId);

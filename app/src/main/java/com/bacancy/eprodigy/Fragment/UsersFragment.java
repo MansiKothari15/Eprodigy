@@ -28,6 +28,7 @@ import com.bacancy.eprodigy.Adapters.ChatAdapter;
 import com.bacancy.eprodigy.Adapters.UsersAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
@@ -81,6 +82,18 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
             chatPojo.setMine(false);
             DataManager.getInstance().AddChat(chatPojo);
 
+            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
+            {
+                GroupPojo groupPojo = new GroupPojo();
+                groupPojo.setGroupId(chatPojo.getGroupId());
+                groupPojo.setGroupTitle(chatPojo.getGroupId());
+                groupPojo.setGroupName(chatPojo.getGroupId());
+                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+
+                DataManager.getInstance().AddGroup(groupPojo);
+            }
             LogM.e("onNewMessageReceived ChatActivity");
 
             // if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
@@ -117,8 +130,8 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
 
             ((BaseActivity)getActivity()).xmppHandler = MyApplication.getmService().xmpp;
             ((BaseActivity)getActivity()).xmppHandler.setUserPassword(((BaseActivity)getActivity()).username, ((BaseActivity)getActivity()).password);
-            //((BaseActivity)getActivity()).xmppHandler.login();
-            new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
+            ((BaseActivity)getActivity()).xmppHandler.login();
+            //new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
         }
 
         public void onLoginFailed() {

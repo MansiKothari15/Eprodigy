@@ -28,8 +28,8 @@ public interface GroupDao {
     @Delete
     int singledelete(GroupPojo userPojo);
 
-/*    @Query("select * from GroupPojo WHERE  username = :username ")
-    GroupPojo getSingle(String username);*/
+    @Query("select * from GroupPojo WHERE  groupId = :groupId ")
+    GroupPojo getSingleGroup(String groupId);
 
   /*  @Query("select displayname from GroupPojo WHERE  username = :username ")
     String getSingleById(String username);*/

@@ -121,18 +121,18 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
         tv_create.setVisibility(View.VISIBLE);
     }
 
-    public void uploadGroupDetail() {
+    public void uploadGroupDetail(final String groupId, final String gName) {
 
         showLoadingDialog(this);
 
-        String username = Pref.getValue(this, AppConfing.USERNAME, "");
+        final String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
-        String groupname = edt_groupName.getText().toString() + "_" + SCUtils.getCurrentTimeStamp2();
+
         String group_title = edt_groupName.getText().toString();
 
         RequestBody userName = RequestBody.create(MediaType.parse(""), username);
         RequestBody loginToken = RequestBody.create(MediaType.parse(""), login_token);
-        RequestBody groupName = RequestBody.create(MediaType.parse(""), groupname);
+        RequestBody groupName = RequestBody.create(MediaType.parse(""), groupId);
         RequestBody groupTitle = RequestBody.create(MediaType.parse(""), group_title);
 
         File file = new File(selectedImageList.get(0).getPath());
@@ -149,38 +149,37 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 dismissLoadingDialog();
                 Log.d("UpdateGroupDetailRes", response.toString());
 
-                GroupPojo groupPojo = new GroupPojo();
-                groupPojo.setGroupId(response.body().getUserdata().getId());
-                groupPojo.setGroupTitle(response.body().getUserdata().getGroup_title());
-                groupPojo.setGroupName(response.body().getUserdata().getGroupname());
-                groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
-                groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
-                groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
-                DataManager.getInstance().AddGroup(groupPojo);
+                mCheckset.add(username);
+                if (XMPPHandler.createRoom(gName, mCheckset, groupId)) {
 
+                    Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
 
-                //userid-JID -chatpojo - group id
-                //DataManager.getInstance().AddChat(chatPojo);
-//                ChatPojo chatPojo = new ChatPojo();
-//                chatPojo.setGroupId(response.body().getUserdata().getId());
-//                DataManager.getInstance().AddChat(chatPojo);
+                    GroupPojo groupPojo = new GroupPojo();
+                    groupPojo.setGroupId(response.body().getUserdata().getGroupname());
+                    groupPojo.setGroupTitle(response.body().getUserdata().getGroup_title());
+                    groupPojo.setGroupName(response.body().getUserdata().getGroupname());
+                    groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                    groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                    groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
+                    DataManager.getInstance().AddGroup(groupPojo);
+                }
 
-                DataManager.getInstance()
+               /* DataManager.getInstance()
                         .getAllGroup()
                         .observe(GroupSubjectActivity.this, new Observer<List<GroupPojo>>() {
                             @Override
                             public void onChanged(@Nullable List<GroupPojo> groupPojoList) {
                                 if (groupPojoList != null)
                                     Log.d("groupPojoList", "" + groupPojoList.size());
-                             /*   if (chatListAdapter != null) {
+                             *//*   if (chatListAdapter != null) {
                                     chatListAdapter.swapItems(userList);
                                     chatListAdapter.notifyDataSetChanged();
-                                }*/
+                                }*//*
 
                             }
-                        });
+                        });*/
 
                 Intent i = new Intent(GroupSubjectActivity.this, MessagingActivity.class);
                 startActivity(i);
@@ -204,26 +203,13 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 finish();
                 break;
             case R.id.tv_create:
+
+
                 if (edt_groupName.getText().length() != 0) {
 
+                    String groupId = edt_groupName.getText().toString() + "_" + SCUtils.getCurrentTimeStamp2();
                     String grpName = edt_groupName.getText().toString();
-                    mCheckset.add(username);
-                    if (XMPPHandler.createRoom(grpName, mCheckset)) {
-//                        for (String names : mCheckset) {
-//                            XMPPHandler.inviteToGroup(names, grpName);
-//
-//                        }
-                        Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
-                        uploadGroupDetail();
-//            startActivity(new Intent(GroupSubjectActivity.this, MessagingActivity.class)
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_ID, "")
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_USER_NAME, grpName)
-//                    .putExtra(Constant.BUNDLE.BUNDLE_CHAT_TYPE, 1)
-//            );
-//            finish();
-
-                    }
-
+                    uploadGroupDetail(groupId, grpName);
 
                 } else {
                     Toast.makeText(this, "Group subject is required!", Toast.LENGTH_SHORT).show();

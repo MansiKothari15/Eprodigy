@@ -104,6 +104,10 @@ public class DataManager implements IDataManager {
     }
 
     @Override
+    public List<String> getGroupIdList() {
+        return mDataBaseHelper.getChatDao().getGroupIdList();
+    }
+    @Override
     public List<String> getChatUserListNew() {
         return mDataBaseHelper.getChatDao().getChatUserSendList();
     }
@@ -116,6 +120,11 @@ public class DataManager implements IDataManager {
     @Override
     public LiveData<List<ChatPojo>> getRecentChatUserListById(List<String> chatList) {
         return mDataBaseHelper.getChatDao().getRecentChatAll(chatList);
+    }
+
+    @Override
+    public LiveData<List<ChatPojo>> getRecentGroupUserListById(List<String> groupId) {
+        return mDataBaseHelper.getChatDao().getRecentGroupChatAll(groupId);
     }
 
     @Override

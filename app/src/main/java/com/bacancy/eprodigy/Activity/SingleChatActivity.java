@@ -35,6 +35,7 @@ import com.bacancy.eprodigy.Adapters.ChatAdapter;
 import com.bacancy.eprodigy.Models.ChatMediaModel;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.Models.UserLocation;
 import com.bacancy.eprodigy.MyApplication;
@@ -134,7 +135,18 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             chatPojo.setShowing(true);
             chatPojo.setMine(false);
             DataManager.getInstance().AddChat(chatPojo);
+            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
+            {
+                GroupPojo groupPojo = new GroupPojo();
+                groupPojo.setGroupId(chatPojo.getGroupId());
+                groupPojo.setGroupTitle(chatPojo.getGroupId());
+                groupPojo.setGroupName(chatPojo.getGroupId());
+                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
+                DataManager.getInstance().AddGroup(groupPojo);
+            }
             LogM.e("onNewMessageReceived ChatActivity");
 
             if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
@@ -177,8 +189,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             xmppHandler.setUserPassword(username, password);
 
             if (!xmppHandler.loggedin)
-                new XMPPHandler.LoginTask(mActivity,username,password);
-           // xmppHandler.login();
+              //  new XMPPHandler.LoginTask(mActivity,username,password);
+            xmppHandler.login();
         }
 
         public void onLoginFailed() {

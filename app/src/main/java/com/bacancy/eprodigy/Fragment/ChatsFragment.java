@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Activity.GroupSubjectActivity;
 import com.bacancy.eprodigy.Activity.NewMessageActivity;
@@ -58,11 +59,31 @@ public class ChatsFragment extends Fragment {
         //Event Listeners
         public void onNewMessageReceived(ChatPojo chatPojo) {
 
+
+
+
             Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
 
             chatPojo.setShowing(true);
             chatPojo.setMine(false);
+
+
+
             DataManager.getInstance().AddChat(chatPojo);
+
+            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
+            {
+
+                GroupPojo groupPojo = new GroupPojo();
+                groupPojo.setGroupId(chatPojo.getGroupId());
+             groupPojo.setGroupTitle(chatPojo.getGroupId());
+                groupPojo.setGroupName(chatPojo.getGroupId());
+                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+
+                DataManager.getInstance().AddGroup(groupPojo);
+            }
 
             LogM.e("onNewMessageReceived ChatActivity");
 
@@ -93,6 +114,9 @@ public class ChatsFragment extends Fragment {
                 LogM.e("onChatStateChanged");
             }
         }
+        {
+
+        }
 
         @Override
         public void onConnected() {
@@ -100,8 +124,8 @@ public class ChatsFragment extends Fragment {
 
             ((BaseActivity)getActivity()).xmppHandler = MyApplication.getmService().xmpp;
             ((BaseActivity)getActivity()).xmppHandler.setUserPassword(((BaseActivity)getActivity()).username, ((BaseActivity)getActivity()).password);
-            //((BaseActivity)getActivity()).xmppHandler.login();
-            new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
+            ((BaseActivity)getActivity()).xmppHandler.login();
+           // new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
         }
 
         public void onLoginFailed() {
@@ -214,7 +238,7 @@ public class ChatsFragment extends Fragment {
                                 Log.e("Recv=",">"+chatPojo.getChatRecv());
                                 Log.e("grp id=",">"+chatPojo.getGroupId());
                             }
-
+//select grouptable where grpid=gid
                             if (chatListAdapter != null) {
                                 chatListAdapter.swapItems(userList);
                                 chatListAdapter.notifyDataSetChanged();
@@ -223,20 +247,34 @@ public class ChatsFragment extends Fragment {
                         }
                     });
 
+
+        List<String> groupIdList = DataManager.getInstance().getGroupIdList();
+
         DataManager.getInstance()
+                .getRecentGroupUserListById(groupIdList)
+                .observe(getActivity(), new Observer<List<ChatPojo>>() {
+                    @Override
+                    public void onChanged(@Nullable List<ChatPojo> groupList) {
+                        Log.d("grpList",groupList.toString());
+
+                    }
+                });
+
+
+       /* DataManager.getInstance()
                 .getAllGroup()
                 .observe(getActivity(), new Observer<List<GroupPojo>>() {
                     @Override
                     public void onChanged(@Nullable List<GroupPojo> groupPojoList) {
                         if (groupPojoList != null)
                             Log.d("groupPojoList", "" + groupPojoList.size());
-                             /*   if (chatListAdapter != null) {
+                             *//*   if (chatListAdapter != null) {
                                     chatListAdapter.swapItems(userList);
                                     chatListAdapter.notifyDataSetChanged();
-                                }*/
+                                }*//*
 
                     }
-                });
+                });*/
 
     }
 

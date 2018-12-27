@@ -14,10 +14,12 @@ import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
+import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
@@ -326,7 +328,7 @@ public class XMPPHandler {
     }
 
 
-    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset) {
+    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset,String groupId) {
         try {
 
             if (TextUtils.isEmpty(grp_name)) {
@@ -374,7 +376,7 @@ public class XMPPHandler {
                     Message message = new Message();
                     message.setBody("Greetings");
                     EntityBareJid eJId = JidCreate.entityBareFrom(names + "@" + Constants.XMPP_DOMAIN);
-                    muc.invite(message, eJId, grp_name);
+                    muc.invite(message, eJId, groupId);
 
 
                 }
@@ -1072,14 +1074,15 @@ public class XMPPHandler {
     public void login2() {
         try {
 
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
+            new Thread(new Runnable() {
+               @Override
+                public void run() {
             if (!connected && !isconnecting) {
-                new XMPPHandler.ConnectXMPP().execute();
+                //new XMPPHandler.ConnectXMPP().execute();
+                connect();
             }
-//                }
-//            }).start();
+                }
+            }).start();
 
             if (debug) Log.i(TAG, "User " + userId + userPassword);
 
@@ -1771,18 +1774,31 @@ public class XMPPHandler {
 
     }
 
-    public void updateDB(String username, String message, String chatSender, String groupName) {
+    public void updateDB(String username, String message, String chatSender, String groupId) {
+
+        /*GroupPojo groupPojo = new GroupPojo();
+        groupPojo.setGroupId(groupId);
+        groupPojo.setGroupTitle(groupId);
+        groupPojo.setGroupName(groupId);
+        //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+        //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+        //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+
+        DataManager.getInstance().AddGroup(groupPojo);*/
+
+
 
         ChatPojo chatPojo = new ChatPojo();
 
 
-        chatPojo.setGroupId(groupName + "_" + SCUtils.getCurrentTimeStamp2());
+        chatPojo.setGroupId(groupId);
 
         Log.e("ad", "updateDB=" + chatPojo.getGroupId());
 
 
         chatPojo.setChatSender(chatSender);//from
         chatPojo.setChatId(username);//to
+        chatPojo.setMsgMode(AppConfing.GROUP_CHAT_MSG_MODE);
         chatPojo.setChatRecv(mUser);
         chatPojo.setChatText(message);
         chatPojo.setShowing(false);
@@ -1810,6 +1826,7 @@ public class XMPPHandler {
         Log.e(TAG, "updateDB >" + chatPojo.getMsgType() + "==" + chatPojo.getChatText());
 
         chatPojo.setChatId(s);
+        chatPojo.setMsgMode(AppConfing.SINGLE_CHAT_MSG_MODE);
         //chatPojo.setChatId(AppConfing.chatID + mUser + "_" + s);
         chatPojo.setChatRecv(mUser);//to
         chatPojo.setChatSender(username);//from
