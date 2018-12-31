@@ -22,11 +22,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
+import com.bacancy.eprodigy.ResponseModel.LastSeenResponse;
+import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.permission.MyPermission;
@@ -41,6 +45,12 @@ import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class BaseActivity extends AppCompatActivity {
@@ -66,13 +76,12 @@ public class BaseActivity extends AppCompatActivity {
         xmppEventReceiver = mChatApp.getEventReceiver();
 
 
-
         permissionActivity = new PermissionActivity(BaseActivity.this);
 
 
         customProgressDialog = new CustomProgressDialog();
 
-        username = Pref.getValue( activity, "username", "");
+        username = Pref.getValue(activity, "username", "");
         password = Pref.getValue(activity, "password", "");
 
 
@@ -81,7 +90,7 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * @param mActivity
      * @param permissionlistener
-     * @param isDenied : for denied message ,if true then user must allow permission
+     * @param isDenied           : for denied message ,if true then user must allow permission
      * @param permissions
      */
     public void initPermission(Activity mActivity, PermissionListener permissionlistener, boolean isDenied, String... permissions) {
@@ -167,7 +176,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public void showLoadingDialog(Context mActivity) {
 
-        if (mActivity!=null &&customProgressDialog != null) {
+        if (mActivity != null && customProgressDialog != null) {
 
             customProgressDialog.showCustomDialog(mActivity);
         }
@@ -281,7 +290,6 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-
     public void startXmppService(Activity mActivity) {
 
 
@@ -301,8 +309,8 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             xmppHandler = MyApplication.getmService().xmpp;
             if (!xmppHandler.isConnected()) {
-                  xmppHandler.connect();
-               // new XMPPHandler.ConnectXMPP(mActivity).execute();
+                xmppHandler.connect();
+                // new XMPPHandler.ConnectXMPP(mActivity).execute();
             } else {
 
                 username = Pref.getValue(mActivity, "username", "");
@@ -311,8 +319,8 @@ public class BaseActivity extends AppCompatActivity {
 
                 xmppHandler.setUserPassword(username, password);
                 if (!xmppHandler.loggedin)
-                  //  new XMPPHandler.LoginTask(mActivity,username,password);
-                 xmppHandler.login();
+                    //  new XMPPHandler.LoginTask(mActivity,username,password);
+                    xmppHandler.login();
             }
         }
 
@@ -327,4 +335,58 @@ public class BaseActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    public void getGroupDetailsApiCall(final Activity mActivity, final ChatPojo chatPojo) {
+
+        showLoadingDialog(this);
+
+        String username = Pref.getValue(this, AppConfing.USERNAME, "");
+        String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("username", username);
+        data.put("login_token", login_token);
+
+        Call<UpdateGroupDetailResponse> call = ApiClient.getClient().getGroupDetailsApiCall(data);
+        call.enqueue(new Callback<UpdateGroupDetailResponse>() {
+            @Override
+            public void onResponse(Call<UpdateGroupDetailResponse> call, Response<UpdateGroupDetailResponse> response) {
+                if (response.isSuccessful()) {
+                    dismissLoadingDialog();
+
+                    if (validateUser(mActivity,
+                            response.body().getStatus(),
+                            response.body().getMessage())) {
+                        return;
+                    }
+
+                    chatPojo.setShowing(true);
+                    chatPojo.setMine(false);
+                    DataManager.getInstance().AddChat(chatPojo);
+
+                    GroupPojo groupPojo = new GroupPojo();
+//                    groupPojo.setGroupId(chatPojo.getGroupId());
+//                    groupPojo.setGroupTitle(chatPojo.getGroupId());
+//                    groupPojo.setGroupName(chatPojo.getGroupId());
+                    //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                    //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
+                    //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+
+                    DataManager.getInstance().AddGroup(groupPojo);
+
+                } else {
+                    dismissLoadingDialog();
+                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UpdateGroupDetailResponse> call, Throwable t) {
+                LogM.e("errrrrrr" + t.toString());
+                dismissLoadingDialog();
+            }
+        });
+    }
+
+
 }

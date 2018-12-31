@@ -61,7 +61,6 @@ public class ChatsFragment extends Fragment {
 
 
 
-
             Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
 
             chatPojo.setShowing(true);
@@ -73,7 +72,6 @@ public class ChatsFragment extends Fragment {
 
             if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
             {
-
                 GroupPojo groupPojo = new GroupPojo();
                 groupPojo.setGroupId(chatPojo.getGroupId());
              groupPojo.setGroupTitle(chatPojo.getGroupId());
@@ -84,6 +82,7 @@ public class ChatsFragment extends Fragment {
 
                 DataManager.getInstance().AddGroup(groupPojo);
             }
+
 
             LogM.e("onNewMessageReceived ChatActivity");
 

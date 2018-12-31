@@ -88,14 +88,14 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
     Activity mActivity;
-      PopupMenu popup;
+    PopupMenu popup;
 
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
     RecyclerView rv_singleChat;
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String ChatUserId, mName="";
+    String ChatUserId, mName = "";
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -124,7 +124,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private boolean ifshow = false;
 
 
-
     public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
 
         //Event Listeners
@@ -132,21 +131,18 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
 
-            chatPojo.setShowing(true);
-            chatPojo.setMine(false);
-            DataManager.getInstance().AddChat(chatPojo);
-            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
-            {
-                GroupPojo groupPojo = new GroupPojo();
-                groupPojo.setGroupId(chatPojo.getGroupId());
-                groupPojo.setGroupTitle(chatPojo.getGroupId());
-                groupPojo.setGroupName(chatPojo.getGroupId());
-                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
-                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
-                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
-                DataManager.getInstance().AddGroup(groupPojo);
+
+            if (chatPojo != null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)) {
+                getGroupDetailsApiCall(SingleChatActivity.this,chatPojo);
             }
+            else if (chatPojo != null)
+            {
+                chatPojo.setShowing(true);
+                chatPojo.setMine(false);
+                DataManager.getInstance().AddChat(chatPojo);
+            }
+
             LogM.e("onNewMessageReceived ChatActivity");
 
             if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
@@ -183,14 +179,14 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             username = Pref.getValue(SingleChatActivity.this, "username", "");
             password = Pref.getValue(SingleChatActivity.this, "password", "");
 
-            Log.d("startXmppService","login-onConnected="+username + " " + password);
+            Log.d("startXmppService", "login-onConnected=" + username + " " + password);
 
             xmppHandler = MyApplication.getmService().xmpp;
             xmppHandler.setUserPassword(username, password);
 
             if (!xmppHandler.loggedin)
-              //  new XMPPHandler.LoginTask(mActivity,username,password);
-            xmppHandler.login();
+                //  new XMPPHandler.LoginTask(mActivity,username,password);
+                xmppHandler.login();
         }
 
         public void onLoginFailed() {
@@ -242,7 +238,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     private void init() {
-
 
 
         Log.d("Login init-", username + " " + password);
@@ -361,8 +356,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     public void sendAudio() {
 //        sendMsg(Constants.TYPE_AUDIO);
-        listLocalMedia=new ArrayList<>();
-        LocalMedia localMedia=new LocalMedia();
+        listLocalMedia = new ArrayList<>();
+        LocalMedia localMedia = new LocalMedia();
         localMedia.setPath(AudioSavePathInDevice);
         localMedia.setPictureType("audio/*");//audio/mpeg
         listLocalMedia.add(localMedia);
@@ -456,7 +451,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             Log.d(TAG, "requestUpload:" + index + "  " + filePath);
 
             File file = new File(filePath);
-          //  String fileMimeType = SCUtils.getMimeTypeFomFile(file);
+            //  String fileMimeType = SCUtils.getMimeTypeFomFile(file);
             Log.e("ad", "mime type=" + listLocalMedia.get(index).getPictureType());
 
             RequestBody mBody = RequestBody.create(MediaType.parse(listLocalMedia.get(index).getPictureType()), file);
@@ -572,7 +567,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             }
         });
     }
-
 
 
     private void sendMsg(int msgType) {
@@ -704,8 +698,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         }
 
 
-
-         if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
+        if (msgType == Constants.TYPE_IMAGE || msgType == Constants.TYPE_AUDIO || msgType == Constants.TYPE_VIDEO) {
             if (TextUtils.isEmpty(url)) {
                 Toast.makeText(this, "Media url empty", Toast.LENGTH_SHORT).show();
             } else {
@@ -758,10 +751,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 break;
             case REQUEST_PICK_VIDEO:
                 if (resultCode == RESULT_OK) {
-                listLocalMedia = new ArrayList<>();
-                listLocalMedia = PictureSelector.obtainMultipleResult(data);
-                Log.e("ad", "REQUEST_PICK_VIDEO =" + listLocalMedia.size());
-                mediaUpload(Constants.TYPE_VIDEO);}
+                    listLocalMedia = new ArrayList<>();
+                    listLocalMedia = PictureSelector.obtainMultipleResult(data);
+                    Log.e("ad", "REQUEST_PICK_VIDEO =" + listLocalMedia.size());
+                    mediaUpload(Constants.TYPE_VIDEO);
+                }
                 break;
             case REQUEST_CAMERA_PICTURE:
                 if (resultCode == RESULT_OK) {
@@ -873,7 +867,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     private void openPopup() {
 
 
-         popup = new PopupMenu(SingleChatActivity.this, img_add);
+        popup = new PopupMenu(SingleChatActivity.this, img_add);
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 

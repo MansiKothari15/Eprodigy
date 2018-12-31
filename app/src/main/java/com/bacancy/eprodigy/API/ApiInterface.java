@@ -126,6 +126,12 @@ public interface ApiInterface {
             @FieldMap HashMap<String, String> data
     );
 
+    @FormUrlEncoded
+    @POST("getgroupdetails")
+    Call<UpdateGroupDetailResponse> getGroupDetailsApiCall(
+            @FieldMap HashMap<String, String> data
+    );
+
 
     @Multipart
     @POST("updategroupdetails")
