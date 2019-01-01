@@ -30,4 +30,6 @@ public class AppConfing {
     public static String grpID = "group_";
     public static String SINGLE_CHAT_MSG_MODE = "0";
     public static String GROUP_CHAT_MSG_MODE = "1";
+    public static String GROUP_GREETINGS = "Greetings";
+
 }

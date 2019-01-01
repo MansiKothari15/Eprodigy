@@ -87,7 +87,7 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
-    Activity mActivity;
+    
     PopupMenu popup;
 
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
@@ -121,89 +121,19 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     MediaPlayer mediaPlayer;
     Random random;
 
-    private boolean ifshow = false;
+    public static boolean isChatActivityOpened = false;
 
 
-    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
-
-        //Event Listeners
-        public void onNewMessageReceived(ChatPojo chatPojo) {
-
-            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
-
-
-
-            if (chatPojo != null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)) {
-                getGroupDetailsApiCall(SingleChatActivity.this,chatPojo);
-            }
-            else if (chatPojo != null)
-            {
-                chatPojo.setShowing(true);
-                chatPojo.setMine(false);
-                DataManager.getInstance().AddChat(chatPojo);
-            }
-
-            LogM.e("onNewMessageReceived ChatActivity");
-
-            if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
-
-        }
-
-        @Override
-        public void onPresenceChanged(PresenceModel presenceModel) {
-//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    txtUserStatus.setText(presence);
-//                    LogM.e("onPresenceChanged" + presence);
-//                }
-//            });
-        }
-
-
-        //On Chat Status Changed
-        public void onChatStateChanged(ChatStateModel chatStateModel) {
-
-//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
-            LogM.e("chatStatus --- onChatStateChanged");
-            if (MyApplication.getmService().xmpp.checkSender(username, chatStateModel.getUser())) {
-                //  chatStatusTv.setText(chatStatus);
-                LogM.e("onChatStateChanged");
-            }
-        }
-
-        @Override
-        public void onConnected() {
-
-            username = Pref.getValue(SingleChatActivity.this, "username", "");
-            password = Pref.getValue(SingleChatActivity.this, "password", "");
-
-            Log.d("startXmppService", "login-onConnected=" + username + " " + password);
-
-            xmppHandler = MyApplication.getmService().xmpp;
-            xmppHandler.setUserPassword(username, password);
-
-            if (!xmppHandler.loggedin)
-                //  new XMPPHandler.LoginTask(mActivity,username,password);
-                xmppHandler.login();
-        }
-
-        public void onLoginFailed() {
-            xmppHandler.disconnect();
-            Toast.makeText(getApplicationContext(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
-        }
-
-    };
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
-        mActivity = this;
+      
 
-        startXmppService(mActivity);
-        xmppEventReceiver = mChatApp.getEventReceiver();
+        startXmppService(activity);
+
 
 
         Bundle extras = getIntent().getExtras();
@@ -355,6 +285,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     }
 
     public void sendAudio() {
+
 //        sendMsg(Constants.TYPE_AUDIO);
         listLocalMedia = new ArrayList<>();
         LocalMedia localMedia = new LocalMedia();
@@ -424,7 +355,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
     private void mediaUpload(final int msgType) {
 
-        showLoadingDialog(mActivity);
+        showLoadingDialog(activity);
 
         String username = Pref.getValue(this, AppConfing.USERNAME, "");
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
@@ -469,7 +400,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 Log.d("MediaUploadResponse", response.toString());
 
                 if (response.isSuccessful()) {
-                    if (validateUser(mActivity,
+                    if (validateUser(activity,
                             response.body().getStatus(),
                             response.body().getMessage())) {
                         return;
@@ -503,12 +434,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     } else {
                         dismissLoadingDialog();
                         String msg = response.body().getMessage();
-                        AlertUtils.showSimpleAlert(mActivity, TextUtils.isEmpty(msg) ? mActivity.getString(R.string.server_error) : msg);
+                        AlertUtils.showSimpleAlert(activity, TextUtils.isEmpty(msg) ? activity.getString(R.string.server_error) : msg);
                     }
 
                 } else {
                     dismissLoadingDialog();
-                    AlertUtils.showSimpleAlert(mActivity, mActivity.getString(R.string.server_error));
+                    AlertUtils.showSimpleAlert(activity, activity.getString(R.string.server_error));
                 }
 
             }
@@ -525,8 +456,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     protected void onResume() {
         super.onResume();
         //Here we bind our event listener (XmppCustomEventListener)
-        xmppEventReceiver.setListener(xmppCustomEventListener);
-        ifshow = false;
+
+        isChatActivityOpened = false;
 
     }
 
@@ -768,7 +699,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
             case REQUEST_PLACE_PICKER:
                 if (resultCode == RESULT_OK) {
-                    Place place = PlacePicker.getPlace(data, mActivity);
+                    Place place = PlacePicker.getPlace(data, activity);
 
                     String mName = place.getName().toString();
                     //  if (!TextUtils.isEmpty(mName) && SCUtils.isContainLatLng(mName))
@@ -988,12 +919,12 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                     case R.id.menu_location:
 
 
-                       /* initPermission(mActivity, new PermissionListener() {
+                       /* initPermission(activity, new PermissionListener() {
                             @Override
                             public void onPermissionGranted() {
                                 try {
                                     PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-                                    Intent intent = intentBuilder.build(mActivity);
+                                    Intent intent = intentBuilder.build(activity);
                                     // Start the intent by requesting a result,
                                     // identified by a request code.
                                     startActivityForResult(intent, REQUEST_PLACE_PICKER);
@@ -1007,13 +938,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                             @Override
                             public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                                Toast.makeText(mActivity, "PLease provide location permission.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "PLease provide location permission.", Toast.LENGTH_SHORT).show();
                             }
                         },true,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION);*/
 
                         try {
                             PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-                            Intent intent = intentBuilder.build(mActivity);
+                            Intent intent = intentBuilder.build(activity);
                             // Start the intent by requesting a result,
                             // identified by a request code.
                             startActivityForResult(intent, REQUEST_PLACE_PICKER);
@@ -1077,6 +1008,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         if (popup != null) {
             popup.dismiss();
         }
-        ifshow = true;
+        isChatActivityOpened = true;
     }
 }

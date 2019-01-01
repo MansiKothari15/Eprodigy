@@ -21,11 +21,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Models.ChatPojo;
+import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.GroupPojo;
+import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
@@ -45,6 +48,7 @@ import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
+import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 
 import java.util.HashMap;
 
@@ -67,11 +71,84 @@ public class BaseActivity extends AppCompatActivity {
     public XMPPHandler xmppHandler;
     public String username, password;
 
+
+    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
+
+        //Event Listeners
+        public void onNewMessageReceived(ChatPojo chatPojo) {
+
+            Log.e("ad", "onNewMessageReceived>" + chatPojo.toString());
+
+
+            if (chatPojo != null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
+                    && chatPojo.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
+                getGroupDetailsApiCall(activity, chatPojo);
+            } else if (chatPojo != null) {
+                chatPojo.setShowing(true);
+                chatPojo.setMine(false);
+                DataManager.getInstance().AddChat(chatPojo);
+            }
+
+            LogM.e("onNewMessageReceived ChatActivity");
+
+            if (SingleChatActivity.isChatActivityOpened)
+                BaseActivity.SendNotification(activity, chatPojo);
+
+        }
+
+        @Override
+        public void onPresenceChanged(PresenceModel presenceModel) {
+//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    txtUserStatus.setText(presence);
+//                    LogM.e("onPresenceChanged" + presence);
+//                }
+//            });
+        }
+
+
+        //On Chat Status Changed
+        public void onChatStateChanged(ChatStateModel chatStateModel) {
+
+//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
+            LogM.e("chatStatus --- onChatStateChanged");
+
+            if (MyApplication.getmService().xmpp.checkSender(username, chatStateModel.getUser())) {
+                //  chatStatusTv.setText(chatStatus);
+                LogM.e("onChatStateChanged");
+            }
+        }
+
+        @Override
+        public void onConnected() {
+
+            username = Pref.getValue(activity, "username", "");
+            password = Pref.getValue(activity, "password", "");
+
+            Log.d("startXmppService", "login-onConnected=" + username + " " + password);
+
+            xmppHandler = MyApplication.getmService().xmpp;
+            xmppHandler.setUserPassword(username, password);
+
+            if (!xmppHandler.loggedin)
+                //  new XMPPHandler.LoginTask(mActivity,username,password);
+                xmppHandler.login();
+        }
+
+        public void onLoginFailed() {
+            xmppHandler.disconnect();
+            Toast.makeText(getApplicationContext(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
+        }
+
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.activity = this;
+        activity = this;
 
         xmppEventReceiver = mChatApp.getEventReceiver();
 
@@ -165,6 +242,12 @@ public class BaseActivity extends AppCompatActivity {
                 .show();
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        xmppEventReceiver.setListener(xmppCustomEventListener);
     }
 
     @Override
@@ -372,7 +455,7 @@ public class BaseActivity extends AppCompatActivity {
                     //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
                     //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
-                    DataManager.getInstance().AddGroup(groupPojo);
+                  //  DataManager.getInstance().AddGroup(groupPojo);
 
                 } else {
                     dismissLoadingDialog();

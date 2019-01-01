@@ -64,6 +64,7 @@ import org.jivesoftware.smackx.muc.MultiUserChatException;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.packet.MUCUser;
+import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
@@ -214,6 +215,8 @@ public class XMPPHandler {
 
 //        if (connection == null) {
         connection = new XMPPTCPConnection(config.build());
+        PingManager pingManager = PingManager.getInstanceFor(connection);
+        pingManager.setPingInterval(300);
 //        }
 
 //        connection.removeConnectionListener(mConnectionListener);
@@ -374,7 +377,7 @@ public class XMPPHandler {
                 for (String names : mCheckset) {
 
                     Message message = new Message();
-                    message.setBody("Greetings");
+                    message.setBody(AppConfing.GROUP_GREETINGS);
                     EntityBareJid eJId = JidCreate.entityBareFrom(names + "@" + Constants.XMPP_DOMAIN);
                     muc.invite(message, eJId, groupId);
 
@@ -1295,6 +1298,7 @@ public class XMPPHandler {
 
             try {
                 connection.login(userId, userPassword);
+               // connection.setPacketReplyTimeout(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
