@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.BaseActivity;
-import com.bacancy.eprodigy.Activity.GroupSubjectActivity;
 import com.bacancy.eprodigy.Activity.NewMessageActivity;
 import com.bacancy.eprodigy.Adapters.ChatListAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
@@ -34,7 +33,6 @@ import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.LogM;
-import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 
 import java.util.ArrayList;
@@ -74,7 +72,7 @@ public class ChatsFragment extends Fragment {
             {
                 GroupPojo groupPojo = new GroupPojo();
                 groupPojo.setGroupId(chatPojo.getGroupId());
-             groupPojo.setGroupTitle(chatPojo.getGroupId());
+                groupPojo.setGroupTitle(chatPojo.getGroupId());
                 groupPojo.setGroupName(chatPojo.getGroupId());
                 //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
                 //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
