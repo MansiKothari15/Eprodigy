@@ -38,7 +38,7 @@ import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatsFragment extends Fragment {
+public class ChatsFragment extends BaseFragment {
 
     TextView tv_noChat;
     RecyclerView rv_chat;
@@ -52,85 +52,6 @@ public class ChatsFragment extends Fragment {
     ImageView img_clear;
 
 
-    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
-
-        //Event Listeners
-        public void onNewMessageReceived(ChatPojo chatPojo) {
-
-
-
-            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
-
-            chatPojo.setShowing(true);
-            chatPojo.setMine(false);
-
-
-
-            DataManager.getInstance().AddChat(chatPojo);
-
-            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
-            {
-                GroupPojo groupPojo = new GroupPojo();
-                groupPojo.setGroupId(chatPojo.getGroupId());
-                groupPojo.setGroupTitle(chatPojo.getGroupId());
-                groupPojo.setGroupName(chatPojo.getGroupId());
-                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
-                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
-                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
-
-                DataManager.getInstance().AddGroup(groupPojo);
-            }
-
-
-            LogM.e("onNewMessageReceived ChatActivity");
-
-           // if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
-
-        }
-
-        @Override
-        public void onPresenceChanged(PresenceModel presenceModel) {
-//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    txtUserStatus.setText(presence);
-//                    LogM.e("onPresenceChanged" + presence);
-//                }
-//            });
-        }
-
-
-        //On Chat Status Changed
-        public void onChatStateChanged(ChatStateModel chatStateModel) {
-
-//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
-            LogM.e("chatStatus --- onChatStateChanged");
-            if (MyApplication.getmService().xmpp.checkSender(((BaseActivity)getActivity()).username, chatStateModel.getUser())) {
-                //  chatStatusTv.setText(chatStatus);
-                LogM.e("onChatStateChanged");
-            }
-        }
-        {
-
-        }
-
-        @Override
-        public void onConnected() {
-
-
-            ((BaseActivity)getActivity()).xmppHandler = MyApplication.getmService().xmpp;
-            ((BaseActivity)getActivity()).xmppHandler.setUserPassword(((BaseActivity)getActivity()).username, ((BaseActivity)getActivity()).password);
-            ((BaseActivity)getActivity()).xmppHandler.login();
-           // new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
-        }
-
-        public void onLoginFailed() {
-            ((BaseActivity)getActivity()).xmppHandler.disconnect();
-            Toast.makeText(getActivity(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
-        }
-
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -146,16 +67,6 @@ public class ChatsFragment extends Fragment {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-             //Here we bind our event listener (XmppCustomEventListener)
-        ((BaseActivity)getActivity()).xmppEventReceiver.setListener(xmppCustomEventListener);
-
-
-
-    }
 
     private void setAction(View view) {
         img_clear = (ImageView) view.findViewById(R.id.img_clear);
@@ -234,6 +145,8 @@ public class ChatsFragment extends Fragment {
                                 Log.e("Sender=",">"+chatPojo.getChatSender());
                                 Log.e("Recv=",">"+chatPojo.getChatRecv());
                                 Log.e("grp id=",">"+chatPojo.getGroupId());
+                                Log.e("grp name=",">"+chatPojo.getGroupName());
+                                Log.e("grp image=",">"+chatPojo.getGroupImage());
                             }
 //select grouptable where grpid=gid
                             if (chatListAdapter != null) {
@@ -247,7 +160,7 @@ public class ChatsFragment extends Fragment {
 
         List<String> groupIdList = DataManager.getInstance().getGroupIdList();
 
-        DataManager.getInstance()
+       /* DataManager.getInstance()
                 .getRecentGroupUserListById(groupIdList)
                 .observe(getActivity(), new Observer<List<ChatPojo>>() {
                     @Override
@@ -255,21 +168,21 @@ public class ChatsFragment extends Fragment {
                         Log.d("grpList",groupList.toString());
 
                     }
-                });
+                });*/
 
 
-       /* DataManager.getInstance()
+        /*DataManager.getInstance()
                 .getAllGroup()
                 .observe(getActivity(), new Observer<List<GroupPojo>>() {
                     @Override
                     public void onChanged(@Nullable List<GroupPojo> groupPojoList) {
                         if (groupPojoList != null)
                             Log.d("groupPojoList", "" + groupPojoList.size());
-                             *//*   if (chatListAdapter != null) {
+                               *//* if (chatListAdapter != null) {
                                     chatListAdapter.swapItems(userList);
                                     chatListAdapter.notifyDataSetChanged();
-                                }*//*
-
+                                }
+*//*
                     }
                 });*/
 

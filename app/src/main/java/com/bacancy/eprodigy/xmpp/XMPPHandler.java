@@ -251,10 +251,16 @@ public class XMPPHandler {
                     LogM.e("Type [" + message.getSubject() + "] ");
                     LogM.e("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                     if (message.getSubject().equals("1")) {
-                        updateDB(message.getBody(), message.getBody(), message.getFrom().toString(), message.getBody());
+
+
+                        updateDB(message.getFrom().toString(),
+                                message.getBody(), message.getFrom().toString(), message.getBody());
+
+
                         JoinRoom(message.getBody());
                     } else {
-                        updateDB(message.getBody(), message.getBody(), message.getFrom().toString(), message.getBody());
+                        updateDB(message.getFrom().toString(),
+                                message.getBody(), message.getFrom().toString(), message.getBody());
 
                     }
 
@@ -369,7 +375,10 @@ public class XMPPHandler {
                 for (String names : mCheckset) {
 
                     Message message = new Message();
+                   // message.setType(Type.normal);
+                    message.setSubject(AppConfing.GROUP_CHAT_MSG_MODE);
                     message.setBody(AppConfing.GROUP_GREETINGS);
+
                     EntityBareJid eJId = JidCreate.entityBareFrom(names + "@" + Constants.XMPP_DOMAIN);
                     muc.invite(message, eJId, groupId);
 
@@ -1793,6 +1802,7 @@ public class XMPPHandler {
 
         chatPojo.setGroupId(groupId);
 
+
         Log.e("ad", "updateDB=" + chatPojo.getGroupId());
 
 
@@ -1800,7 +1810,7 @@ public class XMPPHandler {
         chatPojo.setChatId(username);//to
         chatPojo.setMsgMode(AppConfing.GROUP_CHAT_MSG_MODE);
         chatPojo.setChatRecv(mUser);
-        chatPojo.setChatText(message);
+        chatPojo.setChatText(AppConfing.GROUP_GREETINGS);
         chatPojo.setShowing(false);
         //chatPojo.setChatType(header);
         chatPojo.setChatTimestamp(SCUtils.getNow());

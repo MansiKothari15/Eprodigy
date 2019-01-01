@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
@@ -27,10 +28,10 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyViewHolder> implements Filterable{
+public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyViewHolder> implements Filterable {
 
     private List<ChatPojo> mList = new ArrayList<>();
-    List<ChatPojo> mListFiltered=new ArrayList<>();
+    List<ChatPojo> mListFiltered = new ArrayList<>();
     Context mContext;
 
 
@@ -52,22 +53,34 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
     public void onBindViewHolder(@NonNull final ChatListAdapter.MyViewHolder holder, final int position) {
 
         final ChatPojo bean = mList.get(position);
-        final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
 
-        if (singleUser != null) {
-            holder.tv_id.setText(singleUser.getName());
-            holder.tv_text.setText(singleUser.getPhone());
-            Glide.with(mContext).load(singleUser.getProfilepicture())
+
+        if (bean != null && bean.getMsgMode()!=null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
+                && bean.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
+            holder.tv_id.setText(bean.getGroupName());
+            holder.tv_text.setText("");
+            Glide.with(mContext).load(bean.getGroupImage())
                     .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+        } else {
+            final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
+
+            holder.rv_main.setTag(singleUser.getUsername());
+            if (singleUser != null) {
+                holder.tv_id.setText(singleUser.getName());
+                holder.tv_text.setText(singleUser.getPhone());
+                Glide.with(mContext).load(singleUser.getProfilepicture())
+                        .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+            }
         }
 
         holder.rv_main.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(mContext,SingleChatActivity.class);
+
+                Intent i = new Intent(mContext, SingleChatActivity.class);
                 Bundle b = new Bundle();
-                b.putString("name",holder.tv_id.getText().toString());
-                b.putString("receiverJid",singleUser.getUsername());
+                b.putString("name", holder.tv_id.getText().toString());
+                b.putString("receiverJid", view.getTag().toString());
                 i.putExtras(b);
                 mContext.startActivity(i);
             }
@@ -124,17 +137,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tv_id,tv_text,tv_time;
+        TextView tv_id, tv_text, tv_time;
         RelativeLayout rv_main;
         ImageView img_pic;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            tv_id = (TextView)itemView.findViewById(R.id.tv_id);
-            tv_text = (TextView)itemView.findViewById(R.id.tv_text);
-            tv_time = (TextView)itemView.findViewById(R.id.tv_time);
-            rv_main = (RelativeLayout)itemView.findViewById(R.id.rv_main);
-            img_pic = (ImageView)itemView.findViewById(R.id.img_pic);
+            tv_id = (TextView) itemView.findViewById(R.id.tv_id);
+            tv_text = (TextView) itemView.findViewById(R.id.tv_text);
+            tv_time = (TextView) itemView.findViewById(R.id.tv_time);
+            rv_main = (RelativeLayout) itemView.findViewById(R.id.rv_main);
+            img_pic = (ImageView) itemView.findViewById(R.id.img_pic);
         }
     }
 }

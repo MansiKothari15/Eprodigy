@@ -135,7 +135,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         startXmppService(activity);
 
 
-
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             mName = extras.getString("name");
@@ -515,6 +514,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         chatPojo.setChatId(ChatUserId);//to
         chatPojo.setChatSender(username);//from
         chatPojo.setChatRecv(ChatUserId);
+        chatPojo.setMsgMode(AppConfing.SINGLE_CHAT_MSG_MODE);
         chatPojo.setShowing(true);
         chatPojo.setChatTimestamp(SCUtils.getNow());
         chatPojo.setMsgType(msgType);

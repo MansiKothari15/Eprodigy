@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.API;
 
 
+import com.bacancy.eprodigy.Models.GroupDetailResponse;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.ResponseModel.CountryResponse;
 import com.bacancy.eprodigy.ResponseModel.LastSeenResponse;
@@ -128,7 +129,7 @@ public interface ApiInterface {
 
     @FormUrlEncoded
     @POST("getgroupdetails")
-    Call<UpdateGroupDetailResponse> getGroupDetailsApiCall(
+    Call<GroupDetailResponse> getGroupDetailsApiCall(
             @FieldMap HashMap<String, String> data
     );
 

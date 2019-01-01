@@ -43,6 +43,12 @@ public class ChatPojo implements Parcelable {
     @ColumnInfo(name = "groupId")
     private String groupId;
 
+    @ColumnInfo(name = "groupImage")
+    private String groupImage;
+
+    @ColumnInfo(name = "groupName")
+    private String groupName;
+
     /*0= single ,1 = group chat*/
     @ColumnInfo(name = "msgMode")
     private String msgMode;
@@ -127,6 +133,8 @@ public class ChatPojo implements Parcelable {
         msgType = in.readInt();
         chatId = in.readString();
         groupId = in.readString();
+        groupImage = in.readString();
+        groupName = in.readString();
         msgMode = in.readString();
         chatText = in.readString();
         chatTimestamp = in.readString();
@@ -166,6 +174,22 @@ public class ChatPojo implements Parcelable {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getGroupImage() {
+        return groupImage;
+    }
+
+    public void setGroupImage(String groupImage) {
+        this.groupImage = groupImage;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getMsgMode() {
@@ -348,6 +372,8 @@ public class ChatPojo implements Parcelable {
         parcel.writeInt(msgType);
         parcel.writeString(chatId);
         parcel.writeString(groupId);
+        parcel.writeString(groupImage);
+        parcel.writeString(groupName);
         parcel.writeString(msgMode);
         parcel.writeString(chatText);
         parcel.writeString(chatTimestamp);

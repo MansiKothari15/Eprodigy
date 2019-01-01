@@ -33,6 +33,7 @@ import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.db.DataManager;
+import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
@@ -154,6 +155,14 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                 if (XMPPHandler.createRoom(gName, mCheckset, groupId)) {
 
                     Toast.makeText(GroupSubjectActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+
+                    ChatPojo chatPojo=new ChatPojo();
+                    chatPojo.setGroupId(groupId);
+                    chatPojo.setGroupImage(response.body().getUserdata().getGroupimage());
+                    chatPojo.setGroupName(response.body().getUserdata().getGroup_title());
+                    chatPojo.setMsgMode(AppConfing.GROUP_CHAT_MSG_MODE);
+                    chatPojo.setChatText(AppConfing.GROUP_GREETINGS);
+                    DataManager.getInstance().AddChat(chatPojo);
 
                     GroupPojo groupPojo = new GroupPojo();
                     groupPojo.setGroupId(response.body().getUserdata().getGroupname());

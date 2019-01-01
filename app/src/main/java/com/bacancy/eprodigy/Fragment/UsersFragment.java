@@ -54,9 +54,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UsersFragment extends Fragment implements MyContactListener, PermissionListener {
+public class UsersFragment extends BaseFragment implements MyContactListener, PermissionListener {
 
     private String TAG = "UsersFragment";
+
     PermissionListener permissionListenerIntr;
 
     UsersAdapter usersAdapter;
@@ -69,78 +70,6 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
 
     List<ContactListResponse.ResponseDataBean> responseDataBeanList = new ArrayList<>();
 
-
-
-    public XmppCustomEventListener xmppCustomEventListener = new XmppCustomEventListener() {
-
-        //Event Listeners
-        public void onNewMessageReceived(ChatPojo chatPojo) {
-
-            Log.e("ad", "onNewMessageReceived>>" + chatPojo.toString());
-
-            chatPojo.setShowing(true);
-            chatPojo.setMine(false);
-            DataManager.getInstance().AddChat(chatPojo);
-
-            if (chatPojo!=null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE))
-            {
-                GroupPojo groupPojo = new GroupPojo();
-                groupPojo.setGroupId(chatPojo.getGroupId());
-                groupPojo.setGroupTitle(chatPojo.getGroupId());
-                groupPojo.setGroupName(chatPojo.getGroupId());
-                //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
-                //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
-                //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
-
-                DataManager.getInstance().AddGroup(groupPojo);
-            }
-            LogM.e("onNewMessageReceived ChatActivity");
-
-            // if (ifshow) BaseActivity.SendNotification(SingleChatActivity.this, chatPojo);
-
-        }
-
-        @Override
-        public void onPresenceChanged(PresenceModel presenceModel) {
-//            final String presence = com.coinasonchatapp.app.utils.Utils.getStatusMode(presenceModel.getUserStatus());
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    txtUserStatus.setText(presence);
-//                    LogM.e("onPresenceChanged" + presence);
-//                }
-//            });
-        }
-
-
-        //On Chat Status Changed
-        public void onChatStateChanged(ChatStateModel chatStateModel) {
-
-//            String chatStatus = com.coinasonchatapp.app.utils.Utils.getChatMode(chatStateModel.getChatState());
-            LogM.e("chatStatus --- onChatStateChanged");
-            if (MyApplication.getmService().xmpp.checkSender(((BaseActivity)getActivity()).username, chatStateModel.getUser())) {
-                //  chatStatusTv.setText(chatStatus);
-                LogM.e("onChatStateChanged");
-            }
-        }
-
-        @Override
-        public void onConnected() {
-
-
-            ((BaseActivity)getActivity()).xmppHandler = MyApplication.getmService().xmpp;
-            ((BaseActivity)getActivity()).xmppHandler.setUserPassword(((BaseActivity)getActivity()).username, ((BaseActivity)getActivity()).password);
-            ((BaseActivity)getActivity()).xmppHandler.login();
-            //new XMPPHandler.LoginTask(getActivity(),((BaseActivity)getActivity()).password,((BaseActivity)getActivity()).username);
-        }
-
-        public void onLoginFailed() {
-            ((BaseActivity)getActivity()).xmppHandler.disconnect();
-            Toast.makeText(getActivity(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
-        }
-
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,16 +81,7 @@ public class UsersFragment extends Fragment implements MyContactListener, Permis
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_users, container, false);
     }
-    @Override
-    public void onResume() {
-        super.onResume();
 
-        //Here we bind our event listener (XmppCustomEventListener)
-        ((BaseActivity)getActivity()).xmppEventReceiver.setListener(xmppCustomEventListener);
-
-
-
-    }
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

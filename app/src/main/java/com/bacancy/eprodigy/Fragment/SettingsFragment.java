@@ -53,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SettingsFragment extends Fragment implements View.OnClickListener {
+public class SettingsFragment extends BaseFragment implements View.OnClickListener {
 
     TextView tv_logout, tv_chats, tv_account, tv_username, tv_phoneNo, tv_status;
 

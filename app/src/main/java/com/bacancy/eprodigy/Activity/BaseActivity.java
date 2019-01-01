@@ -27,6 +27,7 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
+import com.bacancy.eprodigy.Models.GroupDetailResponse;
 import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
@@ -49,8 +50,16 @@ import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
 import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -77,13 +86,14 @@ public class BaseActivity extends AppCompatActivity {
         //Event Listeners
         public void onNewMessageReceived(ChatPojo chatPojo) {
 
-            Log.e("ad", "onNewMessageReceived>" + chatPojo.toString());
+            Log.e("ad", "BaseActivity onNewMessageReceived>" + chatPojo.toString());
 
 
             if (chatPojo != null && chatPojo.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
                     && chatPojo.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
                 getGroupDetailsApiCall(activity, chatPojo);
             } else if (chatPojo != null) {
+                chatPojo.setMsgMode(AppConfing.SINGLE_CHAT_MSG_MODE);
                 chatPojo.setShowing(true);
                 chatPojo.setMine(false);
                 DataManager.getInstance().AddChat(chatPojo);
@@ -427,13 +437,28 @@ public class BaseActivity extends AppCompatActivity {
         String login_token = Pref.getValue(this, AppConfing.LOGIN_TOKEN, "");
 
         HashMap<String, String> data = new HashMap<>();
+
+
+        /*[{"name":"qwertyu_1546334361"}]*/
+
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        try {
+             jsonObject.put("name", chatPojo.getGroupId());
+          //  jsonObject.put("name", "video_1546337418");
+            jsonArray.put(jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        data.put("group_list", jsonArray.toString());
         data.put("username", username);
         data.put("login_token", login_token);
 
-        Call<UpdateGroupDetailResponse> call = ApiClient.getClient().getGroupDetailsApiCall(data);
-        call.enqueue(new Callback<UpdateGroupDetailResponse>() {
+        Call<GroupDetailResponse> call = ApiClient.getClient().getGroupDetailsApiCall(data);
+        call.enqueue(new Callback<GroupDetailResponse>() {
             @Override
-            public void onResponse(Call<UpdateGroupDetailResponse> call, Response<UpdateGroupDetailResponse> response) {
+            public void onResponse(Call<GroupDetailResponse> call, Response<GroupDetailResponse> response) {
                 if (response.isSuccessful()) {
                     dismissLoadingDialog();
 
@@ -442,20 +467,34 @@ public class BaseActivity extends AppCompatActivity {
                             response.body().getMessage())) {
                         return;
                     }
+                    List<GroupDetailResponse.UserdataBean> beanList = response.body().getUserdata();
 
-                    chatPojo.setShowing(true);
-                    chatPojo.setMine(false);
-                    DataManager.getInstance().AddChat(chatPojo);
+                    for (GroupDetailResponse.UserdataBean userdataBean : beanList) {
+                        if (userdataBean != null) {
 
-                    GroupPojo groupPojo = new GroupPojo();
-//                    groupPojo.setGroupId(chatPojo.getGroupId());
-//                    groupPojo.setGroupTitle(chatPojo.getGroupId());
-//                    groupPojo.setGroupName(chatPojo.getGroupId());
-                    //groupPojo.setGroupImage(response.body().getUserdata().getGroupimage());
-                    //groupPojo.setCreatedAt(response.body().getUserdata().getCreated_at());
-                    //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
+                            chatPojo.setShowing(true);
+                            chatPojo.setMine(false);
+                            chatPojo.setMsgMode(AppConfing.GROUP_CHAT_MSG_MODE);
+                            chatPojo.setGroupImage(userdataBean.getGroupimage());
+                            chatPojo.setGroupName(userdataBean.getGroup_title());
+                            DataManager.getInstance().AddChat(chatPojo);
 
-                  //  DataManager.getInstance().AddGroup(groupPojo);
+
+                            LogM.e("getGroupId=" + chatPojo.getGroupId());
+
+                            GroupPojo groupPojo = new GroupPojo();
+                            groupPojo.setGroupId(chatPojo.getGroupId());
+                            groupPojo.setGroupTitle(userdataBean.getGroup_title());
+                            groupPojo.setGroupName(userdataBean.getGroupname());
+                            groupPojo.setGroupImage(userdataBean.getGroupimage());
+                            groupPojo.setCreatedAt(userdataBean.getCreated_at());
+                            groupPojo.setModifyAt(userdataBean.getModify_at());
+
+                            DataManager.getInstance().AddGroup(groupPojo);
+                        }
+                    }
+//                     GroupDetailResponse.UserdataBean userdataBean = response.body().getUserdata().get(0);
+
 
                 } else {
                     dismissLoadingDialog();
@@ -464,7 +503,7 @@ public class BaseActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<UpdateGroupDetailResponse> call, Throwable t) {
+            public void onFailure(Call<GroupDetailResponse> call, Throwable t) {
                 LogM.e("errrrrrr" + t.toString());
                 dismissLoadingDialog();
             }
