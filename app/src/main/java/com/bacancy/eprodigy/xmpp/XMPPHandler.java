@@ -1,8 +1,6 @@
 package com.bacancy.eprodigy.xmpp;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,21 +9,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
-import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
-import com.bacancy.eprodigy.Models.GroupPojo;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
-import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
-import com.bacancy.eprodigy.db.DataManager;
 import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.google.gson.Gson;
-import com.luck.picture.lib.tools.Constant;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -86,7 +79,6 @@ import org.jxmpp.util.XmppStringUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.cert.Extension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1546,8 +1538,8 @@ public class XMPPHandler {
                     public void run() {
                         // TODO Auto-generated method stub
 
-//                        Toast.makeText(service, "ConnectionCLosed!",
-//                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(service, "ConnectionCLosed!",
+                                Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -1558,6 +1550,8 @@ public class XMPPHandler {
             //    chat_created = false;
             chatInstanceIterator(chat_created_for);
             loggedin = false;
+
+            service.onReConnected();
         }
 
         //Our connection has closed, due to error. Still, it is same thing as above. Reset everything
@@ -1572,8 +1566,8 @@ public class XMPPHandler {
 
                     @Override
                     public void run() {
-//                        Toast.makeText(service, "ConnectionClosedOn Error!!",
-//                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(service, "ConnectionClosedOn Error!!",
+                                Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -1583,6 +1577,8 @@ public class XMPPHandler {
             connected = false;
             chatInstanceIterator(chat_created_for);
             loggedin = false;
+
+            service.onReConnected();
         }
 
         @Override
