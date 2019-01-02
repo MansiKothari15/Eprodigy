@@ -25,6 +25,7 @@ import com.bacancy.eprodigy.db.DataManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
         this.mListFiltered = chatUserList;
         this.mContext = mContext;
     }
+
 
     @Override
     public ChatListAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,6 +59,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
         if (bean != null && bean.getMsgMode()!=null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
                 && bean.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
+
+
+
             holder.tv_id.setText(bean.getGroupName());
             holder.tv_text.setText("");
             Glide.with(mContext).load(bean.getGroupImage())
@@ -81,6 +86,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 Bundle b = new Bundle();
                 b.putString("name", holder.tv_id.getText().toString());
                 b.putString("receiverJid", view.getTag().toString());
+
                 i.putExtras(b);
                 mContext.startActivity(i);
             }

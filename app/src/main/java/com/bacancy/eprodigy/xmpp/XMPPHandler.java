@@ -97,7 +97,7 @@ public class XMPPHandler {
     public static boolean isconnecting = false;
     public static boolean isToasted = true; //Show toast for events? set false to just print via Log
     private HashMap<String, Boolean> chat_created_for = new HashMap<>(); //for single chat env
-    public static AbstractXMPPConnection connection;
+
     public static String userId;
     public String userPassword;
     private boolean autoLogin = true;
@@ -206,19 +206,19 @@ public class XMPPHandler {
         XMPPTCPConnection.setUseStreamManagementDefault(true);
 
 //        if (connection == null) {
-        connection = new XMPPTCPConnection(config.build());
-        PingManager pingManager = PingManager.getInstanceFor(connection);
+        MyApplication.connection = new XMPPTCPConnection(config.build());
+        PingManager pingManager = PingManager.getInstanceFor(MyApplication.connection);
         pingManager.setPingInterval(300);
 //        }
 
 //        connection.removeConnectionListener(mConnectionListener);
-        connection.addConnectionListener(mConnectionListener);
+        MyApplication.connection.addConnectionListener(mConnectionListener);
 
 
         //  StanzaFilter filter = MessageTypeFilter.CHAT;
 
 //        connection.removeAsyncStanzaListener(mStanzaListener);
-        connection.addAsyncStanzaListener(mStanzaListener, new StanzaFilter() {
+        MyApplication.connection.addAsyncStanzaListener(mStanzaListener, new StanzaFilter() {
             @Override
             public boolean accept(Stanza stanza) {
                 return true;
@@ -228,7 +228,7 @@ public class XMPPHandler {
 
         Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
 
-        roster = Roster.getInstanceFor(connection);
+        roster = Roster.getInstanceFor(MyApplication.connection);
 
 
         roster.addRosterListener(mRoasterListener);
@@ -238,7 +238,7 @@ public class XMPPHandler {
 
 
         StanzaFilter headFilter = MessageTypeFilter.HEADLINE;
-        connection.addAsyncStanzaListener(new StanzaListener() {
+        MyApplication.connection.addAsyncStanzaListener(new StanzaListener() {
             @Override
             public void processStanza(Stanza packet) {
                 Message message = (Message) packet;
@@ -268,7 +268,7 @@ public class XMPPHandler {
             }
         }, headFilter);
 
-        MultiUserChatManager.getInstanceFor(connection).addInvitationListener(new InvitationListener() {
+        MultiUserChatManager.getInstanceFor(MyApplication.connection).addInvitationListener(new InvitationListener() {
             @Override
             public void invitationReceived(XMPPConnection conn, MultiUserChat room, EntityJid inviter, String reason, String password, Message message, MUCUser.Invite invitation) {
                 //  Utils.Log(TAG, "invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
@@ -342,7 +342,7 @@ public class XMPPHandler {
             // Create the nickname.
             Resourcepart nickname = Resourcepart.from(userId);
             // Get the MultiUserChatManager
-            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
             // Get a MultiUserChat using MultiUserChatManager
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
             // Prepare a list of owners of the new room
@@ -428,7 +428,7 @@ public class XMPPHandler {
             message.setType(Type.headline);
             message.setSubject("1");
 //            message.addExtension(new GroupChatInvitation(grp_name + "@" + grp_service));
-            connection.sendStanza(message);
+            MyApplication.connection.sendStanza(message);
             Log.e(TAG, "inviteToGroup() called with: inviteuser = [" + inviteuser + "], groupName = [" + groupName + "]");
         } catch (XmppStringprepException | InterruptedException | SmackException.NotConnectedException e) {
             Log.e(TAG, "sendMessage() Error = [" + e.getMessage() + "]");
@@ -449,7 +449,7 @@ public class XMPPHandler {
 
             EntityBareJid mucJid = JidCreate.entityBareFrom(grpName + "@" + Constants.GRP_SERVICE);
             Resourcepart nickname = Resourcepart.from(mUser);
-            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
 
             MucEnterConfiguration.Builder mucEnterConfiguration
@@ -483,7 +483,7 @@ public class XMPPHandler {
             msg.setSubject("chat");
             msg.setBody(msgText);
             EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
-            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(connection);
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
 
             muc.sendMessage(msg);
@@ -549,7 +549,7 @@ public class XMPPHandler {
         @Override
         protected Boolean doInBackground(Void... voids) {
             Log.e("ad", "------------------doInBackground");
-            if (connection.isConnected())
+            if (MyApplication.connection.isConnected())
                 return false;
 
 
@@ -567,12 +567,12 @@ public class XMPPHandler {
 
             try {
 
-                connection.connect();
+                MyApplication.connection.connect();
 
 
-                ReconnectionManager.getInstanceFor(connection).enableAutomaticReconnection();
+                ReconnectionManager.getInstanceFor(MyApplication.connection).enableAutomaticReconnection();
 
-                connection.setReplyTimeout(100000);
+                MyApplication.connection.setReplyTimeout(100000);
 
 //                    PingManager pm =  PingManager.getInstanceFor(connection) ;
 //                    pm.setPingInterval(5) ;  // 5 sec
@@ -591,7 +591,7 @@ public class XMPPHandler {
 
 
                     DeliveryReceiptManager
-                            dm = DeliveryReceiptManager.getInstanceFor(connection);
+                            dm = DeliveryReceiptManager.getInstanceFor(MyApplication.connection);
                     dm.setAutoReceiptMode(DeliveryReceiptManager.AutoReceiptMode.always);
                     dm.autoAddDeliveryReceiptRequests();
                     ProviderManager.addExtensionProvider(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE, new DeliveryReceipt.Provider());
@@ -680,7 +680,7 @@ public class XMPPHandler {
             @Override
             protected synchronized Boolean doInBackground(Void... arg0) {
                 //There is no point in reconnecting an already established connection. So abort, if we do
-                if (connection.isConnected())
+                if (MyApplication.connection.isConnected())
                     return false;
 
                 //We are currently in "connection" phase, so no requests should be made while we are connecting.
@@ -698,12 +698,12 @@ public class XMPPHandler {
 
                 try {
 
-                    connection.connect();
+                    MyApplication.connection.connect();
 
 
-                    ReconnectionManager.getInstanceFor(connection).enableAutomaticReconnection();
+                    ReconnectionManager.getInstanceFor(MyApplication.connection).enableAutomaticReconnection();
 
-                    connection.setReplyTimeout(100000);
+                    MyApplication.connection.setReplyTimeout(100000);
 
 //                    PingManager pm =  PingManager.getInstanceFor(connection) ;
 //                    pm.setPingInterval(5) ;  // 5 sec
@@ -733,7 +733,7 @@ public class XMPPHandler {
 
 
                         DeliveryReceiptManager
-                                dm = DeliveryReceiptManager.getInstanceFor(connection);
+                                dm = DeliveryReceiptManager.getInstanceFor(MyApplication.connection);
                         dm.setAutoReceiptMode(DeliveryReceiptManager.AutoReceiptMode.always);
                         dm.autoAddDeliveryReceiptRequests();
                         ProviderManager.addExtensionProvider(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE, new DeliveryReceipt.Provider());
@@ -812,13 +812,13 @@ public class XMPPHandler {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                connection.disconnect();
+                MyApplication.connection.disconnect();
             }
         }).start();
     }
 
     public String getCurrentUserDetails() {
-        VCardManager vCardManager = VCardManager.getInstanceFor(connection);
+        VCardManager vCardManager = VCardManager.getInstanceFor(MyApplication.connection);
         try {
             VCard mCard = vCardManager.loadVCard();
             return String.valueOf(mCard.getTo());
@@ -1093,7 +1093,7 @@ public class XMPPHandler {
 //            if (connection.isAuthenticated() && connection.isConnected()) {
 //            connection.login(userId+"@" +AppConfing.SERVICE, userPassword+"@" +AppConfing.SERVICE);
 //            connection.login("eprodigyo6pm0w45f91542272066", "eprodigyo6pm0w45f91542272066");
-            connection.login(userId, userPassword);
+            MyApplication.connection.login(userId, userPassword);
 
 
 //            if (!roster.isLoaded())
@@ -1298,7 +1298,7 @@ public class XMPPHandler {
             if (debug) Log.i(TAG, "User " + userId + userPassword);
 
             try {
-                connection.login(userId, userPassword);
+                MyApplication.connection.login(userId, userPassword);
                // connection.setPacketReplyTimeout(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -1344,7 +1344,7 @@ public class XMPPHandler {
                 if (debug) Log.i(TAG, "User " + username + password);
 
                 try {
-                    connection.login(username, password);
+                    MyApplication.connection.login(username, password);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -1395,7 +1395,7 @@ public class XMPPHandler {
             Log.e(TAG, "jusabtsend:" + chatMessage.getChatRecv());
 
 
-            mChat = org.jivesoftware.smack.chat2.ChatManager.getInstanceFor(connection);
+            mChat = org.jivesoftware.smack.chat2.ChatManager.getInstanceFor(MyApplication.connection);
 
             EntityBareJid jid;
             try {
@@ -1486,7 +1486,7 @@ public class XMPPHandler {
 
 
         try {
-            if (connection.isAuthenticated() && connection.isConnected()) {
+            if (MyApplication.connection.isAuthenticated() && MyApplication.connection.isConnected()) {
 
                 DeliveryReceiptManager.receiptMessageFor(message);
                 final String msgReceipt = DeliveryReceiptRequest.addTo(message);
@@ -1637,7 +1637,7 @@ public class XMPPHandler {
             setUserStatus(Presence.Mode.available);
 
 
-            org.jivesoftware.smack.chat2.ChatManager.getInstanceFor(connection)
+            org.jivesoftware.smack.chat2.ChatManager.getInstanceFor(MyApplication.connection)
                     .addIncomingListener(mChatManagerListener);
 //
 //            Stanza iq = new Stanza() {
@@ -1884,7 +1884,7 @@ public class XMPPHandler {
 
 
             if (lastActivityManager == null) {
-                lastActivityManager = LastActivityManager.getInstanceFor(connection);
+                lastActivityManager = LastActivityManager.getInstanceFor(MyApplication.connection);
             }
             Long time;
             try {
@@ -1957,13 +1957,13 @@ public class XMPPHandler {
      */
 
     public static void setUserStatus(Presence.Mode status) {
-        if (connection != null) {
+        if (MyApplication.connection != null) {
             try {
                 Presence presence = new Presence(Presence.Type.available);
                 presence.setStatus("Online");
                 presence.setPriority(24);
                 presence.setMode(Presence.Mode.available);
-                connection.sendStanza(presence);
+                MyApplication.connection.sendStanza(presence);
 
 
             } catch (SmackException.NotConnectedException | InterruptedException e) {
@@ -2108,13 +2108,13 @@ public class XMPPHandler {
             try {
                 if (shouldSubscribe) {
                     if (newEntry == null || newEntry.getType() == RosterPacket.ItemType.from) {
-                        connection.sendStanza(subscribed);
-                        connection.sendStanza(subscribe);
+                        MyApplication.connection.sendStanza(subscribed);
+                        MyApplication.connection.sendStanza(subscribe);
                     } else {
-                        connection.sendStanza(subscribed);
+                        MyApplication.connection.sendStanza(subscribed);
                     }
                 } else {
-                    connection.sendStanza(unsubscribe);
+                    MyApplication.connection.sendStanza(unsubscribe);
                 }
             } catch (SmackException e) {
                 e.printStackTrace();
@@ -2145,7 +2145,7 @@ public class XMPPHandler {
             EntityBareJid jid;
             try {
                 jid = JidCreate.entityBareFrom(receiver + "@" + Constants.XMPP_DOMAIN);
-                chat1 = ChatManager.getInstanceFor(connection)
+                chat1 = ChatManager.getInstanceFor(MyApplication.connection)
                         .createChat(
                                 jid, mMessageListener);
                 updateChatEntryMap(receiver);
@@ -2158,9 +2158,9 @@ public class XMPPHandler {
 
 
             try {
-                if (connection.isAuthenticated()) {
+                if (MyApplication.connection.isAuthenticated()) {
                     assert chat1 != null;
-                    ChatStateManager.getInstance(connection).setCurrentState(chatState, chat1);
+                    ChatStateManager.getInstance(MyApplication.connection).setCurrentState(chatState, chat1);
 
                 }
             } catch (SmackException.NotConnectedException e) {
