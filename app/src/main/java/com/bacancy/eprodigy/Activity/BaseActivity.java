@@ -53,10 +53,15 @@ import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
+import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,9 +147,10 @@ public class BaseActivity extends AppCompatActivity {
             xmppHandler = MyApplication.getmService().xmpp;
             xmppHandler.setUserPassword(username, password);
 
-            if (!xmppHandler.loggedin)
+            if (!xmppHandler.loggedin) {
                 //  new XMPPHandler.LoginTask(mActivity,username,password);
                 xmppHandler.login();
+            }
         }
 
         public void onLoginFailed() {
@@ -385,37 +391,37 @@ public class BaseActivity extends AppCompatActivity {
 
     public void startXmppService(Activity mActivity) {
 
-
-        //Start XMPP Service (if not running already)
-        if (!isMyServiceRunning(XMPPService.class)) {
-            Log.d("startXmppService--", "running already");
-            final Intent intent = new Intent(this, XMPPService.class);
+            if (!isMyServiceRunning(XMPPService.class)) {
+                Log.d("startXmppService--", "running already");
+                final Intent intent = new Intent(this, XMPPService.class);
 // mChatApp.UnbindService();
-            Handler handler1 = new Handler();
-            handler1.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mChatApp.BindService(intent);
-                }
-            }, 200);
+                Handler handler1 = new Handler();
+                handler1.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChatApp.BindService(intent);
+                    }
+                }, 200);
 
-        } else {
-            xmppHandler = MyApplication.getmService().xmpp;
-            if (!xmppHandler.isConnected()) {
-                xmppHandler.connect();
-                // new XMPPHandler.ConnectXMPP(mActivity).execute();
             } else {
-
-                username = Pref.getValue(mActivity, "username", "");
-                password = Pref.getValue(mActivity, "password", "");
-                Log.d("Login startXmppService-", username + " " + password);
-
+                xmppHandler = MyApplication.getmService().xmpp;
                 xmppHandler.setUserPassword(username, password);
-                if (!xmppHandler.loggedin)
-                    //  new XMPPHandler.LoginTask(mActivity,username,password);
-                    xmppHandler.login();
+
+                if (!xmppHandler.isConnected()) {
+                    xmppHandler.connect();
+
+
+                    // new XMPPHandler.ConnectXMPP(mActivity).execute();
+                } else {
+                    Log.d("Login startXmppService-", username + " " + password);
+
+                    if (!xmppHandler.loggedin) {
+                        //  new XMPPHandler.LoginTask(mActivity,username,password);
+                        xmppHandler.login();
+                    }
+                }
             }
-        }
+
 
     }
 
@@ -444,8 +450,8 @@ public class BaseActivity extends AppCompatActivity {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
         try {
-             jsonObject.put("name", chatPojo.getGroupId());
-          //  jsonObject.put("name", "video_1546337418");
+            jsonObject.put("name", chatPojo.getGroupId());
+            //  jsonObject.put("name", "video_1546337418");
             jsonArray.put(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();

@@ -80,6 +80,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             });
 
         } else {
+
             final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
 
             holder.rv_main.setTag(singleUser.getUsername());

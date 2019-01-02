@@ -15,6 +15,7 @@ import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.custom_loader.CustomProgressDialog;
 import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
@@ -42,6 +43,7 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.roster.RosterGroup;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
@@ -55,6 +57,7 @@ import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatException;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
+import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.packet.MUCUser;
 import org.jivesoftware.smackx.ping.PingManager;
@@ -84,8 +87,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class XMPPHandler {
@@ -93,13 +98,13 @@ public class XMPPHandler {
     private static String TAG = "XMPPHandler";
     public static boolean connected = false;
     private static LastActivityManager lastActivityManager;
-    public boolean loggedin = false;
+    public static boolean loggedin = false;
     public static boolean isconnecting = false;
     public static boolean isToasted = true; //Show toast for events? set false to just print via Log
     private HashMap<String, Boolean> chat_created_for = new HashMap<>(); //for single chat env
 
     public static String userId;
-    public String userPassword;
+    public static String userPassword;
     private boolean autoLogin = true;
     Roster roster;
 
@@ -152,6 +157,7 @@ public class XMPPHandler {
 
     public void init() {
 
+
         if (debug) Log.e(TAG, "starting XMPPHandler");
 
         gson = new Gson(); //We need GSON to parse chat messages
@@ -160,6 +166,12 @@ public class XMPPHandler {
         mStanzaListener = new MyStanzaListener(); // Listen for incoming stanzas (packets)
         mRoasterListener = new MyRosterListener();
         mUser = Pref.getValue(MyApplication.getInstance(), AppConfing.USERNAME, "");
+
+
+        userId = Pref.getValue(MyApplication.getInstance(), AppConfing.USERNAME, "");
+        userPassword = Pref.getValue(MyApplication.getInstance(), "password", "");
+
+
         // Ok, now that events have been attached, we can prepare connection
         // (we will initialize connection by calling ".connect()" method later on.
         initialiseConnection();
@@ -174,6 +186,7 @@ public class XMPPHandler {
         try {
             config.setXmppDomain(Constants.XMPP_DOMAIN);
             config.setPort(Constants.XMPP_PORT);
+
             config.setHost(Constants.XMPP_HOST);
         } catch (XmppStringprepException e) {
             e.printStackTrace();
@@ -225,6 +238,18 @@ public class XMPPHandler {
             }
         });
 //
+        connect();
+
+        /*while (!MyApplication.connection.isConnected()) {
+
+                connect();
+
+
+
+
+        }
+
+        login();*/
 
         Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
 
@@ -271,7 +296,7 @@ public class XMPPHandler {
         MultiUserChatManager.getInstanceFor(MyApplication.connection).addInvitationListener(new InvitationListener() {
             @Override
             public void invitationReceived(XMPPConnection conn, MultiUserChat room, EntityJid inviter, String reason, String password, Message message, MUCUser.Invite invitation) {
-                //  Utils.Log(TAG, "invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
+                //  Log.e(TAG, "invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
                 LogM.e("invitationReceived() called with: conn = [" + conn + "], room = [" + room + "], inviter = [" + inviter + "], reason = [" + reason + "], password = [" + password + "], message = [" + message + "], invitation = [" + invitation + "]");
                 try {
                     Resourcepart nickname = null;
@@ -329,7 +354,7 @@ public class XMPPHandler {
     }
 
 
-    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset,String groupId) {
+    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset, String groupId) {
         try {
 
             if (TextUtils.isEmpty(grp_name)) {
@@ -375,7 +400,7 @@ public class XMPPHandler {
                 for (String names : mCheckset) {
 
                     Message message = new Message();
-                   // message.setType(Type.normal);
+                    // message.setType(Type.normal);
                     message.setSubject(AppConfing.GROUP_CHAT_MSG_MODE);
                     message.setBody(AppConfing.GROUP_GREETINGS);
 
@@ -410,6 +435,51 @@ public class XMPPHandler {
         }
     }
 
+    public static void getRoomInfo(String grp_id) {
+        try {
+
+
+            EntityBareJid mucJid = JidCreate.entityBareFrom(grp_id + "@" + Constants.GRP_SERVICE);
+            //     EntityBareJid mucJid = JidCreate.entityBareFrom(grp_name + "@" + grp_service);
+            // Create the nickname.
+            // Resourcepart nickname = Resourcepart.from(mUser);
+
+            MultiUserChatManager manager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
+            MultiUserChat muc = manager.getMultiUserChat(mucJid);
+
+            RoomInfo info = manager.getRoomInfo(mucJid);
+
+            LogM.e("Number of occupants:" + info.getOccupantsCount());
+            LogM.e("Room Subject:" + info.getSubject());
+
+            Log.e(TAG, "members " + muc.getMembers().size());
+
+            List<Occupant> affiliatesMembers = new ArrayList<Occupant>();
+
+            if (muc.getModerators() != null) {
+                affiliatesMembers.addAll(muc.getModerators());
+            }
+            if (muc.getParticipants() != null) {
+                affiliatesMembers.addAll(muc.getParticipants());
+            }
+            if (affiliatesMembers.size() == 0) {
+                Log.e(TAG, "Error: looking for a non existant room");
+            }
+
+            for (Occupant affiliate : affiliatesMembers) {
+                Log.e(TAG, "members: Jid:" + affiliate.getJid() + " \nnick:" + affiliate.getNick()
+                        + "\n Role:" + affiliate.getRole().toString() + " \naffi: " + affiliate.getAffiliation().toString());
+
+            }
+
+        } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | InterruptedException | XmppStringprepException e) {
+            Log.e(TAG, "Group Error : " + e.getMessage());
+
+        } catch (SmackException.NotConnectedException e) {
+            Log.e(TAG, "Group Error2 : " + e.getMessage());
+
+        }
+    }
 
     /**
      * Add users to group
@@ -673,7 +743,20 @@ public class XMPPHandler {
     }
 
 
+
+
     public static void connect() {
+
+        if (!InternetUtils.isNetworkConnected((service))) {
+            return;
+        }
+        if (MyApplication.connection != null && MyApplication.connection.isAuthenticated() && MyApplication.connection.isConnected()) {
+
+            return;
+        }
+
+
+
 
 
         AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
@@ -699,6 +782,11 @@ public class XMPPHandler {
                 try {
 
                     MyApplication.connection.connect();
+
+                    if (!loggedin && !TextUtils.isEmpty(userId) && !TextUtils.isEmpty(userId)) {
+                        //  new XMPPHandler.LoginTask(mActivity,username,password);
+                        login();
+                    }
 
 
                     ReconnectionManager.getInstanceFor(MyApplication.connection).enableAutomaticReconnection();
@@ -1079,12 +1167,12 @@ public class XMPPHandler {
         try {
 
             new Thread(new Runnable() {
-               @Override
+                @Override
                 public void run() {
-            if (!connected && !isconnecting) {
-                //new XMPPHandler.ConnectXMPP().execute();
-                connect();
-            }
+                    if (!connected && !isconnecting) {
+                        //new XMPPHandler.ConnectXMPP().execute();
+                        connect();
+                    }
                 }
             }).start();
 
@@ -1285,7 +1373,13 @@ public class XMPPHandler {
         }
     }
 
-    public void login() {
+
+    public static void login() {
+        if (!InternetUtils.isNetworkConnected((service))) {
+            return;
+        }
+
+
         try {
 
             new Thread(new Runnable() {
@@ -1299,7 +1393,7 @@ public class XMPPHandler {
 
             try {
                 MyApplication.connection.login(userId, userPassword);
-               // connection.setPacketReplyTimeout(10000);
+                // connection.setPacketReplyTimeout(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -1493,6 +1587,7 @@ public class XMPPHandler {
                 LogM.e("msgReceipt" + msgReceipt);
                 chat.send(message);
             } else {
+
                 login();
                 return false;
             }
@@ -1794,7 +1889,6 @@ public class XMPPHandler {
         //groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
         DataManager.getInstance().AddGroup(groupPojo);*/
-
 
 
         ChatPojo chatPojo = new ChatPojo();

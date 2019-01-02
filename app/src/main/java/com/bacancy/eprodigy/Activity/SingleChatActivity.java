@@ -43,6 +43,7 @@ import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
+import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
@@ -127,8 +128,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             mName = extras.getString("name");
             ChatUserId = extras.getString("receiverJid");
             isGroup = extras.getString("isGroup");
+
+
+            LogM.e("ChatUserId="+ChatUserId);
+            LogM.e("isGroup="+isGroup);
+
             if(isGroup.equalsIgnoreCase("true")){
-                Log.d("isGroup",isGroup);
+
 //                DataManager.getInstance().getSingleGroupUser(ChatUserId);
 
                 DataManager.getInstance()
@@ -136,8 +142,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                 .observe(SingleChatActivity.this, new Observer<GroupUserPojo>() {
                     @Override
                     public void onChanged(@Nullable GroupUserPojo groupList) {
-                        Log.d("grpId",groupList.getGroupId());
-                        Log.d("grpUserId",groupList.getUserId());
+                      //  Log.d("grpId",groupList.getGroupId());
+                        //Log.d("grpUserId",groupList.getUserId());
 
                     }
                 });

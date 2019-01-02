@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.bacancy.eprodigy.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     TextView tv_label,tv_right;
 
@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        startXmppService(activity);
     }
 
     private void init() {

@@ -10,6 +10,7 @@ import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.ChatStateModel;
 import com.bacancy.eprodigy.Models.PresenceModel;
 import com.bacancy.eprodigy.utils.Constants;
+import com.bacancy.eprodigy.utils.Pref;
 
 
 public class XMPPService extends Service {
@@ -24,6 +25,7 @@ public class XMPPService extends Service {
     public void onCreate() {
         super.onCreate();
         xmpp = new XMPPHandler(XMPPService.this);
+
     }
 
     @Override
