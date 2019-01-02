@@ -53,6 +53,7 @@ import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.ChatStateListener;
 import org.jivesoftware.smackx.chatstates.ChatStateManager;
 import org.jivesoftware.smackx.iqlast.LastActivityManager;
+import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.InvitationListener;
 import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -72,6 +73,7 @@ import org.jivesoftware.smackx.xdata.Form;
 import org.jivesoftware.smackx.xdata.FormField;
 import org.jxmpp.jid.BareJid;
 import org.jxmpp.jid.EntityBareJid;
+import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.EntityJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -158,7 +160,6 @@ public class XMPPHandler {
 
     public void init() {
 
-
         if (debug) Log.e(TAG, "starting XMPPHandler");
 
         gson = new Gson(); //We need GSON to parse chat messages
@@ -187,7 +188,6 @@ public class XMPPHandler {
         try {
             config.setXmppDomain(Constants.XMPP_DOMAIN);
             config.setPort(Constants.XMPP_PORT);
-
             config.setHost(Constants.XMPP_HOST);
         } catch (XmppStringprepException e) {
             e.printStackTrace();
@@ -355,7 +355,7 @@ public class XMPPHandler {
     }
 
 
-    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset, String groupId) {
+    public static boolean createRoom(String grp_name, ArrayList<String> mCheckset,String groupId) {
         try {
 
             if (TextUtils.isEmpty(grp_name)) {
@@ -401,7 +401,7 @@ public class XMPPHandler {
                 for (String names : mCheckset) {
 
                     Message message = new Message();
-                    // message.setType(Type.normal);
+                   // message.setType(Type.normal);
                     message.setSubject(AppConfing.GROUP_CHAT_MSG_MODE);
                     message.setBody(AppConfing.GROUP_GREETINGS);
 
@@ -480,6 +480,38 @@ public class XMPPHandler {
             Log.e(TAG, "Group Error2 : " + e.getMessage());
 
         }
+    }
+    public static void getGroupUsers(String groupId){
+
+        Log.d("XMPP groupId",groupId);
+        try {
+            EntityBareJid mucJid = JidCreate.entityBareFrom("live_1546411983" + "@" + Constants.GRP_SERVICE);
+
+            MultiUserChatManager multiUserChatManager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
+            MultiUserChat muc =multiUserChatManager.getMultiUserChat(mucJid);
+            try {
+                List<Affiliate> admin=muc.getAdmins();
+                System.out.println("Admin=====>>>"+admin);
+                List<EntityFullJid> userlist=muc.getOccupants();
+                List<Affiliate> member=muc.getMembers();
+                List<Occupant> memBer=muc.getParticipants();
+                List<Affiliate> owner=muc.getOwners();
+
+                System.out.println("userlist=====>>>"+ userlist.toString());
+                System.out.println("usercount=====>>>"+   muc.getOccupantsCount());
+            } catch (SmackException.NoResponseException e) {
+                e.printStackTrace();
+            } catch (XMPPException.XMPPErrorException e) {
+                e.printStackTrace();
+            } catch (SmackException.NotConnectedException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (XmppStringprepException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -742,8 +774,6 @@ public class XMPPHandler {
 
         }
     }
-
-
 
 
     public static void connect() {
@@ -1588,7 +1618,6 @@ public class XMPPHandler {
                 LogM.e("msgReceipt" + msgReceipt);
                 chat.send(message);
             } else {
-
                 login();
                 return false;
             }
@@ -1892,6 +1921,7 @@ public class XMPPHandler {
         DataManager.getInstance().AddGroup(groupPojo);*/
 
 
+
         ChatPojo chatPojo = new ChatPojo();
 
 
@@ -2077,6 +2107,8 @@ public class XMPPHandler {
 
             //only filter Presence packets
             try {
+
+
 //                connection.sendStanza(new Ping((Jid) packet));
 
                 // message successfully send or not check here
@@ -2088,7 +2120,6 @@ public class XMPPHandler {
                 }
 
                 LogM.e("processStanza" + packet.toXML());
-
                 if (packet instanceof Presence) {
                     Presence presence = (Presence) packet;
 
@@ -2128,7 +2159,6 @@ public class XMPPHandler {
             }
         }
     }
-
 
     private class MyRosterListener implements RosterListener {
 
