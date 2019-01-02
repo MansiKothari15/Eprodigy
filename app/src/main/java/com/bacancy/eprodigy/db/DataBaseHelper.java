@@ -6,12 +6,14 @@ import android.arch.persistence.room.RoomDatabase;
 
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.GroupPojo;
+import com.bacancy.eprodigy.Models.GroupUserPojo;
 import com.bacancy.eprodigy.Models.RecentChatUserPojo;
 import com.bacancy.eprodigy.Models.StarredMssagePojo;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.dao.ChatDao;
 import com.bacancy.eprodigy.dao.GroupDao;
+import com.bacancy.eprodigy.dao.GroupUserDao;
 import com.bacancy.eprodigy.dao.RecentChatUserDao;
 import com.bacancy.eprodigy.dao.StarredMessageDao;
 import com.bacancy.eprodigy.dao.UserDao;
@@ -20,7 +22,7 @@ import com.bacancy.eprodigy.dao.UserDao;
  * Created by vishal patel on 2/3/2018.
  */
 @Database(entities = {ChatPojo.class, ContactListResponse.ResponseDataBean.class,
-        StarredMssagePojo.class, RecentChatUserPojo.class,GroupPojo.class}, version = 1)
+        StarredMssagePojo.class, RecentChatUserPojo.class,GroupPojo.class,GroupUserPojo.class}, version = 1)
 abstract class DataBaseHelper extends RoomDatabase {
 
 
@@ -46,6 +48,7 @@ abstract class DataBaseHelper extends RoomDatabase {
     public abstract ChatDao getChatDao();
     public abstract UserDao getUserPojo();
     public abstract GroupDao getGroupDao();
+    public abstract GroupUserDao getGroupUserDao();
     public abstract StarredMessageDao getStarredMessageDao();
     public abstract RecentChatUserDao getRecentChatUserDao();
 

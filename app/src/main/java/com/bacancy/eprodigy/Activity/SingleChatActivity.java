@@ -1,10 +1,7 @@
 package com.bacancy.eprodigy.Activity;
 
-import android.Manifest;
-import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -32,29 +29,20 @@ import android.widget.Toast;
 import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.ChatAdapter;
-import com.bacancy.eprodigy.Models.ChatMediaModel;
 import com.bacancy.eprodigy.Models.ChatPojo;
-import com.bacancy.eprodigy.Models.ChatStateModel;
-import com.bacancy.eprodigy.Models.GroupPojo;
-import com.bacancy.eprodigy.Models.PresenceModel;
+import com.bacancy.eprodigy.Models.GroupUserPojo;
 import com.bacancy.eprodigy.Models.UserLocation;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.LastSeenResponse;
 import com.bacancy.eprodigy.ResponseModel.MediaUploadResponse;
 import com.bacancy.eprodigy.db.DataManager;
-import com.bacancy.eprodigy.permission.PermissionListener;
 import com.bacancy.eprodigy.utils.AlertUtils;
 import com.bacancy.eprodigy.utils.Constants;
-
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
-import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
-import com.bacancy.eprodigy.xmpp.XMPPHandler;
-import com.bacancy.eprodigy.xmpp.XMPPService;
-import com.bacancy.eprodigy.xmpp.XmppCustomEventListener;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
@@ -65,7 +53,6 @@ import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
-
 
 import org.jivesoftware.smack.SmackException;
 
@@ -95,7 +82,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String ChatUserId, mName = "";
+    String ChatUserId, mName = "", isGroup = "";
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -139,6 +126,22 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         if (extras != null) {
             mName = extras.getString("name");
             ChatUserId = extras.getString("receiverJid");
+            isGroup = extras.getString("isGroup");
+            if(isGroup.equalsIgnoreCase("true")){
+                Log.d("isGroup",isGroup);
+//                DataManager.getInstance().getSingleGroupUser(ChatUserId);
+
+                DataManager.getInstance()
+                .getSingleGroupUser(ChatUserId)
+                .observe(SingleChatActivity.this, new Observer<GroupUserPojo>() {
+                    @Override
+                    public void onChanged(@Nullable GroupUserPojo groupList) {
+                        Log.d("grpId",groupList.getGroupId());
+                        Log.d("grpUserId",groupList.getUserId());
+
+                    }
+                });
+            }
 
         }
         init();

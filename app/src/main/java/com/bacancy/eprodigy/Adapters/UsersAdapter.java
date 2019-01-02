@@ -16,10 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
-import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
-import com.bacancy.eprodigy.callback.ActorDiffCallback;
 import com.bacancy.eprodigy.callback.ActorDiffCallbackUser;
 
 import java.util.ArrayList;
@@ -120,6 +118,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
                 Bundle b = new Bundle();
                 b.putString("name",dataBean.getName());
                 b.putString("receiverJid",dataBean.getUsername());
+                b.putString("isGroup", "false");
                 i.putExtras(b);
                 activity.startActivity(i);
             }

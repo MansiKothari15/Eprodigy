@@ -1,7 +1,6 @@
 package com.bacancy.eprodigy.Activity;
 
 import android.Manifest;
-import android.arch.lifecycle.Observer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -30,10 +28,10 @@ import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.CreateGroupAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.Models.GroupPojo;
+import com.bacancy.eprodigy.Models.GroupUserPojo;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.UpdateGroupDetailResponse;
 import com.bacancy.eprodigy.db.DataManager;
-import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
@@ -173,6 +171,15 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
                     groupPojo.setModifyAt(response.body().getUserdata().getModify_at());
 
                     DataManager.getInstance().AddGroup(groupPojo);
+
+                    for (int i=0; i<mCheckset.size(); i++) {
+                        GroupUserPojo groupUserPojo = new GroupUserPojo();
+                        groupUserPojo.setGroupId(groupId);
+                        groupUserPojo.setUserId(mCheckset.get(i));
+                        groupUserPojo.setUserName(mCheckset.get(i));
+
+                        DataManager.getInstance().AddGroupUsers(groupUserPojo);
+                    }
                 }
 
                /* DataManager.getInstance()

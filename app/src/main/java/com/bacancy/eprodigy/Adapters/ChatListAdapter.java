@@ -57,10 +57,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
         if (bean != null && bean.getMsgMode()!=null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
                 && bean.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
+
+            holder.rv_main.setTag(bean.getGroupId());
+
             holder.tv_id.setText(bean.getGroupName());
             holder.tv_text.setText("");
             Glide.with(mContext).load(bean.getGroupImage())
                     .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+
+            holder.rv_main.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent i = new Intent(mContext, SingleChatActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("name", holder.tv_id.getText().toString());
+                    b.putString("receiverJid", view.getTag().toString());
+                    b.putString("isGroup", "true");
+                    i.putExtras(b);
+                    mContext.startActivity(i);
+                }
+            });
+
         } else {
             final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
 
@@ -71,20 +89,22 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 Glide.with(mContext).load(singleUser.getProfilepicture())
                         .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
             }
+
+            holder.rv_main.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent i = new Intent(mContext, SingleChatActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("name", holder.tv_id.getText().toString());
+                    b.putString("receiverJid", view.getTag().toString());
+                    b.putString("isGroup", "false");
+                    i.putExtras(b);
+                    mContext.startActivity(i);
+                }
+            });
+
         }
-
-        holder.rv_main.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent i = new Intent(mContext, SingleChatActivity.class);
-                Bundle b = new Bundle();
-                b.putString("name", holder.tv_id.getText().toString());
-                b.putString("receiverJid", view.getTag().toString());
-                i.putExtras(b);
-                mContext.startActivity(i);
-            }
-        });
 
     }
 
