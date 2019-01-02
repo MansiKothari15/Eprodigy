@@ -21,7 +21,6 @@ import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.google.gson.Gson;
 
-import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
@@ -44,7 +43,6 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
-import org.jivesoftware.smack.roster.RosterGroup;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
@@ -93,7 +91,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 public class XMPPHandler {
@@ -485,6 +482,7 @@ public class XMPPHandler {
 
         Log.d("XMPP groupId",groupId);
         try {
+
             EntityBareJid mucJid = JidCreate.entityBareFrom("live_1546411983" + "@" + Constants.GRP_SERVICE);
 
             MultiUserChatManager multiUserChatManager = MultiUserChatManager.getInstanceFor(MyApplication.connection);

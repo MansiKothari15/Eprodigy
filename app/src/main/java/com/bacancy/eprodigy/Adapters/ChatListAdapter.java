@@ -19,7 +19,9 @@ import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.Models.ChatPojo;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
 import com.bacancy.eprodigy.callback.ActorDiffCallbackChat;
+import com.bacancy.eprodigy.db.DataManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -78,32 +80,32 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             });
 
         }
-//        else {
-//            final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
-//
-//            holder.rv_main.setTag(singleUser.getUsername());
-//            if (singleUser != null) {
-//                holder.tv_id.setText(singleUser.getName());
-//                holder.tv_text.setText(singleUser.getPhone());
-//                Glide.with(mContext).load(singleUser.getProfilepicture())
-//                        .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
-//            }
-//
-//            holder.rv_main.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                    Intent i = new Intent(mContext, SingleChatActivity.class);
-//                    Bundle b = new Bundle();
-//                    b.putString("name", holder.tv_id.getText().toString());
-//                    b.putString("receiverJid", view.getTag().toString());
-//                    b.putString("isGroup", "false");
-//                    i.putExtras(b);
-//                    mContext.startActivity(i);
-//                }
-//            });
-//
-//        }
+        else {
+            final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
+
+            holder.rv_main.setTag(singleUser.getUsername());
+            if (singleUser != null) {
+                holder.tv_id.setText(singleUser.getName());
+                holder.tv_text.setText(singleUser.getPhone());
+                Glide.with(mContext).load(singleUser.getProfilepicture())
+                        .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+            }
+
+            holder.rv_main.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent i = new Intent(mContext, SingleChatActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("name", holder.tv_id.getText().toString());
+                    b.putString("receiverJid", view.getTag().toString());
+                    b.putString("isGroup", "false");
+                    i.putExtras(b);
+                    mContext.startActivity(i);
+                }
+            });
+
+        }
 
     }
 
