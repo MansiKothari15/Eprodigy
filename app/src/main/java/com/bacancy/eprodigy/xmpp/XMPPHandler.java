@@ -36,6 +36,7 @@ import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.ExtensionElement;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Message.Type;
 import org.jivesoftware.smack.packet.Presence;
@@ -2076,8 +2077,6 @@ public class XMPPHandler {
 
             //only filter Presence packets
             try {
-
-
 //                connection.sendStanza(new Ping((Jid) packet));
 
                 // message successfully send or not check here
@@ -2089,6 +2088,7 @@ public class XMPPHandler {
                 }
 
                 LogM.e("processStanza" + packet.toXML());
+
                 if (packet instanceof Presence) {
                     Presence presence = (Presence) packet;
 
@@ -2113,6 +2113,12 @@ public class XMPPHandler {
                     }
                 }
 
+
+                if (packet instanceof IQ)
+                {
+                    //aaaaaaaa
+                }
+
 //                else if (packet instanceof Message){
 //
 //                }
@@ -2122,6 +2128,7 @@ public class XMPPHandler {
             }
         }
     }
+
 
     private class MyRosterListener implements RosterListener {
 
