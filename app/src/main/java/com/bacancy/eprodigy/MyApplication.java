@@ -17,12 +17,16 @@ import com.bacancy.eprodigy.xmpp.LocalBinder;
 import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPService;
 
+import org.jivesoftware.smack.AbstractXMPPConnection;
+
 
 public class MyApplication extends Application implements Application.ActivityLifecycleCallbacks {
     private static volatile MyApplication instance = null;
     private final String TAG = getClass().getSimpleName();
     public static XMPPService xmppService;
+    public static AbstractXMPPConnection connection;
     public Boolean mBounded = false;
+
 
     //Our broadCast receive to update us on various events
     private XMPPEventReceiver mEventReceiver;
@@ -90,6 +94,7 @@ public class MyApplication extends Application implements Application.ActivityLi
         }
         return instance;
     }
+
 
 
     public XMPPEventReceiver getEventReceiver() {
