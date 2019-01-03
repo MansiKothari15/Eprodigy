@@ -61,6 +61,9 @@ import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.packet.MUCUser;
+import org.jivesoftware.smackx.muclight.MUCLightAffiliation;
+import org.jivesoftware.smackx.muclight.MultiUserChatLight;
+import org.jivesoftware.smackx.muclight.MultiUserChatLightManager;
 import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
@@ -2128,7 +2131,21 @@ public class XMPPHandler {
             }
         }
     }
+    public static List<String> loadMUCLightMembers(String roomJid) throws XmppStringprepException, SmackException.NoResponseException, XMPPException.XMPPErrorException, SmackException.NotConnectedException, InterruptedException {
+        MultiUserChatLightManager multiUserChatLightManager = MultiUserChatLightManager.getInstanceFor(MyApplication.connection);
+        MultiUserChatLight multiUserChatLight = multiUserChatLightManager.getMultiUserChatLight(JidCreate.from(roomJid).asEntityBareJidIfPossible());
 
+        HashMap<Jid, MUCLightAffiliation> occupants = multiUserChatLight.getAffiliations();
+        List<String> jids = new ArrayList<>();
+
+        for (Map.Entry<Jid, MUCLightAffiliation> pair : occupants.entrySet()) {
+            Jid jid = pair.getKey();
+            if (jid != null) {
+                jids.add(jid.toString());
+            }
+        }
+        return jids;
+    }
 
     private class MyRosterListener implements RosterListener {
 

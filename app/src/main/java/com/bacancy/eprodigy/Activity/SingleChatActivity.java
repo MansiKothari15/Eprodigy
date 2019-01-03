@@ -56,6 +56,8 @@ import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
@@ -770,13 +772,30 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_add:
-                openPopup();
+                try {
+
+                    xmppHandler.loadMUCLightMembers("live_1546411983");
+                } catch (XmppStringprepException e) {
+                    e.printStackTrace();
+                } catch (SmackException.NoResponseException e) {
+                    e.printStackTrace();
+                } catch (XMPPException.XMPPErrorException e) {
+                    e.printStackTrace();
+                } catch (SmackException.NotConnectedException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                //openPopup();
 
                 break;
             case R.id.tv_back:
                 finish();
                 break;
             case R.id.imgSend:
+
+
 
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
                     sendMsg(Constants.TYPE_MESSAGE);
