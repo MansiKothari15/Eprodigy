@@ -1,6 +1,7 @@
 package com.bacancy.eprodigy.Activity;
 
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -49,6 +50,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.tasks.Tasks;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
@@ -71,6 +73,8 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import com.nanotasks.BackgroundWork;
+import com.nanotasks.Completion;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -134,7 +138,26 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             LogM.e("isGroup=" + isGroup);
 
             if (isGroup) {
-                XMPPHandler.getGroupUsers(ChatUserId);
+
+                com.nanotasks.Tasks.executeInBackground(this, new BackgroundWork<Object>() {
+                    @Override
+                    public Object doInBackground() throws Exception {
+                        List<String> jids = xmppHandler.loadMUCLightMembers("live_1546411983" + "@" + Constants.GRP_SERVICE);
+                        for (String jid : jids) {
+                           // obtainUser(XMPPUtils.fromJIDToUserName(jid));
+                        }
+                        return null;
+                    }
+                }, new Completion<Object>() {
+                    @Override
+                    public void onSuccess(Context context, Object result) {
+                    }
+
+                    @Override
+                    public void onError(Context context, Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
 

@@ -76,7 +76,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                     Bundle b = new Bundle();
                     b.putString("name", holder.tv_id.getText().toString());
                     b.putString("receiverJid", view.getTag().toString());
-                    b.putString("isGroup", "true");
+                    b.putBoolean("isGroup", true);
                     i.putExtras(b);
                     mContext.startActivity(i);
                 }
@@ -110,7 +110,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                     b.putString("name", holder.tv_id.getText().toString());
 
                     b.putString("receiverJid", view.getTag().toString());
-                    b.putString("isGroup", "false");
+                    b.putBoolean("isGroup", false);
                     i.putExtras(b);
                     mContext.startActivity(i);
                 }

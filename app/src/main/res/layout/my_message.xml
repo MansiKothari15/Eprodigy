@@ -27,7 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_username"
-                android:paddingLeft="@dimen/padding_xsmall"
+
                 android:textSize="@dimen/text_normal"
                 android:text="Name"
                 android:textColor="@color/white"/>

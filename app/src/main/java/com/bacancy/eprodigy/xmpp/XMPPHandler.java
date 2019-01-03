@@ -49,6 +49,7 @@ import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smackx.bob.element.BoBIQ;
 import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.ChatStateListener;
 import org.jivesoftware.smackx.chatstates.ChatStateManager;
@@ -197,6 +198,7 @@ public class XMPPHandler {
         } catch (XmppStringprepException e) {
             e.printStackTrace();
         }
+
         try {
             InetAddress inetAddress = InetAddress.getByName(Constants.XMPP_HOST);
             config.setHostAddress(inetAddress);
@@ -368,6 +370,7 @@ public class XMPPHandler {
             }
 
             String gName = grp_name + "_" + System.currentTimeMillis() / 1000L;
+
             // Create the XMPP address (JID) of the MUC.
             EntityBareJid mucJid = JidCreate.entityBareFrom(gName + "@" + Constants.GRP_SERVICE);
             // Create the nickname.
@@ -485,6 +488,35 @@ public class XMPPHandler {
             Log.e(TAG, "Group Error2 : " + e.getMessage());
 
         }
+    }
+    public List<String> loadMUCLightMembers(String roomJid)  {
+        List<String> jids = new ArrayList<>();
+        try {
+            MultiUserChatLightManager multiUserChatLightManager = MultiUserChatLightManager.getInstanceFor(MyApplication.connection);
+            MultiUserChatLight multiUserChatLight = multiUserChatLightManager.getMultiUserChatLight(JidCreate.from(roomJid).asEntityBareJidIfPossible());
+
+            HashMap<Jid, MUCLightAffiliation> occupants = multiUserChatLight.getAffiliations();
+
+
+            for (Map.Entry<Jid, MUCLightAffiliation> pair : occupants.entrySet()) {
+                Jid jid = pair.getKey();
+                if (jid != null) {
+                    jids.add(jid.toString());
+                }
+            }
+            return jids;
+        } catch (XmppStringprepException e) {
+            e.printStackTrace();
+        } catch (SmackException.NoResponseException e) {
+            e.printStackTrace();
+        } catch (XMPPException.XMPPErrorException e) {
+            e.printStackTrace();
+        } catch (SmackException.NotConnectedException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return jids;
     }
     public static void getGroupUsers(String groupId){
 
@@ -2151,15 +2183,19 @@ public class XMPPHandler {
                     }
                 }
 
-
-                if (packet instanceof IQ)
+                /*if (packet instanceof IQ)
                 {
+                    GroupMemberIQ groupMemberIQ = (GroupMemberIQ) packet;
+
+                    Log.e("ad","getjId>"+groupMemberIQ.getjId());
                     //aaaaaaaa
-                }
+
+                }*/
 
 //                else if (packet instanceof Message){
 //
 //                }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 LogM.e("123" + e.getMessage());

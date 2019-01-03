@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:16.0.0'
     implementation 'com.chaos.view:pinview:1.4.2'
     implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.3'
-
+    implementation 'com.fabiendevos:nanotasks:1.1.0'
 
 
 

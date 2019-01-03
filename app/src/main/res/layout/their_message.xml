@@ -13,6 +13,7 @@
         android:layout_gravity="left"
         android:gravity="left"
         android:layout_marginLeft="3dp"
+
         android:background="@drawable/rounded_rectangle_white"
         android:orientation="vertical"
         android:padding="5dp">
