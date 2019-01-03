@@ -13,5 +13,6 @@
     <color name="green_shade_2">#65AB66</color>
     <color name="colorDarkGray">#525252</color>
     <color name="colorGray">#A5A5A5</color>
+    <color name="lightGray">#ccc9c9</color>
 
 </resources>
