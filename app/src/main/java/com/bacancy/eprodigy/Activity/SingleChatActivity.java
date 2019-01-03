@@ -30,7 +30,6 @@ import com.bacancy.eprodigy.API.ApiClient;
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Adapters.ChatAdapter;
 import com.bacancy.eprodigy.Models.ChatPojo;
-import com.bacancy.eprodigy.Models.GroupUserPojo;
 import com.bacancy.eprodigy.Models.UserLocation;
 import com.bacancy.eprodigy.MyApplication;
 import com.bacancy.eprodigy.R;
@@ -135,22 +134,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             LogM.e("ChatUserId="+ChatUserId);
             LogM.e("isGroup="+isGroup);
 
-            if(isGroup.equalsIgnoreCase("true")){
-
-//                DataManager.getInstance().getSingleGroupUser(ChatUserId);
-
-                DataManager.getInstance()
-                .getSingleGroupUser(ChatUserId)
-                .observe(SingleChatActivity.this, new Observer<GroupUserPojo>() {
-                    @Override
-                    public void onChanged(@Nullable GroupUserPojo groupList) {
-                      //  Log.d("grpId",groupList.getGroupId());
-                        //Log.d("grpUserId",groupList.getUserId());
-
-                    }
-                });
-            }
-
+            XMPPHandler.getGroupUsers(ChatUserId);
         }
         init();
 
