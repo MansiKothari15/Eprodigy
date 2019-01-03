@@ -84,7 +84,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     ImageView img_profile, img_add, imgSend, img_camera, img_audio;
     EditText edtMessage;
     ChatAdapter mMessageAdapter;
-    String ChatUserId, mName = "", isGroup = "";
+    String ChatUserId, mName = "";
+    boolean isGroup = false;
     ArrayList<ChatPojo> chatPojoArrayList = new ArrayList<ChatPojo>();
     private static final String IMAGE_DIRECTORY = "/eProdigyMedia";
 
@@ -126,14 +127,17 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
         if (extras != null) {
             mName = extras.getString("name");
             ChatUserId = extras.getString("receiverJid");
-            isGroup = extras.getString("isGroup");
+            isGroup = extras.getBoolean("isGroup");
 
 
             LogM.e("ChatUserId=" + ChatUserId);
             LogM.e("isGroup=" + isGroup);
 
-            XMPPHandler.getGroupUsers(ChatUserId);
+            if (isGroup) {
+                XMPPHandler.getGroupUsers(ChatUserId);
+            }
         }
+
         init();
 
         /*KeyboardVisibilityEvent.setEventListener(
@@ -759,7 +763,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                 break;
             case R.id.tv_back:
-                SCUtils.forceHideKeyboard(activity,edtMessage);
+                SCUtils.forceHideKeyboard(activity, edtMessage);
                 finish();
 
                 break;

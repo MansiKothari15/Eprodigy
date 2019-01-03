@@ -12,12 +12,13 @@ import com.bacancy.eprodigy.R;
  */
 
 public class ChatHolderFrom extends RecyclerView.ViewHolder {
-    public TextView tvMessage,tvTime;
+    public TextView tvMessage,tvTime,tvUsername;
 
     public ChatHolderFrom(View itemView) {
         super(itemView);
         tvMessage = itemView.findViewById(R.id.tv_message);
         tvTime = itemView.findViewById(R.id.tv_time);
+        tvUsername = itemView.findViewById(R.id.tv_username);
 
     }
 }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bacancy.eprodigy.API.AppConfing;
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
@@ -55,10 +57,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
         final ChatPojo bean = mList.get(position);
 
 
-        if (bean != null && bean.getMsgMode()!=null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
+        if (bean != null && bean.getMsgMode() != null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
                 && bean.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
 
-            holder.rv_main.setTag(bean.getGroupId());
+            if (!TextUtils.isEmpty(bean.getGroupId()))
+                holder.rv_main.setTag(bean.getGroupId());
 
             holder.tv_id.setText(bean.getGroupName());
             holder.tv_text.setText("");
@@ -79,25 +82,33 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 }
             });
 
-        }
-        else {
+        } else {
             final ContactListResponse.ResponseDataBean singleUser = DataManager.getInstance().getUser(bean.getChatId());
 
-            holder.rv_main.setTag(singleUser.getUsername());
             if (singleUser != null) {
-                holder.tv_id.setText(singleUser.getName());
-                holder.tv_text.setText(singleUser.getPhone());
-                Glide.with(mContext).load(singleUser.getProfilepicture())
-                        .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+                if (!TextUtils.isEmpty(singleUser.getUsername()))
+                    holder.rv_main.setTag(singleUser.getUsername());
+                if (singleUser != null) {
+                    holder.tv_id.setText(singleUser.getName());
+                    holder.tv_text.setText(singleUser.getPhone());
+                    Glide.with(mContext).load(singleUser.getProfilepicture())
+                            .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
+                }
             }
 
             holder.rv_main.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
+                    if (TextUtils.isEmpty(view.getTag().toString())) {
+                        Toast.makeText(mContext, mContext.getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     Intent i = new Intent(mContext, SingleChatActivity.class);
                     Bundle b = new Bundle();
                     b.putString("name", holder.tv_id.getText().toString());
+
                     b.putString("receiverJid", view.getTag().toString());
                     b.putString("isGroup", "false");
                     i.putExtras(b);

@@ -129,7 +129,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
                 Bundle b = new Bundle();
                 b.putString("name",dataBean.getName());
                 b.putString("receiverJid",dataBean.getUsername());
-                b.putString("isGroup", "false");
+                b.putBoolean("isGroup",false);
                 i.putExtras(b);
                 activity.startActivity(i);
             }
