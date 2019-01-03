@@ -1,12 +1,17 @@
 package com.bacancy.eprodigy.utils;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
+import android.widget.EditText;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -19,7 +24,10 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
 public class SCUtils {
+
     public static String getMimeTypeFomFile(File file) {
         if (file != null) {
 
@@ -36,6 +44,36 @@ public class SCUtils {
 
     }
 
+    public static void hideSoftKeyboard(Activity activity) {
+        if (activity != null && activity.getCurrentFocus() != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+
+        }
+
+    }
+    public static void forceHideKeyboard(Activity activity, EditText editText) {
+        try {
+
+            if (editText == null) return;
+
+            if (activity.getCurrentFocus() == null
+                    || !(activity.getCurrentFocus() instanceof EditText)) {
+                editText.requestFocus();
+            }
+
+            InputMethodManager imm = (InputMethodManager) activity
+                    .getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+            activity.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
     public static String validateStr(String str) {
         return TextUtils.isEmpty(str) ? "" : str.trim();
     }

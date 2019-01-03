@@ -2167,21 +2167,7 @@ public class XMPPHandler {
         }
     }
 
-    public List<String> loadMUCLightMembers(String roomJid) throws XmppStringprepException, SmackException.NoResponseException, XMPPException.XMPPErrorException, SmackException.NotConnectedException, InterruptedException {
-        MultiUserChatLightManager multiUserChatLightManager = MultiUserChatLightManager.getInstanceFor(MyApplication.connection);
-        MultiUserChatLight multiUserChatLight = multiUserChatLightManager.getMultiUserChatLight(JidCreate.from(roomJid).asEntityBareJidIfPossible());
 
-        HashMap<Jid, MUCLightAffiliation> occupants = multiUserChatLight.getAffiliations();
-        List<String> jids = new ArrayList<>();
-
-        for (Map.Entry<Jid, MUCLightAffiliation> pair : occupants.entrySet()) {
-            Jid jid = pair.getKey();
-            if (jid != null) {
-                jids.add(jid.toString());
-            }
-        }
-        return jids;
-    }
     private class MyRosterListener implements RosterListener {
 
         @Override

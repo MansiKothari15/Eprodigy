@@ -3,6 +3,7 @@ package com.bacancy.eprodigy.Adapters;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bacancy.eprodigy.Activity.BaseActivity;
 import com.bacancy.eprodigy.Activity.SingleChatActivity;
 import com.bacancy.eprodigy.R;
 import com.bacancy.eprodigy.ResponseModel.ContactListResponse;
@@ -104,6 +106,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
         return new MyViewHolder(itemView);
     }
 
+
+    private long mLastClickTime = 0;
+
     @Override
     public void onBindViewHolder(@NonNull UsersAdapter.MyViewHolder holder, final int position) {
 
@@ -112,7 +117,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.MyViewHolder
          holder.tv_country.setText(dataBean.getPhone());
         holder.ll_main.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
+                // mis-clicking prevention, using threshold of 2000 ms
+                if (SystemClock.elapsedRealtime() - mLastClickTime < 2000){
+                    return;
+                }
+                mLastClickTime = SystemClock.elapsedRealtime();
+
 
                 Intent i = new Intent(activity,SingleChatActivity.class);
                 Bundle b = new Bundle();

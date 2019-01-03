@@ -20,6 +20,7 @@ import com.bacancy.eprodigy.Fragment.ChatsFragment;
 import com.bacancy.eprodigy.Fragment.SettingsFragment;
 import com.bacancy.eprodigy.Fragment.UsersFragment;
 import com.bacancy.eprodigy.R;
+import com.bacancy.eprodigy.utils.SCUtils;
 
 import java.lang.reflect.Field;
 
@@ -35,8 +36,11 @@ public class MessagingActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
         startXmppService(activity);
+
         init(savedInstanceState);
     }
+
+
 
     private void init(Bundle savedInstanceState) {
 

@@ -76,7 +76,7 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class SingleChatActivity extends BaseActivity implements View.OnClickListener {
-    
+
     PopupMenu popup;
 
     TextView tv_label, tv_newMessage, tv_createGroup, tv_back, tv_lastseen;
@@ -113,13 +113,11 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public static boolean isChatActivityOpened = false;
 
 
-    
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_singlechat);
-      
+
 
         startXmppService(activity);
 
@@ -131,8 +129,8 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             isGroup = extras.getString("isGroup");
 
 
-            LogM.e("ChatUserId="+ChatUserId);
-            LogM.e("isGroup="+isGroup);
+            LogM.e("ChatUserId=" + ChatUserId);
+            LogM.e("isGroup=" + isGroup);
 
             XMPPHandler.getGroupUsers(ChatUserId);
         }
@@ -756,29 +754,16 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_add:
-                try {
 
-                    xmppHandler.loadMUCLightMembers("live_1546411983");
-                } catch (XmppStringprepException e) {
-                    e.printStackTrace();
-                } catch (SmackException.NoResponseException e) {
-                    e.printStackTrace();
-                } catch (XMPPException.XMPPErrorException e) {
-                    e.printStackTrace();
-                } catch (SmackException.NotConnectedException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                //openPopup();
+                openPopup();
 
                 break;
             case R.id.tv_back:
+                SCUtils.forceHideKeyboard(activity,edtMessage);
                 finish();
+
                 break;
             case R.id.imgSend:
-
 
 
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {

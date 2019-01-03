@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -46,6 +47,7 @@ import com.bacancy.eprodigy.utils.Constants;
 import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
+import com.bacancy.eprodigy.utils.SCUtils;
 import com.bacancy.eprodigy.xmpp.XMPPEventReceiver;
 import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.bacancy.eprodigy.xmpp.XMPPService;
@@ -262,8 +264,9 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
+
         xmppEventReceiver.setListener(xmppCustomEventListener);
+        super.onResume();
     }
 
     @Override
@@ -280,6 +283,8 @@ public class BaseActivity extends AppCompatActivity {
             customProgressDialog.showCustomDialog(mActivity);
         }
     }
+
+
 
     public void dismissLoadingDialog() {
         if (customProgressDialog != null) {
