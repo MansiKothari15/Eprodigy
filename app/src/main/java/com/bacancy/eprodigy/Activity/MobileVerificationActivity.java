@@ -59,11 +59,18 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.btn_confirm:
-                if(!TextUtils.isEmpty(et_code_verification.getText().toString().trim())){
+
+                /*for reduce OTP call ********************************** */
+                directLogin();//9601564269
+                //directLogin2();//9879792298
+
+
+                /*if(!TextUtils.isEmpty(et_code_verification.getText().toString().trim())){
                     getVerifyUser();
                 }else {
                     Toast.makeText(this, "Please enter proper security code.", Toast.LENGTH_SHORT).show();
-                }
+                }*/
+
                 break;
             case R.id.tv_resend:
                 et_code_verification.setText("");
@@ -74,6 +81,46 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
                 break;
         }
     }
+
+    private void directLogin() {
+
+//        9601564269
+
+    /* {"status":200,"message":"your verification process successfully.","userdata":{"username":"eprodigylxcfvvdltk1546324952","password":"eprodigylxcfvvdltk1546324952","email":"eprodigy@eprodigy.com","serverkey":"","salt":"","iterationcount":"0","created_at":"2019-01-01 06:42:32","displayname":"mansi","userstatus":"Available","phone_number":"9601564269","country_code":"91","withcountrycode":"919601564269","authy_id":"110564521","verified":"1","updated_at":"2019-01-01 01:42:32","device_type":"0","profilepicture":"http://158.69.205.234/eprodigy/assets/admin/images/user.png","device_token":"eb129763-53be-45f9-971f-9896c38a7f95","country_name":"India","deleteaccountstatus":"0","readreceiptstatus":"1","privacystatus":"0","userlastseen":"2019-01-01 01:42:32","IsDisable":"0","contactcategory":"Home","login_token":"PQdq2h4T7367284581bb07597c61361a62b5f23e","role_id":"0","privacylastseenstatus":"0",
+    "privacyprofilephotostatus":"0","old_device_token":"eb129763-53be-45f9-971f-9896c38a7f95","notification_enabled":"1"}}*/
+
+        Pref.setValue(MobileVerificationActivity.this,"login_token","PQdq2h4T7367284581bb07597c61361a62b5f23e");
+        Pref.setValue(MobileVerificationActivity.this,"username","eprodigylxcfvvdltk1546324952");
+        Pref.setValue(MobileVerificationActivity.this,"verified","1");
+        Pref.setValue(MobileVerificationActivity.this,"password","eprodigylxcfvvdltk1546324952");
+        Pref.setValueBoolean(MobileVerificationActivity.this, AppConfing.IS_LOGGED_IN_FIRST_TIME,true);
+
+        Intent i = new Intent(MobileVerificationActivity.this,UserDetailsActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
+
+    }
+    private void directLogin2() {
+        //9879792298
+    /* {"status":200,"message":"your verification process successfully.","userdata":{"username":"eprodigyr6i6y2qd9o1545809636","password":"eprodigyr6i6y2qd9o1545809636","email":"eprodigy@eprodigy.com","serverkey":"","salt":"","iterationcount":"0",
+    "created_at":"2018-12-26 07:33:56","displayname":"Adil","userstatus":"Available","phone_number":"9879792298","country_code":"91","withcountrycode":"919879792298","authy_id":"112952212","verified":"1","updated_at":"2018-12-26 02:33:56","device_type":"0"
+    ,"profilepicture":"http://158.69.205.234/eprodigy/assets/admin/images/user.png","device_token":"7e6a517a-0ea5-4ddd-8afe-5ffce2c9069a","country_name":"India","deleteaccountstatus":"0","readreceiptstatus":"1","privacystatus":"0","userlastseen":"2018-12-26 02:33:56",
+    "IsDisable":"0","contactcategory":"Home","login_token":"wc6OehBF11dbba6b3832659720fd2d43a257a470","role_id":"0","privacylastseenstatus":"0","privacyprofilephotostatus":"0","old_device_token":"7e6a517a-0ea5-4ddd-8afe-5ffce2c9069a","notification_enabled":"1"}}*/
+
+        Pref.setValue(MobileVerificationActivity.this,"login_token","wc6OehBF11dbba6b3832659720fd2d43a257a470");
+        Pref.setValue(MobileVerificationActivity.this,"username","eprodigyr6i6y2qd9o1545809636");
+        Pref.setValue(MobileVerificationActivity.this,"verified","1");
+        Pref.setValue(MobileVerificationActivity.this,"password","eprodigyr6i6y2qd9o1545809636");
+        Pref.setValueBoolean(MobileVerificationActivity.this, AppConfing.IS_LOGGED_IN_FIRST_TIME,true);
+
+        Intent i = new Intent(MobileVerificationActivity.this,UserDetailsActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
+
+    }
+
 
     public void resendToken(){
         showLoadingDialog(this);
@@ -140,6 +187,7 @@ public class MobileVerificationActivity extends BaseActivity implements View.OnC
                 if (response.isSuccessful()) {
                     dismissLoadingDialog();
                     Log.d("VerifyUserResponse", response.toString());
+
                     if (validateUser(MobileVerificationActivity.this,
                             response.body().getStatus(),
                             response.body().getMessage())) {
