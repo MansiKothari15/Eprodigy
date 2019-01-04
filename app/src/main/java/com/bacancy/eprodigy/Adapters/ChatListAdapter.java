@@ -56,6 +56,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
         final ChatPojo bean = mList.get(position);
 
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.placeholder(R.mipmap.profile_pic);
+        requestOptions.error(R.mipmap.profile_pic);
+
 
         if (bean != null && bean.getMsgMode() != null && bean.getMsgMode().equalsIgnoreCase(AppConfing.GROUP_CHAT_MSG_MODE)
                 && bean.getChatText().equals(AppConfing.GROUP_GREETINGS)) {
@@ -65,7 +69,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
             holder.tv_id.setText(bean.getGroupName());
             holder.tv_text.setText("");
-            Glide.with(mContext).load(bean.getGroupImage())
+            Glide.with(mContext)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(bean.getGroupImage())
                     .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
 
             holder.rv_main.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +97,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 if (singleUser != null) {
                     holder.tv_id.setText(singleUser.getName());
                     holder.tv_text.setText(singleUser.getPhone());
-                    Glide.with(mContext).load(singleUser.getProfilepicture())
+                    Glide.with(mContext)
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(singleUser.getProfilepicture())
                             .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
                 }
             }

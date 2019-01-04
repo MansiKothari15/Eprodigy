@@ -502,7 +502,7 @@ public class XMPPHandler {
         Log.d("XMPP groupId", groupId);
         try {
 
-            EntityBareJid mucJid = JidCreate.entityBareFrom("live_1546411983" + "@" + Constants.GRP_SERVICE);
+            EntityBareJid mucJid = JidCreate.entityBareFrom(groupId + "@" + Constants.GRP_SERVICE);
 
             MultiUserChatManager multiUserChatManager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
             MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
@@ -511,16 +511,14 @@ public class XMPPHandler {
                 System.out.println("Admin=====>>>" + admin);
                 List<EntityFullJid> userlist = muc.getOccupants();
                 List<Affiliate> member = muc.getMembers();
-                //List<Occupant> memBer = muc.getParticipants();
-                //List<Affiliate> owner = muc.getOwners();
 
                 System.out.println("userlist=====>>>" + userlist.toString());
                 System.out.println("usercount=====>>>" + muc.getOccupantsCount());
 
-                for (EntityFullJid jid : muc.getOccupants()) {
+                for (Affiliate jid : member) {
 
                     if (jid != null) {
-                        jids.add(jid.toString());
+                        jids.add(String.valueOf(jid.getJid()));
                     }
                 }
             } catch (SmackException.NoResponseException e) {
@@ -2167,8 +2165,10 @@ public class XMPPHandler {
                 }
 
                 if (packet instanceof IQ) {
-                    JoinRoom("live_1546411983");
-                }/*if (packet instanceof IQ)
+                    JoinRoom("ghosts_1546599457");
+                }
+
+                /*if (packet instanceof IQ)
                 {
                     GroupMemberIQ groupMemberIQ = (GroupMemberIQ) packet;
 

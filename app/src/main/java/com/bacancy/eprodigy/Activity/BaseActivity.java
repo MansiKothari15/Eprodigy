@@ -398,7 +398,7 @@ public class BaseActivity extends AppCompatActivity {
 
             if (!isMyServiceRunning(XMPPService.class)) {
                 Log.d("startXmppService--", "running already");
-                final Intent intent = new Intent(this, XMPPService.class);
+                final Intent intent = new Intent(mActivity, XMPPService.class);
 // mChatApp.UnbindService();
                 Handler handler1 = new Handler();
                 handler1.postDelayed(new Runnable() {
