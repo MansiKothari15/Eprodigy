@@ -8,7 +8,13 @@
 
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <include
+        layout="@layout/app_bar_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,6 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/text_normal"
                 android:text="Group Name" />
             <ImageView
                 android:layout_width="wrap_content"
@@ -45,6 +52,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/text_normal"
                 android:text="Users 5 of 10"/>
         </LinearLayout>
 
@@ -61,6 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/blue"
+                android:textSize="@dimen/text_normal"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/_10sdp"
                 android:text="Add Users"/>
@@ -86,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Clear Chat"
+            android:textSize="@dimen/text_normal"
             android:padding="@dimen/_5sdp"/>
 
         <View
@@ -97,6 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/_5sdp"
+            android:textSize="@dimen/text_normal"
             android:text="Exit Group"/>
 
         <View
@@ -108,6 +119,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/_5sdp"
+            android:textSize="@dimen/text_normal"
             android:text="Report Spam"/>
 
         <LinearLayout
@@ -119,11 +131,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/text_normal"
                 android:text="Created by"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Created on"
+                android:textSize="@dimen/text_normal"
                 android:layout_marginTop="@dimen/_5sdp"/>
         </LinearLayout>
 

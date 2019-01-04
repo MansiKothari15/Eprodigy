@@ -271,6 +271,21 @@ public class GroupSubjectActivity extends BaseActivity implements View.OnClickLi
         pictureDialog.show();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 0) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                choosePhotoFromGallary();
+            }
+        } else if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                takePhotoFromCamera();
+            }
+        }
+    }
+
     public void choosePhotoFromGallary() {
 
         PictureSelector.create(GroupSubjectActivity.this)
