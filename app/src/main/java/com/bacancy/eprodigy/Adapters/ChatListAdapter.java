@@ -65,7 +65,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
             holder.tv_id.setText(bean.getGroupName());
             holder.tv_text.setText("");
-            Glide.with(mContext).load(bean.getGroupImage())
+
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions.placeholder(R.mipmap.profile_pic);
+            Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(bean.getGroupImage())
                     .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
 
             holder.rv_main.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +94,11 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
                 if (singleUser != null) {
                     holder.tv_id.setText(singleUser.getName());
                     holder.tv_text.setText(singleUser.getPhone());
-                    Glide.with(mContext).load(singleUser.getProfilepicture())
+
+                    RequestOptions requestOptions = new RequestOptions();
+                    requestOptions.placeholder(R.mipmap.profile_pic);
+
+                    Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(singleUser.getProfilepicture())
                             .apply(RequestOptions.circleCropTransform()).into(holder.img_pic);
                 }
             }
