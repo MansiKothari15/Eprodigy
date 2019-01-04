@@ -137,15 +137,13 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
             LogM.e("ChatUserId=" + ChatUserId);
             LogM.e("isGroup=" + isGroup);
 
-            if (isGroup) {
+            if (!isGroup) {
 
                 com.nanotasks.Tasks.executeInBackground(this, new BackgroundWork<Object>() {
                     @Override
                     public Object doInBackground() throws Exception {
-                        List<String> jids = xmppHandler.loadMUCLightMembers("live_1546411983" + "@" + Constants.GRP_SERVICE);
-                        for (String jid : jids) {
-                           // obtainUser(XMPPUtils.fromJIDToUserName(jid));
-                        }
+                        List<String> jids = xmppHandler.getGroupUsers("live_1546411983" + "@" + Constants.GRP_SERVICE);
+                        LogM.e("jid"+jids);
                         return null;
                     }
                 }, new Completion<Object>() {

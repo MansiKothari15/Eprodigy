@@ -294,7 +294,6 @@ public class XMPPHandler {
                     } else {
                         updateDB(message.getFrom().toString(),
                                 message.getBody(), message.getFrom().toString(), message.getBody());
-
                     }
 
                 }
@@ -446,7 +445,8 @@ public class XMPPHandler {
         }
     }
 
-    public static void getRoomInfo(String grp_id) {
+    public static List<String> getRoomInfo(String grp_id) {
+        List<String> jids = new ArrayList<>();
         try {
 
 
@@ -459,6 +459,7 @@ public class XMPPHandler {
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
 
             RoomInfo info = manager.getRoomInfo(mucJid);
+
 
             LogM.e("Number of occupants:" + info.getOccupantsCount());
             LogM.e("Room Subject:" + info.getSubject());
@@ -480,8 +481,11 @@ public class XMPPHandler {
             for (Occupant affiliate : affiliatesMembers) {
                 Log.e(TAG, "members: Jid:" + affiliate.getJid() + " \nnick:" + affiliate.getNick()
                         + "\n Role:" + affiliate.getRole().toString() + " \naffi: " + affiliate.getAffiliation().toString());
-
+                if (affiliate.getJid() != null) {
+                    jids.add(affiliate.getJid().toString());
+                }
             }
+            return jids;
 
         } catch (SmackException.NoResponseException | XMPPException.XMPPErrorException | InterruptedException | XmppStringprepException e) {
             Log.e(TAG, "Group Error : " + e.getMessage());
@@ -490,55 +494,35 @@ public class XMPPHandler {
             Log.e(TAG, "Group Error2 : " + e.getMessage());
 
         }
-    }
-    public List<String> loadMUCLightMembers(String roomJid)  {
-        List<String> jids = new ArrayList<>();
-        try {
-            MultiUserChatLightManager multiUserChatLightManager = MultiUserChatLightManager.getInstanceFor(MyApplication.connection);
-            MultiUserChatLight multiUserChatLight = multiUserChatLightManager.getMultiUserChatLight(JidCreate.from(roomJid).asEntityBareJidIfPossible());
-
-            HashMap<Jid, MUCLightAffiliation> occupants = multiUserChatLight.getAffiliations();
-
-
-            for (Map.Entry<Jid, MUCLightAffiliation> pair : occupants.entrySet()) {
-                Jid jid = pair.getKey();
-                if (jid != null) {
-                    jids.add(jid.toString());
-                }
-            }
-            return jids;
-        } catch (XmppStringprepException e) {
-            e.printStackTrace();
-        } catch (SmackException.NoResponseException e) {
-            e.printStackTrace();
-        } catch (XMPPException.XMPPErrorException e) {
-            e.printStackTrace();
-        } catch (SmackException.NotConnectedException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return jids;
     }
-    public static void getGroupUsers(String groupId){
 
-        Log.d("XMPP groupId",groupId);
+    public static List<String> getGroupUsers(String groupId) {
+        List<String> jids = new ArrayList<>();
+        Log.d("XMPP groupId", groupId);
         try {
 
             EntityBareJid mucJid = JidCreate.entityBareFrom("live_1546411983" + "@" + Constants.GRP_SERVICE);
 
             MultiUserChatManager multiUserChatManager = MultiUserChatManager.getInstanceFor(MyApplication.connection);
-            MultiUserChat muc =multiUserChatManager.getMultiUserChat(mucJid);
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
             try {
-                List<Affiliate> admin=muc.getAdmins();
-                System.out.println("Admin=====>>>"+admin);
-                List<EntityFullJid> userlist=muc.getOccupants();
-                List<Affiliate> member=muc.getMembers();
-                List<Occupant> memBer=muc.getParticipants();
-                List<Affiliate> owner=muc.getOwners();
+                List<Affiliate> admin = muc.getAdmins();
+                System.out.println("Admin=====>>>" + admin);
+                List<EntityFullJid> userlist = muc.getOccupants();
+                List<Affiliate> member = muc.getMembers();
+                //List<Occupant> memBer = muc.getParticipants();
+                //List<Affiliate> owner = muc.getOwners();
 
-                System.out.println("userlist=====>>>"+ userlist.toString());
-                System.out.println("usercount=====>>>"+   muc.getOccupantsCount());
+                System.out.println("userlist=====>>>" + userlist.toString());
+                System.out.println("usercount=====>>>" + muc.getOccupantsCount());
+
+                for (EntityFullJid jid : muc.getOccupants()) {
+
+                    if (jid != null) {
+                        jids.add(jid.toString());
+                    }
+                }
             } catch (SmackException.NoResponseException e) {
                 e.printStackTrace();
             } catch (XMPPException.XMPPErrorException e) {
@@ -548,10 +532,12 @@ public class XMPPHandler {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            return jids;
         } catch (XmppStringprepException e) {
             e.printStackTrace();
         }
-
+        return jids;
     }
 
     /**
@@ -816,8 +802,6 @@ public class XMPPHandler {
     }
 
 
-
-
     public static void connect() {
 
         if (!InternetUtils.isNetworkConnected((service))) {
@@ -827,9 +811,6 @@ public class XMPPHandler {
 
             return;
         }
-
-
-
 
 
         AsyncTask<Void, Void, Boolean> connectionThread = new AsyncTask<Void, Void, Boolean>() {
@@ -2185,7 +2166,9 @@ public class XMPPHandler {
                     }
                 }
 
-                /*if (packet instanceof IQ)
+                if (packet instanceof IQ) {
+                    JoinRoom("live_1546411983");
+                }/*if (packet instanceof IQ)
                 {
                     GroupMemberIQ groupMemberIQ = (GroupMemberIQ) packet;
 
