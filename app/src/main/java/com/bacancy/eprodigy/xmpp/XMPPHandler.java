@@ -361,7 +361,7 @@ public class XMPPHandler {
         this.userPassword = mPassword;
     }
 
-//9601564269
+
     public static boolean createRoom(String grp_name, ArrayList<String> mCheckset, String groupId) {
         try {
 
