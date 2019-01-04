@@ -58,6 +58,7 @@
         <activity android:name=".Activity.ContactListActivity" />
         <activity android:name=".Activity.ChatContactDetailActivity" />
         <activity android:name=".Activity.VideoActivity" />
+        <activity android:name=".Activity.GroupInfoActivity" />
 
         <service android:name=".xmpp.XMPPService" />
 
