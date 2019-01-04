@@ -43,22 +43,20 @@ import com.bacancy.eprodigy.utils.InternetUtils;
 import com.bacancy.eprodigy.utils.LogM;
 import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
-import com.bacancy.eprodigy.xmpp.XMPPHandler;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.tasks.Tasks;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
+import com.nanotasks.BackgroundWork;
+import com.nanotasks.Completion;
 
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException;
-import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,8 +71,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import com.nanotasks.BackgroundWork;
-import com.nanotasks.Completion;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -223,6 +219,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
 
         tv_label.setText(mName);
+        tv_label.setOnClickListener(this);
 
         img_audio.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -779,18 +776,22 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_add:
-
                 openPopup();
-
                 break;
+
             case R.id.tv_back:
                 SCUtils.forceHideKeyboard(activity, edtMessage);
                 finish();
-
                 break;
+
+            case R.id.tv_label:
+                if(isGroup){
+                    Intent i = new Intent(SingleChatActivity.this,GroupInfoActivity.class);
+                    startActivity(i);
+                }
+                break;
+
             case R.id.imgSend:
-
-
                 if (InternetUtils.isNetworkConnected(SingleChatActivity.this)) {
                     sendMsg(Constants.TYPE_MESSAGE);
                 } else {
@@ -798,6 +799,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                 }
                 break;
+
             case R.id.img_camera:
                 PictureSelector.create(SingleChatActivity.this)
                         .openCamera(PictureMimeType.ofAll())
@@ -811,8 +813,6 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
                         .compress(true)
                         .minimumCompressSize(100)
                         .forResult(REQUEST_CAMERA_PICTURE);
-
-
                 break;
         }
     }
