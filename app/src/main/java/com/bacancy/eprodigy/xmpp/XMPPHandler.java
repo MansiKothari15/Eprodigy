@@ -380,6 +380,7 @@ public class XMPPHandler {
             // Get a MultiUserChat using MultiUserChatManager
             MultiUserChat muc = manager.getMultiUserChat(mucJid);
             // Prepare a list of owners of the new room
+
             try {
                 Log.e(TAG, "userId=" + userId);
                 Set<Jid> owners = JidUtil.jidSetFrom(new String[]{userId + "@" + Constants.XMPP_HOST});
@@ -391,6 +392,7 @@ public class XMPPHandler {
                 Form submitForm = form.createAnswerForm();
 
                 for (FormField formField : submitForm.getFields()) {
+
                     if (!FormField.Type.hidden.equals(formField.getType())
                             && formField.getVariable() != null) {
                         submitForm.setDefaultAnswer(formField.getVariable());
