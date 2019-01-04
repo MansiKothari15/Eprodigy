@@ -21,7 +21,6 @@ import com.bacancy.eprodigy.utils.Pref;
 import com.bacancy.eprodigy.utils.SCUtils;
 import com.google.gson.Gson;
 
-import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
@@ -44,12 +43,10 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
-import org.jivesoftware.smack.roster.RosterGroup;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jivesoftware.smackx.bob.element.BoBIQ;
 import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.ChatStateListener;
 import org.jivesoftware.smackx.chatstates.ChatStateManager;
@@ -60,12 +57,8 @@ import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatException;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
-import org.jivesoftware.smackx.muc.Occupant;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.packet.MUCUser;
-import org.jivesoftware.smackx.muclight.MUCLightAffiliation;
-import org.jivesoftware.smackx.muclight.MultiUserChatLight;
-import org.jivesoftware.smackx.muclight.MultiUserChatLightManager;
 import org.jivesoftware.smackx.ping.PingManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
@@ -97,7 +90,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 public class XMPPHandler {
@@ -464,23 +456,28 @@ public class XMPPHandler {
             LogM.e("Number of occupants:" + info.getOccupantsCount());
             LogM.e("Room Subject:" + info.getSubject());
 
-            Log.e(TAG, "members " + muc.getMembers().size());
+            Log.e(TAG, "members " + muc.getMembers().size() );
 
-            List<Occupant> affiliatesMembers = new ArrayList<Occupant>();
+            List<Affiliate> affiliatesMembers = muc.getMembers();
 
-            if (muc.getModerators() != null) {
-                affiliatesMembers.addAll(muc.getModerators());
-            }
-            if (muc.getParticipants() != null) {
-                affiliatesMembers.addAll(muc.getParticipants());
-            }
-            if (affiliatesMembers.size() == 0) {
-                Log.e(TAG, "Error: looking for a non existant room");
-            }
-
-            for (Occupant affiliate : affiliatesMembers) {
-                Log.e(TAG, "members: Jid:" + affiliate.getJid() + " \nnick:" + affiliate.getNick()
-                        + "\n Role:" + affiliate.getRole().toString() + " \naffi: " + affiliate.getAffiliation().toString());
+//            List<Occupant> affiliatesMembers = new ArrayList<Occupant>();
+//
+//            if (muc.getModerators() != null) {
+//                affiliatesMembers.addAll(muc.getModerators());
+//            }
+//            if (muc.getParticipants() != null) {
+//                affiliatesMembers.addAll(muc.getParticipants());
+//            }
+//            if (affiliatesMembers.size() == 0) {
+//                Log.e(TAG, "Error: looking for a non existant room");
+//            }
+            Log.e(TAG, "members1 " + affiliatesMembers.size());
+            for (Affiliate affiliate : affiliatesMembers) {
+                Log.e(TAG, "members: Jid:" + affiliate.getJid()
+//                        + " \nnick:" + affiliate.getNick()
+//                        + "\n Role:" + affiliate.getRole().toString()
+//                        + " \naffi: " + affiliate.getAffiliation().toString()
+                );
                 if (affiliate.getJid() != null) {
                     jids.add(affiliate.getJid().toString());
                 }

@@ -141,7 +141,7 @@ public class SingleChatActivity extends BaseActivity implements View.OnClickList
 
                         xmppHandler.JoinRoom("ghosts_1546599457");
 
-                        List<String> jids = xmppHandler.getGroupUsers("ghosts_1546599457" + "@" + Constants.GRP_SERVICE);
+                        List<String> jids = xmppHandler.getRoomInfo("ghosts_1546599457");
                         LogM.e("jid>>>>>>>>"+jids);
                         return null;
                     }
